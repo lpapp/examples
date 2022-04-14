@@ -1,0 +1,43 @@
+[1/2] Building CXX object CMakeFiles/helloworld.dir/main.cpp.o
+FAILED: CMakeFiles/helloworld.dir/main.cpp.o 
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DNDEBUG -DPYSIDE_QML_SUPPORT=1 -DQT_CORE_LIB -DQT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/Users/lpapp/Projects/testbed/pyside/build/x64-Release/helloworld_autogen/include -iframework /Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib -isystem /Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtWidgets.framework/Headers -isystem /Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtGui.framework/Headers -isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk/System/Library/Frameworks/OpenGL.framework/Headers -isystem /Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtCore.framework/Headers -isystem /Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/./mkspecs/macx-clang -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2 -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtCore -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtGui -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/shiboken2 -isystem /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include -isystem /Users/lpapp/.conan/data/Python/3.7.7/thirdparty/development/package/03db91a62823ebc2b1df6e5cf549c2f674116656/Python.framework/Versions/3.7/Headers -O2 -g -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -fPIC -std=gnu++17 -MD -MT CMakeFiles/helloworld.dir/main.cpp.o -MF CMakeFiles/helloworld.dir/main.cpp.o.d -o CMakeFiles/helloworld.dir/main.cpp.o -c /Users/lpapp/Projects/testbed/pyside/main.cpp
+In file included from /Users/lpapp/Projects/testbed/pyside/main.cpp:4:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets/pyside2_qtwidgets_python.h:50:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtGui/pyside2_qtgui_python.h:50:
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtCore/pyside2_qtcore_python.h:899:42: error: no member named 'MacVersion' in 'QSysInfo'; did you mean 'qVersion'?
+template<> inline PyTypeObject *SbkType< ::QSysInfo::MacVersion >() { return SbkPySide2_QtCoreTypes[SBK_QSYSINFO_MACVERSION_IDX]; }
+                                         ^~~~~~~~~~~~
+/Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtCore.framework/Headers/qglobal.h:477:49: note: 'qVersion' declared here
+Q_CORE_EXPORT Q_DECL_CONST_FUNCTION const char *qVersion(void) Q_DECL_NOEXCEPT;
+                                                ^
+In file included from /Users/lpapp/Projects/testbed/pyside/main.cpp:4:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets/pyside2_qtwidgets_python.h:50:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtGui/pyside2_qtgui_python.h:50:
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtCore/pyside2_qtcore_python.h:899:33: error: no function template matches function template specialization 'SbkType'
+template<> inline PyTypeObject *SbkType< ::QSysInfo::MacVersion >() { return SbkPySide2_QtCoreTypes[SBK_QSYSINFO_MACVERSION_IDX]; }
+                                ^
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/shiboken2/sbkconverter.h:374:36: note: candidate template ignored: invalid explicitly-specified argument for template parameter 'T'
+template<typename T> PyTypeObject *SbkType() { return nullptr; }
+                                   ^
+In file included from /Users/lpapp/Projects/testbed/pyside/main.cpp:4:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets/pyside2_qtwidgets_python.h:50:
+In file included from /Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtGui/pyside2_qtgui_python.h:50:
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtCore/pyside2_qtcore_python.h:929:55: error: no member named 'CurveShape' in 'QTimeLine'
+template<> inline PyTypeObject *SbkType< ::QTimeLine::CurveShape >() { return SbkPySide2_QtCoreTypes[SBK_QTIMELINE_CURVESHAPE_IDX]; }
+                                         ~~~~~~~~~~~~~^
+In file included from /Users/lpapp/Projects/testbed/pyside/main.cpp:4:
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets/pyside2_qtwidgets_python.h:796:44: error: no member named 'QDirModel' in the global namespace; did you mean 'QListModel'?
+template<> inline PyTypeObject *SbkType< ::QDirModel::Roles >() { return SbkPySide2_QtWidgetsTypes[SBK_QDIRMODEL_ROLES_IDX]; }
+                                         ~~^
+/Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtWidgets.framework/Headers/qlistwidget.h:54:7: note: 'QListModel' declared here
+class QListModel;
+      ^
+In file included from /Users/lpapp/Projects/testbed/pyside/main.cpp:4:
+/Users/lpapp/.conan/data/PySide2/5.12.6/thirdparty/development/package/7063c0f8b648bb5c3639f9af92791aada6da0f76/include/PySide2/QtWidgets/pyside2_qtwidgets_python.h:796:44: error: incomplete type 'QListModel' named in nested name specifier
+template<> inline PyTypeObject *SbkType< ::QDirModel::Roles >() { return SbkPySide2_QtWidgetsTypes[SBK_QDIRMODEL_ROLES_IDX]; }
+                                         ~~^~~~~~~~~~~
+/Users/lpapp/.conan/data/Qt/5.15.2/_/_/package/e96309fed8610c1dd27f4b65ca61c0d512e9294f/lib/QtWidgets.framework/Headers/qlistwidget.h:54:7: note: forward declaration of 'QListModel'
+class QListModel;
+      ^
+5 errors generated.
+ninja: build stopped: subcommand failed.
