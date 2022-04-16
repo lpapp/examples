@@ -11,8 +11,5 @@ class TestbedConan(ConanFile):
   ]
 
   requires = [
-    "Qt/5.15.2",
-    # "PySide2/5.15.2.1@thirdparty/development",
-    "PySide2/5.12.6@thirdparty/development",
-    "Python/3.7.7@thirdparty/development"
+    "GLEW/1.13.0@thirdparty/development",
   ]
