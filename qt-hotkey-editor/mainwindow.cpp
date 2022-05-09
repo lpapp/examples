@@ -32,7 +32,7 @@ MainWindow::MainWindow()
 
     std::vector<HotkeyEntry> hotkeys;
     hotkeys.push_back({"File", {
-        {newAct->text(), newAct, newAct->toolTip()}}
+        {newAct->text(), newAct, newAct->toolTip(), newAct->shortcut().toString(QKeySequence::NativeText)}}
       }
     );
     widget->setHotkeys(hotkeys);

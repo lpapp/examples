@@ -1,24 +1,27 @@
-#ifndef OTKEYEDITORWIDGET_H
-#define OTKEYEDITORWIDGET_H
+#ifndef HOTKEYEDITORWIDGET_H
+#define HOTKEYEDITORWIDGET_H
 
 #include <QtWidgets/QStyledItemDelegate>
 #include <QtWidgets/QWidget>
 
 #include <string>
-#include <tuple>
-#include <utility>
 
 class QAction;
 class QLineEdit;
 class QPushButton;
+class QSortFilterProxyModel;
 class QTreeView;
 
-using HotkeyEntry = std::pair<QString, std::vector<std::tuple<QString, QAction*, QString>>>;
+// Key: category name
+// Value: List of actions (each action having a name, hotkey, description,
+//        default hotkey value.
+using HotkeyEntry = std::pair<QString, std::vector<std::tuple<QString, QAction*, QString, QString>>>;
 
 enum class Column : uint8_t {
   Name,
   Hotkey,
   Description,
+  DefaultHotkey
 };
 
 class HotkeyEditorModelItem
@@ -51,7 +54,7 @@ public:
   explicit HotkeyEditorModel(QObject* parent = nullptr);
   ~HotkeyEditorModel() override;
 
-  QVariant data(const QModelIndex& index, int role) const override;
+  QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
   Qt::ItemFlags flags(const QModelIndex& index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
@@ -59,7 +62,9 @@ public:
   int rowCount(const QModelIndex& index = QModelIndex()) const override;
   int columnCount(const QModelIndex& index = QModelIndex()) const override;
 
-  bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+  bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+  HotkeyEditorModelItem* findKeySequence(const QString& keySequenceString);
 
   void resetAll();
   QModelIndex reset(const QModelIndexList& selectedItems);
@@ -68,6 +73,7 @@ public:
   const QString& hoverTooltipText();
 
   void setHotkeys(const std::vector<HotkeyEntry>& hotkeys);
+  std::vector<HotkeyEntry> getHotkeys() const;
 
 private:
   void setupModelData(HotkeyEditorModelItem* parent);
@@ -94,6 +100,21 @@ public:
                             const QModelIndex& index) const override;
 };
 
+class KeyboardWidget : public QWidget
+{
+  Q_OBJECT
+
+public:
+  explicit KeyboardWidget(QWidget *parent = Q_NULLPTR);
+
+Q_SIGNALS:
+    void specialKeyClicked(int key);
+    void keyClicked(const QString &text);
+
+private Q_SLOTS:
+    void buttonClicked(int key);
+};
+
 class HotkeyEditorWidget : public QWidget
 {
   Q_OBJECT
@@ -107,6 +128,7 @@ public:
   void setHoverTooltipText(const QString& hoverTooltipText);
 
   void setHotkeys(const std::vector<HotkeyEntry>& hotkeys);
+  std::vector<HotkeyEntry> getHotkeys() const;
 
 public Q_SLOTS:
   void resetAll();
@@ -124,6 +146,7 @@ private:
 
   HotkeyEditorDelegate* _delegate;
   HotkeyEditorModel* _model;
+  QSortFilterProxyModel* _filterModel;
   QLineEdit* _search;
   QTreeView* _view;
   QPushButton* _resetAllButton;

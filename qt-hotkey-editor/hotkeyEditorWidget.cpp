@@ -1,15 +1,18 @@
-
 #include "hotkeyEditorWidget.h"
 
 #include <QtWidgets/QAction>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QKeySequenceEdit>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QSignalMapper>
+#include <QtCore/QSortFilterProxyModel>
 
 #include <cassert>
 #include <iostream>
@@ -74,13 +77,11 @@ QVariant HotkeyEditorModelItem::data(int column) const
   QVariant columnVariant = m_itemData.at(column);
   if (column == static_cast<int>(Column::Hotkey) && !columnVariant.canConvert<QString>()) {
     QAction* action = static_cast<QAction*>(columnVariant.value<void*>());
-    // std::cout << "TEST ITEM DATA 0: " << std::endl;
     if (!action) {
       return QVariant();
     }
     QKeySequence keySequence = action->shortcut();
     QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
-    std::cout << "TEST ITEM DATA: " << keySequenceString.toStdString() << std::endl;
     return keySequenceString;
   }
   
@@ -95,7 +96,9 @@ bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
 
   if (column == static_cast<int>(Column::Hotkey)) {
     QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
-    action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
+    if (action) {
+      action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
+    }
   }
   else {
     m_itemData[column] = value;
@@ -118,6 +121,8 @@ QWidget* HotkeyEditorDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& /* option */,
                                             const QModelIndex& /* index */) const
 {
+  // TODO: do not show the editor for categories. Instead, treat the whole row
+  // to expand or collapse?
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
   return editor;
 }
@@ -134,10 +139,44 @@ void HotkeyEditorDelegate::setEditorData(QWidget* editor,
 void HotkeyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                         const QModelIndex &index) const
 {
-  QKeySequenceEdit *keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
-  QKeySequence keySequence = keySequenceEdit->keySequence();
+  const QKeySequenceEdit *keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
+  const QKeySequence keySequence = keySequenceEdit->keySequence();
+  QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
+  if (keySequenceString.isEmpty()) {
+    model->setData(index, keySequenceString, Qt::EditRole);
+    return;
+  }
 
-  model->setData(index, keySequence.toString(QKeySequence::NativeText), Qt::EditRole);
+  HotkeyEditorModel* hotkeyEditorModel = static_cast<HotkeyEditorModel*>(model);
+  HotkeyEditorModelItem* foundItem = hotkeyEditorModel->findKeySequence(keySequenceString);
+  const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
+  if (!foundItem || currentItem == foundItem) {
+    model->setData(index, keySequenceString, Qt::EditRole);
+    return;
+  }
+
+  QMessageBox messageBox;
+  messageBox.setWindowTitle("Reassign hotkey?");
+  messageBox.setIcon(QMessageBox::Warning);
+  const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
+  const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Hotkey)).toString();
+  const QString text = QLatin1String("Keyboard hotkey \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
+  messageBox.setText(text);
+  messageBox.setInformativeText(tr("Are you sure you want to reassign this hotkey?"));
+  messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+  messageBox.setDefaultButton(QMessageBox::No);
+
+  const int ret = messageBox.exec();
+  switch (ret) {
+    case QMessageBox::Yes:
+      model->setData(index, keySequenceString, Qt::EditRole);
+      foundItem->setData(static_cast<int>(Column::Hotkey), QVariant());
+      break;
+    case QMessageBox::No:
+      break;
+    default:
+      break;
+  }
 }
 
 void HotkeyEditorDelegate::updateEditorGeometry(QWidget* editor,
@@ -169,6 +208,11 @@ void HotkeyEditorModel::setHotkeys(const std::vector<HotkeyEntry>& hotkeys)
   _hotkeys = hotkeys;
   setupModelData(rootItem);
   endResetModel();
+}
+
+std::vector<HotkeyEntry> HotkeyEditorModel::getHotkeys() const
+{
+  return _hotkeys;
 }
 
 QModelIndex HotkeyEditorModel::index(int row, int column, const QModelIndex &parent) const
@@ -280,14 +324,13 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
     for (const auto& firstLevel : _hotkeys) {
       // TODO: make it "tr()".
       QAction* firstLevelAction = nullptr;
-      HotkeyEditorModelItem* firstLevelItem = new HotkeyEditorModelItem({firstLevel.first, QVariant::fromValue(firstLevelAction), QString()}, parent);
+      HotkeyEditorModelItem* firstLevelItem = new HotkeyEditorModelItem({firstLevel.first, QVariant::fromValue(firstLevelAction), QString(), QString()}, parent);
       parent->appendChild(firstLevelItem);
       for (const auto& secondLevel : firstLevel.second) {
         QAction* action = std::get<1>(secondLevel);
         QKeySequence keySequence = action->shortcut();
         QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
-        std::cout << "TEST SETUP MODEL DATA: " << keySequenceString.toStdString() << std::endl;
-        HotkeyEditorModelItem* secondLevelItem = new HotkeyEditorModelItem({std::get<0>(secondLevel), QVariant::fromValue(reinterpret_cast<void*>(action)), std::get<2>(secondLevel)}, firstLevelItem);
+        HotkeyEditorModelItem* secondLevelItem = new HotkeyEditorModelItem({std::get<0>(secondLevel), QVariant::fromValue(reinterpret_cast<void*>(action)), std::get<2>(secondLevel), std::get<3>(secondLevel)}, firstLevelItem);
         firstLevelItem->appendChild(secondLevelItem);
       }
     }
@@ -309,17 +352,41 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
   return QAbstractItemModel::setData(index, value, role);
 }
 
+HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequenceString)
+{
+  for (int i = 0; i < rootItem->childCount(); ++i) {
+    HotkeyEditorModelItem* firstLevel = rootItem->child(i);
+    for (int j = 0; j < firstLevel->childCount(); ++j) {
+      HotkeyEditorModelItem* secondLevel = firstLevel->child(j);
+      const QVariant secondLevelHotkey = secondLevel->data(static_cast<int>(Column::Hotkey));
+      if (keySequenceString == secondLevelHotkey.toString()) {
+        return secondLevel;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
 void HotkeyEditorModel::resetAll()
 {
-  beginResetModel();
-  // TODO: implement me, maybe have a static default data container and reset it to that here?
-  // _hotkeys.clear();
-  endResetModel();
+  for (int i = 0; i < rootItem->childCount(); ++i) {
+    HotkeyEditorModelItem* firstLevel = rootItem->child(i);
+    for (int j = 0; j < firstLevel->childCount(); ++j) {
+      HotkeyEditorModelItem* secondLevel = firstLevel->child(j);
+      secondLevel->setData(static_cast<int>(Column::Hotkey), secondLevel->data(static_cast<int>(Column::DefaultHotkey)));
+    }
+  }
+  Q_EMIT dataChanged(QModelIndex(), QModelIndex());
 }
 
 QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
 {
-  // TODO: implement me
+  for (const QModelIndex &selectedItem : selectedItems) {
+    HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(selectedItem.internalPointer());
+    item->setData(static_cast<int>(Column::Hotkey), item->data(static_cast<int>(Column::DefaultHotkey)));
+    Q_EMIT dataChanged(selectedItem, selectedItem);
+  }
   return QModelIndex();
 }
 
@@ -333,13 +400,69 @@ const QString& HotkeyEditorModel::hoverTooltipText()
   return _hoverTooltip;
 }
 
+std::vector<std::vector<int>> keyboardLayout {
+    { Qt::Key_1, Qt::Key_2, Qt::Key_3, Qt::Key_4, Qt::Key_5, Qt::Key_6,
+      Qt::Key_7, Qt::Key_8, Qt::Key_9, Qt::Key_0, Qt::Key_Backspace },
+
+    { Qt::Key_Tab, Qt::Key_Q, Qt::Key_W, Qt::Key_E, Qt::Key_R, Qt::Key_T,
+      Qt::Key_Z, Qt::Key_U, Qt::Key_I, Qt::Key_O, Qt::Key_P },
+
+    { Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_F, Qt::Key_G, Qt::Key_H,
+      Qt::Key_J, Qt::Key_K, Qt::Key_L },
+
+    { Qt::Key_Shift, Qt::Key_Y, Qt::Key_X, Qt::Key_C, Qt::Key_V, Qt::Key_B,
+      Qt::Key_N, Qt::Key_M, Qt::Key_Enter },
+
+    { Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_Space }
+};
+
+KeyboardWidget::KeyboardWidget(QWidget *parent)
+  : QWidget(parent)
+{
+  QGridLayout *gridLayout = new QGridLayout(this);
+  gridLayout->setSpacing(0);
+  gridLayout->setColumnStretch(0, 0);
+  gridLayout->setRowStretch(0, 0);
+  gridLayout->setContentsMargins(0, 0, 0, 0);
+  QSignalMapper *mapper = new QSignalMapper(this);
+  // connect(mapper, &QSignalMapper::mapped, this, &KeyboardWidget::buttonClicked);
+
+  int row = 0;
+  int column = 0;
+
+  for (auto& keyboardRow : keyboardLayout) {
+    for (auto& key : keyboardRow) {
+      QKeySequence keySequence(key);
+      QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
+      QPushButton *button = new QPushButton(keySequenceString);
+      button->setFixedWidth(40);
+      button->setContentsMargins(0, 0, 0, 0);
+
+      // mapper->setMapping(button, keyString.first);
+      // connect(button, &QPushButton::clicked, mapper, &QSignalMapper::map);
+
+      gridLayout->addWidget(button, row, column);
+      ++column;
+    }
+    ++row;
+    column = 0;
+  }
+}
+
+void KeyboardWidget::buttonClicked(int key)
+{
+  if ((key == Qt::Key_Enter) || (key == Qt::Key_Backspace)) {
+    emit specialKeyClicked(key);
+  }
+  else {
+    // emit keyClicked(keyToCharacter(key));
+  }
+}
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
 HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
-  QWidget(parent),
-  _resetAllButton(nullptr),
-  _resetButton(nullptr)
+  QWidget(parent)
 {
   if (objName) {
     setObjectName(objName);
@@ -354,15 +477,19 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   _model = new HotkeyEditorModel(_view);
   setToolTip(_model->hoverTooltipText());
-  // TODO: "new" signal/slot syntax.
-  bool connected = connect(_model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), SIGNAL(remapsChanged()));
+  _filterModel = new QSortFilterProxyModel(this);
+  _filterModel->setSourceModel(_model);
+  // bool connected = connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
   assert(connected);
+  // _view->setModel(_filterModel);
   _view->setModel(_model);
   _delegate = new HotkeyEditorDelegate(_view);
   _view->setItemDelegateForColumn(1, _delegate);
 
+  connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterFixedString);
+
   QItemSelectionModel* selectionModel = _view->selectionModel();
-  connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), SLOT(selectionChanged()));
+  connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &HotkeyEditorWidget::selectionChanged);
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
@@ -375,23 +502,24 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addLayout(buttonLayout);
 
   _resetAllButton = new QPushButton("Reset All", this);
-  // TODO: "new" signal/slot syntax
-  connect(_resetAllButton, SIGNAL(clicked()), SLOT(resetAll()));
+  connect(_resetAllButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
   _resetButton = new QPushButton("Reset", this);
-  connect(_resetButton, SIGNAL(clicked()), SLOT(reset()));
+  connect(_resetButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::reset);
   buttonLayout->addWidget(_resetButton);
 
   buttonLayout->addStretch(0);
 
   _importButton = new QPushButton("Import", this);
-  connect(_importButton, SIGNAL(clicked()), SLOT(importHotkeys()));
+  connect(_importButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::importHotkeys);
   buttonLayout->addWidget(_importButton);
 
   _exportButton = new QPushButton("Export", this);
-  connect(_exportButton, SIGNAL(clicked()), SLOT(exportHotkeys()));
+  connect(_exportButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::exportHotkeys);
   buttonLayout->addWidget(_exportButton);
+
+  layout->addWidget(new KeyboardWidget());
 
   if (!objectName().isEmpty()) {
     /*QByteArray headerColumns = settings.value(HOTKEY_EDITOR_HEADER_PREFERENCE_KEY + sPlatformStrings[sCurrentPlaform]).toByteArray();
@@ -428,6 +556,11 @@ void HotkeyEditorWidget::setHotkeys(const std::vector<HotkeyEntry>& hotkeys)
   selectionChanged();
 }
 
+std::vector<HotkeyEntry> HotkeyEditorWidget::getHotkeys() const
+{
+  return _model->getHotkeys();
+}
+
 void HotkeyEditorWidget::resetAll()
 {
   _model->resetAll();
@@ -460,3 +593,7 @@ void HotkeyEditorWidget::exportHotkeys()
 void HotkeyEditorWidget::selectionChanged()
 {
 }
+
+
+
+
