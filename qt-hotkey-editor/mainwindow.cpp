@@ -32,9 +32,23 @@ MainWindow::MainWindow()
 
     std::vector<HotkeyEntry> hotkeys;
     hotkeys.push_back({"File", {
-        {newAct->text(), newAct, newAct->toolTip(), newAct->shortcut().toString(QKeySequence::NativeText)}}
+        {newAct->text(), newAct, newAct->toolTip(), newAct->shortcut().toString(QKeySequence::NativeText)},
+        {openAct->text(), openAct, openAct->toolTip(), openAct->shortcut().toString(QKeySequence::NativeText)},
+        {saveAct->text(), saveAct, saveAct->toolTip(), saveAct->shortcut().toString(QKeySequence::NativeText)},
+        {printAct->text(), printAct, printAct->toolTip(), printAct->shortcut().toString(QKeySequence::NativeText)},
+        {exitAct->text(), exitAct, exitAct->toolTip(), exitAct->shortcut().toString(QKeySequence::NativeText)}}
       }
     );
+
+    hotkeys.push_back({"Edit", {
+        {undoAct->text(), undoAct, undoAct->toolTip(), undoAct->shortcut().toString(QKeySequence::NativeText)},
+        {redoAct->text(), redoAct, redoAct->toolTip(), redoAct->shortcut().toString(QKeySequence::NativeText)},
+        {cutAct->text(), cutAct, cutAct->toolTip(), cutAct->shortcut().toString(QKeySequence::NativeText)},
+        {copyAct->text(), copyAct, copyAct->toolTip(), copyAct->shortcut().toString(QKeySequence::NativeText)},
+        {pasteAct->text(), pasteAct, pasteAct->toolTip(), pasteAct->shortcut().toString(QKeySequence::NativeText)}}
+      }
+    );
+
     widget->setHotkeys(hotkeys);
 
     QString message = tr("A context menu is available by right-clicking");
@@ -42,7 +56,7 @@ MainWindow::MainWindow()
 
     setWindowTitle(tr("Menus"));
     setMinimumSize(160, 160);
-    resize(480, 320);
+    resize(1920, 1280);
 }
 
 #ifndef QT_NO_CONTEXTMENU
