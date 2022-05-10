@@ -447,6 +447,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
     ++row;
     column = 0;
   }
+  setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
 void KeyboardWidget::buttonClicked(int key)
@@ -481,12 +482,13 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel->setSourceModel(_model);
   // bool connected = connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
   assert(connected);
-  // _view->setModel(_filterModel);
-  _view->setModel(_model);
+  _view->setModel(_filterModel);
+  // _view->setModel(_model);
   _delegate = new HotkeyEditorDelegate(_view);
   _view->setItemDelegateForColumn(1, _delegate);
 
   connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterFixedString);
+  // connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterRegExp);
 
   QItemSelectionModel* selectionModel = _view->selectionModel();
   connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &HotkeyEditorWidget::selectionChanged);
