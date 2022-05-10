@@ -476,6 +476,11 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   // set up the model and view
   _view = new QTreeView(this);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+  _view->resizeColumnToContents(0);                                         
+  _view->resizeColumnToContents(1);                                         
+  _view->setAlternatingRowColors(true);                                     
+  _view->setMinimumSize(400, 300);
+
   _model = new HotkeyEditorModel(_view);
   setToolTip(_model->hoverTooltipText());
   _filterModel = new QSortFilterProxyModel(this);
