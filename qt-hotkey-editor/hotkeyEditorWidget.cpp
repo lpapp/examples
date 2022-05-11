@@ -3,6 +3,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QKeySequenceEdit>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMessageBox>
@@ -480,6 +481,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->resizeColumnToContents(1);                                         
   _view->setAlternatingRowColors(true);                                     
   _view->setMinimumSize(400, 300);
+  _view->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   _model = new HotkeyEditorModel(_view);
   setToolTip(_model->hoverTooltipText());
