@@ -85,7 +85,7 @@ QVariant HotkeyEditorModelItem::data(int column) const
     QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
     return keySequenceString;
   }
-  
+
   return columnVariant;
 }
 
@@ -477,11 +477,16 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   // set up the model and view
   _view = new QTreeView(this);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-  _view->resizeColumnToContents(0);                                         
-  _view->resizeColumnToContents(1);                                         
-  _view->setAlternatingRowColors(true);                                     
+  _view->setAlternatingRowColors(true);
   _view->setMinimumSize(400, 300);
-  _view->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+  // Note: this would need to be applied after filling in the data. But also,
+  // this only seems to adjust based on the header content, not body. So,
+  // probably not good.
+  // _view->resizeColumnToContents(0);
+  // Note: this does not allow the user to resize the column
+  // _view->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   _model = new HotkeyEditorModel(_view);
   setToolTip(_model->hoverTooltipText());
