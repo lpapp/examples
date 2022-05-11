@@ -1,8 +1,11 @@
 #ifndef HOTKEYEDITORWIDGET_H
 #define HOTKEYEDITORWIDGET_H
 
+#include <QtWidgets/QKeySequenceEdit>
 #include <QtWidgets/QStyledItemDelegate>
 #include <QtWidgets/QWidget>
+
+#include <QtCore/QEvent>
 
 #include <string>
 
@@ -113,6 +116,21 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void buttonClicked(int key);
+};
+
+class KeySequenceEdit : public QKeySequenceEdit
+{
+  Q_OBJECT
+  public:
+    KeySequenceEdit(QWidget* parent) : QKeySequenceEdit(parent) {}
+
+    bool event(QEvent* event) override {
+      if (event->type() == QEvent::ShortcutOverride) {
+        return true;
+      }
+
+      return QWidget::event(event);
+    }
 };
 
 class HotkeyEditorWidget : public QWidget
