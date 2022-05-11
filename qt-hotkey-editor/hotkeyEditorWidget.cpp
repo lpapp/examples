@@ -485,7 +485,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel = new QSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
   // bool connected = connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
-  assert(connected);
+  // assert(connected);
   _view->setModel(_filterModel);
   // _view->setModel(_model);
   _delegate = new HotkeyEditorDelegate(_view);
