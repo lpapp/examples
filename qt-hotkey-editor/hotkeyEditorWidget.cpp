@@ -484,8 +484,12 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   setToolTip(_model->hoverTooltipText());
   _filterModel = new QSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
-  // bool connected = connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
-  // assert(connected);
+  _filterModel->setFilterKeyColumn(-1);
+  _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  _filterModel->setRecursiveFilteringEnabled(true);
+  _filterModel->setDynamicSortFilter(true);
+
+  // connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
   _view->setModel(_filterModel);
   // _view->setModel(_model);
   _delegate = new HotkeyEditorDelegate(_view);
