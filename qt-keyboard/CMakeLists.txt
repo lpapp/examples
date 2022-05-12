@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 add_executable(Keyboard
   main.cpp
@@ -17,4 +17,4 @@ add_executable(Keyboard
   keyboardWidget.cpp
 )
 
-target_link_libraries(Keyboard Qt::Widgets)
+target_link_libraries(Keyboard Qt::Core Qt::Gui Qt::Widgets)

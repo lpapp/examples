@@ -1,5 +1,7 @@
 #include "keyboardWidget.h"
 
+#include <QtCore/QString>
+
 struct Key {
   int key;
   float width = 1;
