@@ -83,6 +83,7 @@ std::vector<RowKeys> keyboardLayout {
 };
 
 KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
+  static constexpr int kMultiplier = 54;
 	int row = 0;
   int width = 0;
 	for (auto& keyboardRow : keyboardLayout) {
@@ -92,12 +93,13 @@ KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
 			  QKeySequence keySequence(key.key);
 			  QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
 			  QPushButton *button = new QPushButton(keySequenceString, this);
-			  button->setGeometry(48 * column, 48 * row, 48 * key.width, 48 * key.height);
+			  button->setGeometry(kMultiplier * column, kMultiplier * row, 
+                            kMultiplier * key.width, kMultiplier * key.height);
       }
 			column += key.width;
 		}
     width = std::max(width, column);
 		++row;
 	}
-  setFixedSize(48 * width, 48 * row);
+  setFixedSize(kMultiplier * width, kMultiplier * row);
 }
