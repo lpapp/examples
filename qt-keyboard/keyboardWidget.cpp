@@ -2,6 +2,8 @@
 
 #include <QtCore/QString>
 
+#include <iostream>
+
 struct Key {
   int key;
   float width = 1;
@@ -47,8 +49,9 @@ std::vector<RowKeys> keyboardLayout {
     {Qt::Key_paragraph}, {Qt::Key_1}, {Qt::Key_2}, {Qt::Key_3}, {Qt::Key_4},
     {Qt::Key_5}, {Qt::Key_6}, {Qt::Key_7}, {Qt::Key_8}, {Qt::Key_9},
     {Qt::Key_0}, {Qt::Key_Minus}, {Qt::Key_Equal}, {Qt::Key_Backspace, 1.6f},
-    {0, kSpaceWidth}, {0}, {Qt::Key_Home}, {Qt::Key_PageUp}, {0, kSpaceWidth},
-    {Qt::Key_Clear}, {Qt::Key_Equal}, {Qt::Key_Slash}, {Qt::Key_Asterisk}
+    {0, kSpaceWidth}, {Qt::Key_Insert}, {Qt::Key_Home}, {Qt::Key_PageUp},
+    {0, kSpaceWidth}, {Qt::Key_Clear}, {Qt::Key_Equal}, {Qt::Key_Slash},
+    {Qt::Key_Asterisk}
   },
   
   {
@@ -86,22 +89,23 @@ std::vector<RowKeys> keyboardLayout {
 
 KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
   static constexpr int kMultiplier = 54;
-	int row = 0;
-  int width = 0;
-	for (auto& keyboardRow : keyboardLayout) {
-		int column = 0;
-		for (auto& key : keyboardRow) {
+  float row = 0;
+  float width = 0;
+  for (auto& keyboardRow : keyboardLayout) {
+    float column = 0;
+    for (auto& key : keyboardRow) {
       if (key.key) {
-			  QKeySequence keySequence(key.key);
-			  QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
-			  QPushButton *button = new QPushButton(keySequenceString, this);
-			  button->setGeometry(kMultiplier * column, kMultiplier * row, 
+        QKeySequence keySequence(key.key);
+        QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
+        QPushButton *button = new QPushButton(keySequenceString, this);
+        button->setFocusPolicy(Qt::NoFocus);
+        button->setGeometry(kMultiplier * column, kMultiplier * row, 
                             kMultiplier * key.width, kMultiplier * key.height);
       }
-			column += key.width;
-		}
+      column += key.width;
+    }
     width = std::max(width, column);
-		++row;
-	}
+    ++row;
+  }
   setFixedSize(kMultiplier * width, kMultiplier * row);
 }
