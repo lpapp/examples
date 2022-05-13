@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 {
     QApplication application(argc, argv);
     setApplication(application);
+    application.setAttribute(Qt::AA_MacDontSwapCtrlAndMeta);
     MainWindow window;
     window.show();
     return application.exec();

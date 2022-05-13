@@ -2,8 +2,6 @@
 
 #include <QtCore/QString>
 
-#include <iostream>
-
 struct Key {
   int key;
   float width = 1;
@@ -72,18 +70,21 @@ std::vector<RowKeys> keyboardLayout {
   },
 
   {
-    {Qt::Key_Shift, 1.3f}, {Qt::Key_QuoteLeft}, {Qt::Key_Z}, {Qt::Key_X},
+    {Qt::ShiftModifier, 1.3f}, {Qt::Key_QuoteLeft}, {Qt::Key_Z}, {Qt::Key_X},
     {Qt::Key_C}, {Qt::Key_V}, {Qt::Key_B}, {Qt::Key_N}, {Qt::Key_M},
-    {Qt::Key_Less}, {Qt::Key_Greater}, {Qt::Key_Slash}, {Qt::Key_Shift, 2.3f},
-    {0, kSpaceWidth}, {0}, {Qt::Key_Up}, {0}, {0, kSpaceWidth}, {Qt::Key_1},
-    {Qt::Key_2}, {Qt::Key_3}, {Qt::Key_Enter, 1.0f, 2.0f}
+    {Qt::Key_Less}, {Qt::Key_Greater}, {Qt::Key_Slash},
+    {Qt::ShiftModifier, 2.3f}, {0, kSpaceWidth}, {0}, {Qt::Key_Up}, {0},
+    {0, kSpaceWidth}, {Qt::Key_1}, {Qt::Key_2}, {Qt::Key_3},
+    {Qt::Key_Enter, 1.0f, 2.0f}
   },
 
   {
-    {Qt::Key_Meta, 1.5f}, {Qt::Key_Alt, 1.3f}, {Qt::Key_Control, 1.5f},
-    {Qt::Key_Space, 6.0f}, {Qt::Key_Control, 1.5f}, {Qt::Key_Alt, 1.3f},
-    {Qt::Key_Meta, 1.5f}, {0, kSpaceWidth}, {Qt::Key_Left}, {Qt::Key_Down},
-    {Qt::Key_Right}, {0, kSpaceWidth}, {Qt::Key_0, 2.0f}, {Qt::Key_Period}
+    {Qt::ControlModifier, 1.5f}, {Qt::AltModifier, 1.3f},
+    {Qt::MetaModifier, 1.5f}, {Qt::Key_Space, 6.0f},
+    {Qt::MetaModifier, 1.5f}, {Qt::AltModifier, 1.3f},
+    {Qt::ControlModifier, 1.5f}, {0, kSpaceWidth}, {Qt::Key_Left},
+    {Qt::Key_Down}, {Qt::Key_Right}, {0, kSpaceWidth}, {Qt::Key_0, 2.0f},
+    {Qt::Key_Period}
   }
 };
 
@@ -97,6 +98,17 @@ KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
       if (key.key) {
         QKeySequence keySequence(key.key);
         QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
+        if (keySequenceString == "Meta+") {
+          keySequenceString.clear();
+        }
+
+        for (const auto& modifier : {"Shift", "Control", "Alt"}) {
+          QString modifierString = QString(modifier) + "+";
+          if (modifierString == keySequenceString) {
+            keySequenceString = modifier;
+          }
+        }
+
         QPushButton *button = new QPushButton(keySequenceString, this);
         button->setFocusPolicy(Qt::NoFocus);
         button->setGeometry(kMultiplier * column, kMultiplier * row, 
