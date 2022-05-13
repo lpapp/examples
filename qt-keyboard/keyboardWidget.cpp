@@ -102,7 +102,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
           keySequenceString.clear();
         }
 
-        for (const auto& modifier : {"Shift", "Control", "Alt"}) {
+        for (const auto& modifier : {"Shift", "Ctrl", "Alt"}) {
           QString modifierString = QString(modifier) + "+";
           if (modifierString == keySequenceString) {
             keySequenceString = modifier;

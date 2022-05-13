@@ -46,6 +46,7 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::child(int row)
 
 int HotkeyEditorModelItem::childCount() const
 {
+  std::cout << "TEST CHILD COUNT: " << m_itemData[0].toString().toStdString() << std::endl;
   return m_childItems.size();
 }
 
@@ -323,6 +324,7 @@ QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation,
 void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
 {
     for (const auto& firstLevel : _hotkeys) {
+      if (firstLevel.first.isEmpty()) continue;
       // TODO: make it "tr()".
       QAction* firstLevelAction = nullptr;
       HotkeyEditorModelItem* firstLevelItem = new HotkeyEditorModelItem({firstLevel.first, QVariant::fromValue(firstLevelAction), QString(), QString()}, parent);
