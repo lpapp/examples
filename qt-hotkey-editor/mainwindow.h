@@ -20,27 +20,6 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
 #endif // QT_NO_CONTEXTMENU
 
-private slots:
-    void newFile();
-    void open();
-    void save();
-    void print();
-    void undo();
-    void redo();
-    void cut();
-    void copy();
-    void paste();
-    void bold();
-    void italic();
-    void leftAlign();
-    void rightAlign();
-    void justify();
-    void center();
-    void setLineSpacing();
-    void setParagraphSpacing();
-    void about();
-    void aboutQt();
-
 private:
     void createActions();
     void createMenus();
@@ -70,7 +49,6 @@ private:
     QAction *setParagraphSpacingAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
-    QLabel *infoLabel;
 };
 
 #endif

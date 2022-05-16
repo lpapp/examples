@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QKeySequenceEdit>
-#include <QMainWindow>
 
 int main(int argc, char *argv[])
 {
