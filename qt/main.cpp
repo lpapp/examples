@@ -1,12 +1,11 @@
 #include <QApplication>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QKeySequenceEdit>
+#include <QMainWindow>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    QLineEdit lineEdit;
-    QPushButton pushButton;
-    QObject::connect(&lineEdit, &QLineEdit::returnPressed, [&pushButton]() {emit pushButton.clicked(true);});
+    QKeySequenceEdit keySequenceEdit;
+    keySequenceEdit.show();
     return app.exec();
 }
