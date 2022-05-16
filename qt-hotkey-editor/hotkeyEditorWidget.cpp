@@ -46,7 +46,6 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::child(int row)
 
 int HotkeyEditorModelItem::childCount() const
 {
-  std::cout << "TEST CHILD COUNT: " << m_itemData[0].toString().toStdString() << std::endl;
   return m_childItems.size();
 }
 
@@ -344,6 +343,32 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
   if (role == Qt::EditRole) {
     QString newValue = value.toString();
 
+    HotkeyEditorModelItem* foundItem = findKeySequence(newValue);
+    const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
+    if (!foundItem || currentItem == foundItem) {
+    } else {
+      QMessageBox messageBox;
+      messageBox.setWindowTitle("Reassign hotkey?");
+      messageBox.setIcon(QMessageBox::Warning);
+      const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
+      const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Hotkey)).toString();
+      const QString text = QLatin1String("Keyboard hotkey \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
+      messageBox.setText(text);
+      messageBox.setInformativeText(tr("Are you sure you want to reassign this hotkey?"));
+      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+      messageBox.setDefaultButton(QMessageBox::No);
+
+      const int ret = messageBox.exec();
+      switch (ret) {
+        case QMessageBox::Yes:
+          foundItem->setData(static_cast<int>(Column::Hotkey), QVariant());
+          break;
+        case QMessageBox::No:
+        default:
+          return QAbstractItemModel::setData(index, value, role); 
+      }
+    }
+
     if (index.column() < (static_cast<int>(Column::Description) + 1)) {
       HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
       item->setData(static_cast<int>(Column::Hotkey), value);
@@ -492,10 +517,10 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel->setDynamicSortFilter(true);
 
   // connect(_model, &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
-  _view->setModel(_filterModel);
-  // _view->setModel(_model);
+  // _view->setModel(_filterModel);
+  _view->setModel(_model);
   _delegate = new HotkeyEditorDelegate(_view);
-  _view->setItemDelegateForColumn(1, _delegate);
+  // _view->setItemDelegateForColumn(1, _delegate);
 
   connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterFixedString);
   // connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterRegExp);
