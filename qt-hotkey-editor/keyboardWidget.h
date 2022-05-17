@@ -5,6 +5,8 @@
 
 #include <QtGui/QKeySequence>
 
+#include <QtCore/QString>
+
 #include <map>
 #include <vector>
 
@@ -18,8 +20,12 @@ class KeyboardWidget : public QWidget
 public:
 	KeyboardWidget(QWidget *parent = nullptr);
   void setHotkeys(const std::vector<QKeySequence>& hotkeys, const QColor& color);
+
+  void resizeEvent(QResizeEvent *event) override;
+
 private:
-  std::map<QString, QPushButton*> _buttons;
+  std::map<QString, QPushButton*> _buttonsMap;
+  std::vector<std::vector<QPushButton*>> _buttons;
 };
 
 #endif

@@ -538,6 +538,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addWidget(new QSplitter(this));
 
   _keyboardWidget = new KeyboardWidget(this);
+  _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
 
   QHBoxLayout* buttonLayout = new QHBoxLayout();
