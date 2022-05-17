@@ -1,36 +1,45 @@
-#ifndef HOTKEYEDITORWIDGET_H
-#define HOTKEYEDITORWIDGET_H
+#ifndef OTKEYEDITORWIDGET_H
+#define OTKEYEDITORWIDGET_H
 
-#include <QtWidgets/QKeySequenceEdit>
 #include <QtWidgets/QStyledItemDelegate>
 #include <QtWidgets/QWidget>
 
-#include <QtCore/QEvent>
+#include <QtCore/QString>
 
 #include <string>
 
 class QAction;
+class QComboBox;
 class QLineEdit;
+class QMenu;
 class QPushButton;
 class QSortFilterProxyModel;
+class QToolButton;
 class QTreeView;
 
-// Key: category name
-// Value: List of actions (each action having a name, hotkey, description,
-//        default hotkey value.
-using HotkeyEntry = std::pair<QString, std::vector<std::tuple<QString, QAction*, QString, QString>>>;
+class KeyboardWidget;
+
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
+static const char* kIdPropertyName = "id";
+static const std::string kDomainName = "lpapp";
+
+// List of hotkey actions for all categories
+using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;
+
+// List of categories for all contexts
+using HotkeysMap = std::map<QString, CategoryHotkeysMap>;
 
 enum class Column : uint8_t {
   Name,
   Hotkey,
-  Description,
   DefaultHotkey
 };
 
 class HotkeyEditorModelItem
 {
 public:
-    explicit HotkeyEditorModelItem(const std::vector<QVariant> &data, HotkeyEditorModelItem *parentItem = nullptr);
+    explicit HotkeyEditorModelItem(const std::vector<QVariant>& data,
+                                   HotkeyEditorModelItem* parentItem = nullptr);
     ~HotkeyEditorModelItem();
 
     void appendChild(HotkeyEditorModelItem *child);
@@ -75,14 +84,14 @@ public:
   void setHoverTooltipText(const QString& hoverTooltipText);
   const QString& hoverTooltipText();
 
-  void setHotkeys(const std::vector<HotkeyEntry>& hotkeys);
-  std::vector<HotkeyEntry> getHotkeys() const;
+  void setHotkeys(const HotkeysMap& hotkeys);
+  HotkeysMap getHotkeys() const;
 
 private:
   void setupModelData(HotkeyEditorModelItem* parent);
 
   HotkeyEditorModelItem* rootItem;
-  std::vector<HotkeyEntry> _hotkeys;
+  HotkeysMap _hotkeys;
   QString _hoverTooltip;
 };
 
@@ -95,42 +104,14 @@ public:
   QWidget *createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                         const QModelIndex& index) const override;
 
+  void commitAndCloseEditor();
+
   void setEditorData(QWidget* editor, const QModelIndex& index) const override;
   void setModelData(QWidget* editor, QAbstractItemModel* model,
                     const QModelIndex& index) const override;
 
   void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option,
                             const QModelIndex& index) const override;
-};
-
-class KeyboardWidget : public QWidget
-{
-  Q_OBJECT
-
-public:
-  explicit KeyboardWidget(QWidget *parent = Q_NULLPTR);
-
-Q_SIGNALS:
-    void specialKeyClicked(int key);
-    void keyClicked(const QString &text);
-
-private Q_SLOTS:
-    void buttonClicked(int key);
-};
-
-class KeySequenceEdit : public QKeySequenceEdit
-{
-  Q_OBJECT
-  public:
-    KeySequenceEdit(QWidget* parent) : QKeySequenceEdit(parent) {}
-
-    bool event(QEvent* event) override {
-      if (event->type() == QEvent::ShortcutOverride) {
-        return true;
-      }
-
-      return QWidget::event(event);
-    }
 };
 
 class HotkeyEditorWidget : public QWidget
@@ -145,12 +126,14 @@ public:
 
   void setHoverTooltipText(const QString& hoverTooltipText);
 
-  void setHotkeys(const std::vector<HotkeyEntry>& hotkeys);
-  std::vector<HotkeyEntry> getHotkeys() const;
+  void setHotkeys(const HotkeysMap& hotkeys);
+  HotkeysMap getHotkeys() const;
 
 public Q_SLOTS:
   void resetAll();
   void reset();
+
+  void expandRecursively(const QModelIndex& index, QTreeView* view);
 
   void importHotkeys();
   void exportHotkeys();
@@ -165,12 +148,30 @@ private:
   HotkeyEditorDelegate* _delegate;
   HotkeyEditorModel* _model;
   QSortFilterProxyModel* _filterModel;
+  QToolButton* _searchToolButton;
+  QMenu* _searchToolButtonMenu;
   QLineEdit* _search;
   QTreeView* _view;
+  QComboBox* _contextComboBox;
+  KeyboardWidget* _keyboardWidget;
   QPushButton* _resetAllButton;
   QPushButton* _resetButton;
   QPushButton* _importButton;
   QPushButton* _exportButton;
+
+  QAction* _nameAction;
+  QAction* _hotkeyAction;
+  QAction* _allContextsAction;
+  std::vector<QAction*> contextActions;
+  QAction* _defaultHotkeyAction;
+  QAction* _nonDefaultHotkeyAction;
+  QAction* _matchContainsAction;
+  QAction* _matchExactlyAction;
+  QAction* _matchStartsWithAction;
+  QAction* _matchEndsWithAction;
+  QAction* _matchWildcardAction;
+  QAction* _matchRegularExpressionAction;
+
 };
 
 #endif

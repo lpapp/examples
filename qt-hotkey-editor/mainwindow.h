@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include <vector>
+
 class QAction;
 class QActionGroup;
 class QLabel;

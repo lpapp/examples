@@ -4,6 +4,8 @@
 
 #include "hotkeyEditorWidget.h"
 
+#include <vector>
+
 MainWindow::MainWindow()
 {
     HotkeyEditorWidget *widget = new HotkeyEditorWidget;
@@ -12,29 +14,41 @@ MainWindow::MainWindow()
     createActions();
     createMenus();
 
-    std::vector<HotkeyEntry> hotkeys;
-    hotkeys.push_back({"File", {
+    QList<QAction*> actions = findChildren<QAction*>();
+    std::vector<QAction*> _actions;
+    for (QAction* action : actions) {
+      action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
+      CategoryHotkeysMap categoryHotkeys;
+      _actions.push_back(action);
+    }
+
+    CategoryHotkeysMap categoryHotkeys;
+    categoryHotkeys.insert({QString("All"), _actions});
+    HotkeysMap hotkeys;
+    hotkeys.insert({QString("Global"), categoryHotkeys});
+
+    /* hotkeys.insert({
+    "Global", // context key
+    {
+      {"File", {
         {newAct->text(), newAct, newAct->toolTip(), newAct->shortcut().toString(QKeySequence::NativeText)},
         {openAct->text(), openAct, openAct->toolTip(), openAct->shortcut().toString(QKeySequence::NativeText)},
         {saveAct->text(), saveAct, saveAct->toolTip(), saveAct->shortcut().toString(QKeySequence::NativeText)},
         {printAct->text(), printAct, printAct->toolTip(), printAct->shortcut().toString(QKeySequence::NativeText)},
         {exitAct->text(), exitAct, exitAct->toolTip(), exitAct->shortcut().toString(QKeySequence::NativeText)}}
-      }
-    );
+      },
 
-    hotkeys.push_back({"Edit", {
-        {undoAct->text(), undoAct, undoAct->toolTip(), undoAct->shortcut().toString(QKeySequence::NativeText)},
+      {"Edit", {
+          {undoAct->text(), undoAct, undoAct->toolTip(), undoAct->shortcut().toString(QKeySequence::NativeText)},
         {redoAct->text(), redoAct, redoAct->toolTip(), redoAct->shortcut().toString(QKeySequence::NativeText)},
         {cutAct->text(), cutAct, cutAct->toolTip(), cutAct->shortcut().toString(QKeySequence::NativeText)},
         {copyAct->text(), copyAct, copyAct->toolTip(), copyAct->shortcut().toString(QKeySequence::NativeText)},
         {pasteAct->text(), pasteAct, pasteAct->toolTip(), pasteAct->shortcut().toString(QKeySequence::NativeText)}}
       }
-    );
+    }
+    }); */
 
     widget->setHotkeys(hotkeys);
-
-    QString message = tr("A context menu is available by right-clicking");
-    statusBar()->showMessage(message);
 
     setWindowTitle(tr("Menus"));
     setMinimumSize(160, 160);
@@ -85,15 +99,12 @@ void MainWindow::createActions()
     pasteAct->setShortcuts(QKeySequence::Paste);
 
     boldAct = new QAction(tr("&Bold"), this);
-    boldAct->setCheckable(true);
     boldAct->setShortcut(QKeySequence::Bold);
 
     QFont boldFont = boldAct->font();
-    boldFont.setBold(true);
     boldAct->setFont(boldFont);
 
     italicAct = new QAction(tr("&Italic"), this);
-    italicAct->setCheckable(true);
     italicAct->setShortcut(QKeySequence::Italic);
 
     QFont italicFont = italicAct->font();
@@ -108,19 +119,15 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
 
     leftAlignAct = new QAction(tr("&Left Align"), this);
-    leftAlignAct->setCheckable(true);
     leftAlignAct->setShortcut(tr("Ctrl+L"));
 
     rightAlignAct = new QAction(tr("&Right Align"), this);
-    rightAlignAct->setCheckable(true);
     rightAlignAct->setShortcut(tr("Ctrl+R"));
 
     justifyAct = new QAction(tr("&Justify"), this);
-    justifyAct->setCheckable(true);
     justifyAct->setShortcut(tr("Ctrl+J"));
 
     centerAct = new QAction(tr("&Center"), this);
-    centerAct->setCheckable(true);
     centerAct->setShortcut(tr("Ctrl+E"));
 
     alignmentGroup = new QActionGroup(this);
