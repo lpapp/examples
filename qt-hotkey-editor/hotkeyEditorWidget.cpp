@@ -104,7 +104,6 @@ bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
   }
 
   if (column == static_cast<int>(Column::Hotkey)) {
-    std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
     QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
     if (action) {
       action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
@@ -131,7 +130,6 @@ QWidget* HotkeyEditorDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& /* option */,
                                             const QModelIndex& /* index */) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE CREATE EDITOR" << std::endl;
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
   // editor->setFocusPolicy(Qt::StrongFocus);
   // connect(editor, &QKeySequenceEdit::editingFinished, this, &HotkeyEditorDelegate::commitAndCloseEditor);
@@ -148,7 +146,6 @@ void HotkeyEditorDelegate::commitAndCloseEditor()
 void HotkeyEditorDelegate::setEditorData(QWidget* editor,
                                          const QModelIndex& index) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET EDITOR DATA" << std::endl;
   QString value = index.model()->data(index, Qt::EditRole).toString();
 
   QKeySequenceEdit* keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
@@ -158,7 +155,6 @@ void HotkeyEditorDelegate::setEditorData(QWidget* editor,
 void HotkeyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                         const QModelIndex &index) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET MODEL DATA" << std::endl;
   const QKeySequenceEdit *keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
   if (keySequenceEdit) {
     const QKeySequence keySequence = keySequenceEdit->keySequence();
@@ -341,7 +337,6 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
 
 bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA" << std::endl;
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Hotkey)) {
     QString keySequenceString= value.toString();
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
@@ -424,7 +419,6 @@ QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
   for (const QModelIndex &selectedItem : selectedItems) {
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(selectedItem.internalPointer());
     item->setData(static_cast<int>(Column::Hotkey), item->data(static_cast<int>(Column::DefaultHotkey)));
-    std::cout << "TEST RESET HOTKEY: " << item->data(static_cast<int>(Column::Name)).toString().toStdString() << "(" << item->data(static_cast<int>(Column::DefaultHotkey)).toString().toStdString() << ")" << std::endl;
     Q_EMIT dataChanged(selectedItem, selectedItem);
   }
   return QModelIndex();
@@ -474,10 +468,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel->setRecursiveFilteringEnabled(true);
   _filterModel->setDynamicSortFilter(true);
 
-  connect(_model, &QAbstractItemModel::dataChanged, _filterModel, &QAbstractItemModel::dataChanged);
-
   _view->setModel(_filterModel);
-  // _view->setModel(_model);
   connect(_view->model(), &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
 
   _delegate = new HotkeyEditorDelegate(_view);
@@ -713,7 +704,13 @@ void HotkeyEditorWidget::resetAll()
 void HotkeyEditorWidget::reset()
 {
   QModelIndexList selectedItems = _view->selectionModel()->selectedIndexes();
-  QModelIndex newItem = _model->reset(selectedItems);
+
+  QModelIndexList sourceSelectedItems;
+  for (const QModelIndex& selectedItem : selectedItems) {
+    sourceSelectedItems.push_back(_filterModel->mapToSource(selectedItem));
+  }
+
+  QModelIndex newItem = _model->reset(sourceSelectedItems);
 }
 
 void HotkeyEditorWidget::expandRecursively(const QModelIndex& index, QTreeView* view)
