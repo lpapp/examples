@@ -23,9 +23,11 @@ MainWindow::MainWindow()
     }
 
     CategoryHotkeysMap categoryHotkeys;
-    categoryHotkeys.insert({QString("All"), _actions});
+    categoryHotkeys.insert({QString("Category1"), _actions});
     HotkeysMap hotkeys;
-    hotkeys.insert({QString("Global"), categoryHotkeys});
+    hotkeys.insert({QString("Context1"), categoryHotkeys});
+    hotkeys.insert({QString("Context2"), categoryHotkeys});
+    hotkeys.insert({QString("Context3"), categoryHotkeys});
 
     /* hotkeys.insert({
     "Global", // context key
