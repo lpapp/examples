@@ -24,6 +24,8 @@ public:
   void resizeEvent(QResizeEvent *event) override;
 
 private:
+  void resizeButtons();
+
   std::map<QString, QPushButton*> _buttonsMap;
   std::vector<std::vector<QPushButton*>> _buttons;
 };

@@ -96,29 +96,63 @@ std::vector<RowKeys> keyboardLayout {
 };
 
 KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
-  float row = 0;
-  float width = 0;
   for (auto& keyboardRow : keyboardLayout) {
-    float column = 0;
     std::vector<QPushButton*> keyboardRowButtons;
     for (auto& key : keyboardRow) {
       if (key.key) {
         QKeySequence keySequence(key.key);
         QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
+        if (keySequenceString == "Meta+") {
+          keySequenceString.clear();
+        }
+
+        for (const auto& modifier : {"Shift", "Ctrl", "Alt"}) {
+          QString modifierString = QString(modifier) + "+";
+          if (modifierString == keySequenceString) {
+            keySequenceString = modifier;
+          }
+        }
+
         QPushButton *button = new QPushButton(keySequenceString, this);
         button->setFocusPolicy(Qt::NoFocus);
-        button->setGeometry(kMultiplier * column, kMultiplier * row, 
-                            kMultiplier * key.width, kMultiplier * key.height);
         _buttonsMap.insert({keySequenceString, button});
         keyboardRowButtons.push_back(button);
+      }
+    }
+    _buttons.push_back(keyboardRowButtons);
+  }
+
+  resizeButtons();
+}
+
+void KeyboardWidget::resizeButtons()
+{
+  static constexpr float kMultiplier = 37.5f;
+  const QSize currentSize = size();
+  float row = 0;
+  float width = 0;
+  for (int i = 0; i < keyboardLayout.size(); ++i) {
+    float column = 0;
+    for (int j = 0, buttonColumn = 0; j < keyboardLayout[i].size(); ++j) {
+      Key key = keyboardLayout[i][j];
+      if (key.key) {
+        _buttons[i][buttonColumn++]->setGeometry(kMultiplier * column, kMultiplier * row,
+          kMultiplier * key.width, kMultiplier * key.height);
       }
       column += key.width;
     }
     width = std::max(width, column);
     ++row;
-    _buttons.push_back(keyboardRowButtons);
   }
-  // setFixedSize(kMultiplier * width, kMultiplier * row);
+  setMinimumSize(kMultiplier * width, kMultiplier * row);
+}
+
+#include <iostream>
+
+void KeyboardWidget::resizeEvent(QResizeEvent *event)
+{
+  std::cout << "TEST RESIZE EVENT" << std::endl;
+  resizeButtons();
 }
 
 void KeyboardWidget::setHotkeys(const std::vector<QKeySequence>& hotkeys, const QColor& color)
@@ -131,20 +165,6 @@ void KeyboardWidget::setHotkeys(const std::vector<QKeySequence>& hotkeys, const 
     QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
     if (_buttonsMap.count(keySequenceString)) {
       _buttonsMap[keySequenceString]->setPalette(color);
-    }
-  }
-}
-
-#include <iostream>
-
-void KeyboardWidget::resizeEvent(QResizeEvent *event)
-{
-  std::cout << "TEST RESIZING THE KEYBOARD, WIDTH: " << event->size().width() << ", HEIGHT: " <<  event->size().height() << std::endl;
-  for (size_t row = 0; row < _buttons.size(); ++row) {
-    for (size_t column = 0; column < _buttons[row].size(); ++column) {
-      QPushButton* button = _buttons[row][column];
-      Key key = keyboardLayout[row][column];
-      button->setGeometry(button->geometry().x() / 5, button->geometry().y() / 5, key.width * event->size().width()/5, key.height * event->size().height() / 5);
     }
   }
 }
