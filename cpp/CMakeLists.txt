@@ -11,3 +11,5 @@ target_include_directories(libfoo PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_
 add_library(libbar SHARED libbar.cpp libbar.h)
 target_link_libraries(libbar PRIVATE libfoo)
 
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE libbar)

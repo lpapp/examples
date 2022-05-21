@@ -4,7 +4,7 @@
 #include "libfoo.h"
 
 namespace bar {
-  void method(const foo::TimeValueSet tvs);
+  void method();
 }
 
 #endif
