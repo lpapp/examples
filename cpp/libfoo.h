@@ -5,10 +5,10 @@
 #include <set>
 
 namespace foo {
-  using TimeValue = double;
-  using TimeValueSet = std::set<TimeValue>;
+  using Foo = double;
+  using FooSet = std::set<Foo>;
 
-  std::ostream& operator<<(std::ostream& o, const TimeValueSet&);
+  std::ostream& operator<<(std::ostream& o, const FooSet& fooSet);
 }
 
 #endif
