@@ -459,9 +459,13 @@ void HotkeyEditorModel::resetAll()
       HotkeyEditorModelItem* categoryLevel = contextLevel->child(j);
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
-        actionLevel->setData(static_cast<int>(Column::Hotkey), actionLevel->data(static_cast<int>(Column::DefaultHotkey)));
-        QModelIndex index = createIndex(k, 1, actionLevel);
-        Q_EMIT dataChanged(index, index);
+        QString hotkey = actionLevel->data(static_cast<int>(Column::Hotkey)).toString();
+        QString defaultHotkey = actionLevel->data(static_cast<int>(Column::DefaultHotkey)).toString();
+        actionLevel->setData(static_cast<int>(Column::Hotkey), defaultHotkey);
+        if (hotkey != defaultHotkey) {
+          QModelIndex index = createIndex(k, 1, actionLevel);
+          Q_EMIT dataChanged(index, index);
+        }
       }
     }
   }
