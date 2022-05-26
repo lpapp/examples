@@ -1,5 +1,5 @@
-#ifndef OTKEYEDITORWIDGET_H
-#define OTKEYEDITORWIDGET_H
+#ifndef HOTKEYEDITORWIDGET_H
+#define HOTKEYEDITORWIDGET_H
 
 #include <QtWidgets/QStyledItemDelegate>
 #include <QtWidgets/QWidget>
@@ -7,8 +7,10 @@
 #include <QtCore/QString>
 
 #include <string>
+#include <unordered_map>
 
 class QAction;
+class QCheckBox;
 class QComboBox;
 class QLineEdit;
 class QMenu;
@@ -21,7 +23,7 @@ class KeyboardWidget;
 
 static const char* kDefaultShortcutPropertyName = "defaultShortcut";
 static const char* kIdPropertyName = "id";
-static const std::string kDomainName = "lpapp";
+static const std::string kFoundryDomainName = "foundry";
 
 // List of hotkey actions for all categories
 using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;
@@ -29,16 +31,29 @@ using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;
 // List of categories for all contexts
 using HotkeysMap = std::map<QString, CategoryHotkeysMap>;
 
+using HotkeyEditorExpandState = std::unordered_map<std::string, bool>;
+
 enum class Column : uint8_t {
   Name,
   Hotkey,
   DefaultHotkey
 };
 
+struct SearchToolButtonState
+{
+  QString _actionGroupName;
+  QString _matchGroupName;
+  bool _allContexts;
+  bool _defaultHotkeyChecked;
+  bool _nonDefaultHotkeyChecked;
+  std::map<std::string, bool> _contextActionsState;
+};
+
 class HotkeyEditorModelItem
 {
 public:
     explicit HotkeyEditorModelItem(const std::vector<QVariant>& data,
+                                   const QString& id,
                                    HotkeyEditorModelItem* parentItem = nullptr);
     ~HotkeyEditorModelItem();
 
@@ -51,11 +66,13 @@ public:
     bool setData(int column, const QVariant& value);
     int row() const;
     HotkeyEditorModelItem *parentItem();
+    const QString& id() const;
 
 private:
     std::vector<HotkeyEditorModelItem*> m_childItems;
     std::vector<QVariant> m_itemData;
     HotkeyEditorModelItem *m_parentItem;
+    QString m_id;
 };
 
 class HotkeyEditorModel : public QAbstractItemModel
@@ -75,6 +92,9 @@ public:
   int columnCount(const QModelIndex& index = QModelIndex()) const override;
 
   bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+
+  QMimeData* mimeData(const QModelIndexList &indexes) const override;
+  QStringList mimeTypes() const override;
 
   HotkeyEditorModelItem* findKeySequence(const QString& keySequenceString);
 
@@ -133,17 +153,21 @@ public Q_SLOTS:
   void resetAll();
   void reset();
 
-  void expandRecursively(const QModelIndex& index, QTreeView* view);
+  void expandRecursively(const QModelIndex& index, bool fromExpandState = false);
+  void updateExpandStates(const QModelIndex&);
 
   void importHotkeys();
   void exportHotkeys();
 
-  void selectionChanged();
+  // void selectionChanged();
 
 Q_SIGNALS:
   void hotkeysChanged();
 
 private:
+  void restoreExpandState();
+
+  void updateSearchToolButtonState();
 
   HotkeyEditorDelegate* _delegate;
   HotkeyEditorModel* _model;
@@ -152,6 +176,7 @@ private:
   QMenu* _searchToolButtonMenu;
   QLineEdit* _search;
   QTreeView* _view;
+  QToolButton* _keyboardExpandToolButton;
   QComboBox* _contextComboBox;
   KeyboardWidget* _keyboardWidget;
   QPushButton* _resetAllButton;

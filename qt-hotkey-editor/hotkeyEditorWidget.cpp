@@ -4,11 +4,13 @@
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QKeySequenceEdit>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMessageBox>
@@ -19,17 +21,29 @@
 #include <QtWidgets/QVBoxLayout>
 
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QSignalMapper>
+#include <QtCore/QMimeData>
 #include <QtCore/QSortFilterProxyModel>
 
 #include <iostream>
-#include <set>
 
 static const char* HOTKEY_EDITOR_HEADER_PREFERENCE_KEY = "headerColumns";
 
-HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, HotkeyEditorModelItem* parent)
+static HotkeyEditorExpandState sHotkeyEditorCurrentExpandState = {};
+
+static SearchToolButtonState sSearchToolButtonState = {
+  QString("Name"),
+  QString("Contains"),
+  true,
+  true,
+  true,
+  {}
+};
+
+
+HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, const QString& id, HotkeyEditorModelItem* parent)
   : m_itemData(data)
   , m_parentItem(parent)
+  , m_id(id)
 {
 }
 
@@ -84,7 +98,7 @@ QVariant HotkeyEditorModelItem::data(int column) const
   }
 
   QVariant columnVariant = m_itemData.at(column);
-  if (column != static_cast<int>(Column::Hotkey)) {
+  if (column != static_cast<int>(Column::Hotkey) || columnVariant.canConvert<QString>()) {
     return columnVariant;
   }
 
@@ -104,6 +118,7 @@ bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
   }
 
   if (column == static_cast<int>(Column::Hotkey)) {
+    std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
     QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
     if (action) {
       action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
@@ -121,15 +136,22 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
   return m_parentItem;
 }
 
+const QString& HotkeyEditorModelItem::id() const
+{
+  return m_id;
+}
+
 HotkeyEditorDelegate::HotkeyEditorDelegate(QObject *parent)
   : QStyledItemDelegate(parent)
 {
+  std::cout << "TEST HOTKEY EDITOR DELEGATE" << std::endl;
 }
 
 QWidget* HotkeyEditorDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& /* option */,
                                             const QModelIndex& /* index */) const
 {
+  std::cout << "TEST HOTKEY EDITOR DELEGATE CREATE EDITOR" << std::endl;
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
   // editor->setFocusPolicy(Qt::StrongFocus);
   // connect(editor, &QKeySequenceEdit::editingFinished, this, &HotkeyEditorDelegate::commitAndCloseEditor);
@@ -146,6 +168,7 @@ void HotkeyEditorDelegate::commitAndCloseEditor()
 void HotkeyEditorDelegate::setEditorData(QWidget* editor,
                                          const QModelIndex& index) const
 {
+  std::cout << "TEST HOTKEY EDITOR DELEGATE SET EDITOR DATA" << std::endl;
   QString value = index.model()->data(index, Qt::EditRole).toString();
 
   QKeySequenceEdit* keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
@@ -155,6 +178,7 @@ void HotkeyEditorDelegate::setEditorData(QWidget* editor,
 void HotkeyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                         const QModelIndex &index) const
 {
+  std::cout << "TEST HOTKEY EDITOR DELEGATE SET MODEL DATA: " << model->metaObject()->className() << std::endl;
   const QKeySequenceEdit *keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
   if (keySequenceEdit) {
     const QKeySequence keySequence = keySequenceEdit->keySequence();
@@ -168,18 +192,16 @@ void HotkeyEditorDelegate::updateEditorGeometry(QWidget* editor,
                                                 const QStyleOptionViewItem& option,
                                                 const QModelIndex& /* index */) const
 {
+  std::cout << "TEST UPDATE EDITOR GEOMETRY" << std::endl;
   editor->setGeometry(option.rect);
 }
 
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
-  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")});
+  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")}, QString("root"));
   _hoverTooltip =
-    "Define substitution pairs to convert file paths saved on one OS to be usable when loaded on another. This allows Hiero projects to be shared across different operating systems.\n\n"
-    "For example, if you set 'z:' in the Windows column, and '/Volumes/networkmount' in the OSX column:\n"
-    "\tOn Windows, any clip paths encountered that start with '/Volumes/networkmount' will be converted to start with 'z:' instead.\n"
-    "\tOn OSX, any clip paths encountered that start with 'z:' will be converted to start with '/Volumes/networkmount' instead.\n";
+    "Define the keyboard shortcuts for any action available";
 }
 
 HotkeyEditorModel::~HotkeyEditorModel()
@@ -295,7 +317,10 @@ Qt::ItemFlags HotkeyEditorModel::flags(const QModelIndex &index) const
 
   Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index);
   if (index.column() == static_cast<int>(Column::Hotkey)) {
-    modelFlags |= Qt::ItemIsEditable;
+    modelFlags |= Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
+  }
+  else if (index.column() == static_cast<int>(Column::Name)) {
+    modelFlags |= Qt::ItemIsDragEnabled;
   }
 
   return modelFlags;
@@ -313,14 +338,15 @@ QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation,
 void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
 {
   QAction* nullAction = nullptr;
+  const QString contextIdPrefix = "root";
   // Go through each context, one context - many categories each iteration
   for (const auto& contextLevel : _hotkeys) {
     // TODO: make it "tr()".
-    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, parent);
+    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, contextIdPrefix + contextLevel.first, parent);
     parent->appendChild(contextLevelItem);
     // Go through each category, one category - many actions each iteration
     for (const auto& categoryLevel : contextLevel.second) {
-      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction), QString()}, contextLevelItem);
+      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction), QString()}, contextLevel.first + categoryLevel.first, contextLevelItem);
       contextLevelItem->appendChild(categoryLevelItem);
       for (const auto& action : categoryLevel.second) {
         QString name = action->text();
@@ -328,7 +354,7 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
           continue;
         }
         QString defaultHotkey = action->property(kDefaultShortcutPropertyName).value<QKeySequence>().toString(QKeySequence::NativeText);
-        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action)), defaultHotkey}, categoryLevelItem);
+        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action)), defaultHotkey}, categoryLevel.first + name, categoryLevelItem);
         categoryLevelItem->appendChild(actionLevelItem);
       }
     }
@@ -337,6 +363,7 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
 
 bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA" << std::endl;
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Hotkey)) {
     QString keySequenceString= value.toString();
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
@@ -350,6 +377,7 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
     const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
       item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
+      Q_EMIT dataChanged(index, index);
       return true;
     }
 
@@ -369,7 +397,8 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
       case QMessageBox::Yes:
         foundItem->setData(static_cast<int>(Column::Hotkey), QVariant());
         item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
-        break;
+        Q_EMIT dataChanged(index, index);
+        return true;
       case QMessageBox::No:
         break;
       default:
@@ -378,6 +407,29 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
   }
 
   return QAbstractItemModel::setData(index, value, role);
+}
+
+QMimeData* HotkeyEditorModel::mimeData(const QModelIndexList &indexes) const
+{
+  QMimeData *mimeData = new QMimeData;
+  QByteArray encodedData;
+
+  QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+  for (const QModelIndex &index : indexes) {
+      if (index.isValid()) {
+          QString text = data(index, Qt::DisplayRole).toString();
+          stream << text;
+      }
+  }
+
+  mimeData->setData("text/plain", encodedData);
+  return mimeData;
+}
+
+QStringList HotkeyEditorModel::mimeTypes() const
+{
+  return {"text/plain"};
 }
 
 HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequenceString)
@@ -419,6 +471,7 @@ QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
   for (const QModelIndex &selectedItem : selectedItems) {
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(selectedItem.internalPointer());
     item->setData(static_cast<int>(Column::Hotkey), item->data(static_cast<int>(Column::DefaultHotkey)));
+    std::cout << "TEST RESET HOTKEY: " << item->data(static_cast<int>(Column::Name)).toString().toStdString() << "(" << item->data(static_cast<int>(Column::DefaultHotkey)).toString().toStdString() << ")" << std::endl;
     Q_EMIT dataChanged(selectedItem, selectedItem);
   }
   return QModelIndex();
@@ -459,7 +512,9 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   // set up the model and view
   _view = new QTreeView(this);
   _model = new HotkeyEditorModel(_view);
-  setToolTip(_model->hoverTooltipText());
+
+  // TODO: Add meaningful toolbar, maybe with some delay to be less distractive?
+  // setToolTip(_model->hoverTooltipText());
 
   _filterModel = new QSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
@@ -469,17 +524,20 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel->setDynamicSortFilter(true);
 
   _view->setModel(_filterModel);
-  connect(_view->model(), &QAbstractItemModel::dataChanged, this, &HotkeyEditorWidget::hotkeysChanged);
 
   _delegate = new HotkeyEditorDelegate(_view);
   _view->setItemDelegateForColumn(1, _delegate);
 
-  // _view->setMinimumSize(250, 300);
+  _view->setMinimumSize(250, 550);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   // _view->resizeColumnToContents(0);
   _view->setAlternatingRowColors(true);
   _view->setSelectionBehavior(QTreeView::SelectRows);
   _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  _view->setDragDropMode(QAbstractItemView::DragDrop);
+  _view->setDragEnabled(true);
+  _view->setAcceptDrops(true);
+  _view->setDropIndicatorShown(true);
 
   QAction *expandAllAction = new QAction(tr("expand all"), this);
   expandAllAction->setToolTip(tr("Expands all nodes"));
@@ -492,7 +550,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
     for (const auto& selectedIndex : _view->selectionModel()->selectedIndexes()) {
       // TODO: From Qt 5.13
       // _view->expandRecursively(selectedIndex);
-      expandRecursively(selectedIndex, _view);
+      expandRecursively(selectedIndex, false);
     }
   });
   _view->insertAction(nullptr, expandRecursivelyAction);
@@ -524,10 +582,26 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->setAllColumnsShowFocus(true);
   _view->header()->resizeSection(0, 250);
 
-  connect(_search, &QLineEdit::textChanged, _filterModel, &QSortFilterProxyModel::setFilterFixedString);
+  connect(_search, &QLineEdit::textChanged, _filterModel, [this](const QString& text){
+    _filterModel->setFilterFixedString(text);
+    if (text.isEmpty()) {
+      _view->collapseAll();
+    }
+    else {
+      // _view->expandAll();
+    }
+  });
+  /* connect(_search, &QLineEdit::textChanged, [this](const QString& text){
+    if (text.isEmpty()) {
+      _view->collapseAll();
+    }
+    else {
+      _view->expandAll();
+    }
+  }); */
 
-  QItemSelectionModel* selectionModel = _view->selectionModel();
-  connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &HotkeyEditorWidget::selectionChanged);
+  // QItemSelectionModel* selectionModel = _view->selectionModel();
+  // connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &HotkeyEditorWidget::selectionChanged);
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
@@ -535,11 +609,50 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
 
   layout->addLayout(searchLayout);
   layout->addWidget(_view);
-  layout->addWidget(new QSplitter(this));
+
+  QHBoxLayout* keyboardExpandLayout = new QHBoxLayout();
+  _keyboardExpandToolButton = new QToolButton(this);
+  QIcon keyboardExpandIcon;
+  keyboardExpandIcon.addPixmap(style()->standardPixmap(QStyle::SP_ArrowRight),
+                           QIcon::Normal, QIcon::Off);
+  keyboardExpandIcon.addPixmap(style()->standardPixmap(QStyle::SP_ArrowDown),
+                           QIcon::Normal, QIcon::On);
+  _keyboardExpandToolButton->setIcon(keyboardExpandIcon);
+  _keyboardExpandToolButton->setCheckable(true);
+  keyboardExpandLayout->addWidget(_keyboardExpandToolButton);
+  keyboardExpandLayout->addWidget(new QLabel(tr("Keyboard"), this));
+
+  layout->addLayout(keyboardExpandLayout);
+
+  QHBoxLayout* contextLayout = new QHBoxLayout();
+  _contextComboBox = new QComboBox();
+  _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  connect(_contextComboBox, &QComboBox::currentTextChanged, [this](const QString& text){
+    std::vector<QAction*> actions;
+    HotkeysMap hotkeysMap = _model->getHotkeys();
+    for (const auto& category : hotkeysMap[text]) {
+      for (const auto& action : category.second) {
+        actions.push_back(action);
+      }
+    }
+    std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
+    _keyboardWidget->setButtonColor(colors[_contextComboBox->currentIndex()]);
+    _keyboardWidget->setActions(actions);
+  });
+  contextLayout->addWidget(_contextComboBox);
+  contextLayout->addStretch();
+  layout->addLayout(contextLayout);
 
   _keyboardWidget = new KeyboardWidget(this);
-  _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  // TODO: make it dynamically expanding
+  // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
+  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightHotkeys);
+
+  connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
+    _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
+    _contextComboBox->setVisible(!_contextComboBox->isVisible());
+  }); 
 
   QHBoxLayout* buttonLayout = new QHBoxLayout();
   layout->addLayout(buttonLayout);
@@ -563,14 +676,19 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   // buttonLayout->addWidget(_exportButton);
 
   if (!objectName().isEmpty()) {
+    // AppSettings settings;
+    // settings.beginGroup(objectName());
     /*QByteArray headerColumns = settings.value(HOTKEY_EDITOR_HEADER_PREFERENCE_KEY + sPlatformStrings[sCurrentPlaform]).toByteArray();
     if (!headerColumns.isEmpty()) {
       treeHeader->restoreState(headerColumns);
     }*/
   }
 
+  connect(_view, &QTreeView::collapsed, this, &HotkeyEditorWidget::updateExpandStates);
+  connect(_view, &QTreeView::expanded, this, &HotkeyEditorWidget::updateExpandStates);
+
   // update the selection, so that the buttons are in the right state
-  selectionChanged();
+  // selectionChanged();
 }
 
 HotkeyEditorWidget::~HotkeyEditorWidget()
@@ -581,17 +699,25 @@ HotkeyEditorWidget::~HotkeyEditorWidget()
     settings.beginGroup(objectName());
     settings.setValue(HOTKEY_EDITOR_HEADER_PREFERENCE_KEY, treeHeader->saveState()); */
   }
+
+  updateSearchToolButtonState();
 }
 
 void HotkeyEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
 {
   _model->setHoverTooltipText(hoverTooltipText);
-  setToolTip(_model->hoverTooltipText());
+  // TODO: Add meaningful toolbar, maybe with some delay to be less distractive?
+  // setToolTip(_model->hoverTooltipText());
 }
 
 void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 {
   _model->setHotkeys(hotkeys);
+
+  _contextComboBox->clear();
+  for (const auto& context : hotkeys) {
+    _contextComboBox->addItem(context.first);
+  }
 
   _searchToolButtonMenu->addSection("Search");
 
@@ -599,19 +725,19 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 
   _nameAction = _searchToolButtonMenu->addAction(tr("Name"));
   _nameAction->setCheckable(true);
-  _nameAction->setChecked(true);
+  _nameAction->setChecked(sSearchToolButtonState._actionGroupName == _nameAction->text());
   actionGroup->addAction(_nameAction);
 
   _hotkeyAction = _searchToolButtonMenu->addAction(tr("Hotkey"));
   _hotkeyAction->setCheckable(true);
-  _hotkeyAction->setChecked(false);
+  _hotkeyAction->setChecked(sSearchToolButtonState._actionGroupName == _hotkeyAction->text());
   actionGroup->addAction(_hotkeyAction);
 
   _searchToolButtonMenu->addSection("Context");
 
   _allContextsAction = _searchToolButtonMenu->addAction(tr("All"));
   _allContextsAction->setCheckable(true);
-  _allContextsAction->setChecked(true);
+  _allContextsAction->setChecked(sSearchToolButtonState._allContexts);
   connect(_allContextsAction, &QAction::triggered, [this](const bool triggered){
     if (!triggered) {
       return;
@@ -624,12 +750,16 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 
   _searchToolButtonMenu->addSeparator();
 
-  for (const auto& context : hotkeys) {
+  for (const auto& context : hotkeys) { 
     QAction* contextAction = _searchToolButtonMenu->addAction(context.first);
     contextAction->setCheckable(true);
-    contextAction->setChecked(true);
+    std::string stdContextName = context.first.toStdString();
+    if (!sSearchToolButtonState._contextActionsState.count(stdContextName)) {
+      sSearchToolButtonState._contextActionsState[stdContextName] = true;
+    }
+    contextAction->setChecked(sSearchToolButtonState._contextActionsState[stdContextName]);
     contextActions.push_back(contextAction);
-    connect(contextAction, &QAction::triggered, [this, &hotkeys, &context](const bool triggered){
+    /* connect(contextAction, &QAction::triggered, [this, &hotkeys, &context](const bool triggered){
       std::vector<QKeySequence> hotkeyVector;
       HotkeysMap hotkeysMap = _model->getHotkeys();
       for (const auto& category : hotkeysMap[context.first]) {
@@ -638,20 +768,20 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
         }
       }
       std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
-      _keyboardWidget->setHotkeys(hotkeyVector, colors[std::distance(hotkeys.begin(), hotkeys.find(context.first))]);
-    });
-
+      _keyboardWidget->setButtonColor(colors[std::distance(hotkeys.begin(), hotkeys.find(context.first))]);
+      _keyboardWidget->setHotkeys(hotkeyVector);
+    }); */
   }
 
   _searchToolButtonMenu->addSection("Hotkey");
 
   _defaultHotkeyAction = _searchToolButtonMenu->addAction(tr("Default Shortcut"));
   _defaultHotkeyAction->setCheckable(true);
-  _defaultHotkeyAction->setChecked(true);
+  _defaultHotkeyAction->setChecked(sSearchToolButtonState._defaultHotkeyChecked);
 
   _nonDefaultHotkeyAction = _searchToolButtonMenu->addAction(tr("Non-default Shortcut"));
   _nonDefaultHotkeyAction->setCheckable(true);
-  _nonDefaultHotkeyAction->setChecked(true);
+  _nonDefaultHotkeyAction->setChecked(sSearchToolButtonState._nonDefaultHotkeyChecked);
 
   _searchToolButtonMenu->addSection("Match");
 
@@ -659,37 +789,39 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 
   _matchContainsAction = _searchToolButtonMenu->addAction(tr("Contains"));
   _matchContainsAction->setCheckable(true);
-  _matchContainsAction->setChecked(true);
+  _matchContainsAction->setChecked(sSearchToolButtonState._matchGroupName == _matchContainsAction->text());
   matchActionGroup->addAction(_matchContainsAction);
 
   _matchExactlyAction = _searchToolButtonMenu->addAction(tr("Exactly"));
   _matchExactlyAction->setCheckable(true);
-  _matchExactlyAction->setChecked(false);
+  _matchExactlyAction->setChecked(sSearchToolButtonState._matchGroupName == _matchExactlyAction->text());
   matchActionGroup->addAction(_matchExactlyAction);
 
   _matchStartsWithAction = _searchToolButtonMenu->addAction(tr("Starts with"));
   _matchStartsWithAction->setCheckable(true);
-  _matchStartsWithAction->setChecked(false);
+  _matchStartsWithAction->setChecked(sSearchToolButtonState._matchGroupName == _matchStartsWithAction->text());
   matchActionGroup->addAction(_matchStartsWithAction);
 
   _matchEndsWithAction = _searchToolButtonMenu->addAction(tr("Ends with"));
   _matchEndsWithAction->setCheckable(true);
-  _matchEndsWithAction->setChecked(false);
+  _matchEndsWithAction->setChecked(sSearchToolButtonState._matchGroupName == _matchEndsWithAction->text());
   matchActionGroup->addAction(_matchEndsWithAction);
 
   _matchWildcardAction = _searchToolButtonMenu->addAction(tr("Wildcard"));
   _matchWildcardAction->setCheckable(true);
-  _matchWildcardAction->setChecked(false);
+  _matchWildcardAction->setChecked(sSearchToolButtonState._matchGroupName == _matchWildcardAction->text());
   matchActionGroup->addAction(_matchWildcardAction);
 
   _matchRegularExpressionAction = _searchToolButtonMenu->addAction(tr("Regular Expression"));
   _matchRegularExpressionAction->setCheckable(true);
-  _matchRegularExpressionAction->setChecked(false);
+  _matchRegularExpressionAction->setChecked(sSearchToolButtonState._matchGroupName == _matchRegularExpressionAction->text());
   matchActionGroup->addAction(_matchRegularExpressionAction);
+
+  restoreExpandState();
 
   // make sure the button states are properly updated
   // TODO: do we need this?
-  selectionChanged();
+  // selectionChanged();
 }
 
 HotkeysMap HotkeyEditorWidget::getHotkeys() const
@@ -714,19 +846,80 @@ void HotkeyEditorWidget::reset()
   QModelIndex newItem = _model->reset(sourceSelectedItems);
 }
 
-void HotkeyEditorWidget::expandRecursively(const QModelIndex& index, QTreeView* view)
+void HotkeyEditorWidget::updateExpandStates(const QModelIndex& index)
+{
+  QModelIndex sourceIndex = _filterModel->mapToSource(index);
+  HotkeyEditorModelItem* item = static_cast<HotkeyEditorModelItem*>(sourceIndex.internalPointer());
+  sHotkeyEditorCurrentExpandState[item->id().toStdString()] = _view->isExpanded(index);
+}
+
+void HotkeyEditorWidget::restoreExpandState()
+{
+  _view->blockSignals(true);
+  for (int i = 0; i < _model->rowCount(); i++) {
+    const QModelIndex child = _filterModel->index(i, 0);
+    expandRecursively(child, true);
+  }
+  _view->blockSignals(false);
+}
+
+void HotkeyEditorWidget::expandRecursively(const QModelIndex& index, bool fromExpandState)
 {
   if (!index.isValid()) {
     return;
   }
 
   for (int i = 0; i < index.model()->rowCount(index); i++) {
-    const QModelIndex &child = index.child(i, 0);
-    expandRecursively(child, view);
+    const QModelIndex &child = index.model()->index(i, 0, index);
+    expandRecursively(child, fromExpandState);
   }
 
-  if (!view->isExpanded(index)) {
-    view->expand(index);
+  if (fromExpandState) {
+    const auto& nonProxyIndex = _filterModel->mapToSource(index);
+    HotkeyEditorModelItem* item = static_cast<HotkeyEditorModelItem*>(nonProxyIndex.internalPointer());
+    if (sHotkeyEditorCurrentExpandState[item->id().toStdString()]) {
+      _view->expand(index);
+    }
+  }
+  else if (!_view->isExpanded(index)) {
+    _view->expand(index);
+  }
+}
+
+void HotkeyEditorWidget::updateSearchToolButtonState()
+{
+  sSearchToolButtonState._allContexts = _allContextsAction->isChecked();
+  sSearchToolButtonState._defaultHotkeyChecked = _defaultHotkeyAction->isChecked();
+  sSearchToolButtonState._nonDefaultHotkeyChecked = _nonDefaultHotkeyAction->isChecked();
+
+  for (const auto& contextAction : contextActions) {
+    sSearchToolButtonState._contextActionsState[contextAction->text().toStdString()] = contextAction->isChecked();
+  }
+
+  if (_matchContainsAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchContainsAction->text();
+  }
+  else if (_matchExactlyAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchExactlyAction->text();
+  }
+  else if (_matchStartsWithAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchStartsWithAction->text();
+  }
+  else if (_matchEndsWithAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchEndsWithAction->text();
+  }
+  else if (_matchWildcardAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchWildcardAction->text();
+  }
+  else if (_matchRegularExpressionAction->isChecked()) {
+    sSearchToolButtonState._matchGroupName = _matchRegularExpressionAction->text();
+  }
+
+  if (_nameAction->isChecked()) {
+    sSearchToolButtonState._actionGroupName = _nameAction->text();
+  }
+  else if (_hotkeyAction->isChecked()) {
+    sSearchToolButtonState._actionGroupName = _hotkeyAction->text();
   }
 }
 
@@ -739,6 +932,6 @@ void HotkeyEditorWidget::exportHotkeys()
 }
 
 // TODO: do we need this method at all? Do not think we need anything specific that needs changing when the selection changes?
-void HotkeyEditorWidget::selectionChanged()
-{
-}
+// void HotkeyEditorWidget::selectionChanged()
+// {
+// }

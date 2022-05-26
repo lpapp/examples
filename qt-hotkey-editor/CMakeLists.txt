@@ -11,6 +11,8 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
+
 add_executable(HotkeyEditor
   hotkeyEditorWidget.cpp
   keyboardWidget.cpp

@@ -1,17 +1,35 @@
 #ifndef KEYBOARDWIDGET_H
 #define KEYBOARDWIDGET_H
 
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QWidget>
 
 #include <QtGui/QKeySequence>
 
+#include <QtCore/QPoint>
 #include <QtCore/QString>
 
 #include <map>
 #include <vector>
 
+class QAction;
 class QColor;
 class QPushButton;
+
+class KeyButton : QPushButton
+{
+public:
+  KeyButton(const QString& text, QWidget* parent);
+
+private:
+  void mousePressEvent(QMouseEvent *event);
+  void mouseMoveEvent(QMouseEvent *event);
+  void dragEnterEvent(QDragEnterEvent *event);
+  void dragMoveEvent(QDragMoveEvent *event);
+  void dropEvent(QDropEvent *event);
+
+  QPoint dragStartPosition;
+};
 
 class KeyboardWidget : public QWidget
 {
@@ -19,15 +37,24 @@ class KeyboardWidget : public QWidget
 
 public:
 	KeyboardWidget(QWidget *parent = nullptr);
-  void setHotkeys(const std::vector<QKeySequence>& hotkeys, const QColor& color);
+  void setButtonColor(const QColor& color);
+  void setActions(const std::vector<QAction*> hotkeys);
 
-  void resizeEvent(QResizeEvent *event) override;
+public Q_SLOTS:
+  void highlightHotkeys();
 
 private:
-  void resizeButtons();
+  void resizeEvent(QResizeEvent *event) override;
 
-  std::map<QString, QPushButton*> _buttonsMap;
+  void resizeButtons();
+  void resetHighlights();
+
+  std::map<int, QPushButton*> _buttonsMap;
   std::vector<std::vector<QPushButton*>> _buttons;
+
+  Qt::KeyboardModifiers _modifiers;
+  QColor _color;
+  std::vector<QAction*> _actions;
 };
 
 #endif

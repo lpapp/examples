@@ -11,5 +11,11 @@ target_include_directories(libfoo PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_
 add_library(libbar SHARED libbar.cpp libbar.h)
 target_link_libraries(libbar PRIVATE libfoo)
 
+add_library(libFooTime SHARED footime.cpp footime.h)
+target_include_directories(libFooTime PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+
+# add_library(libGeomOp SHARED GeomOp.cpp GeomOp.h)
+# target_include_directories(libGeomOp PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE libbar)

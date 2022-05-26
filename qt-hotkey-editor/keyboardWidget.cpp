@@ -1,14 +1,19 @@
 #include "keyboardWidget.h"
 
-#include <QtWidgets/QPushButton>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
 
+#include <QtGui/QGuiApplication>
 #include <QtGui/QColor>
+#include <QtGui/QDrag>
 #include <QtGui/QKeySequence>
+#include <QtGui/QMouseEvent>
 #include <QtGui/QPalette>
-#include <QtGui/QResizeEvent>
 
+#include <QtCore/QMimeData>
 #include <QtCore/QString>
 
+#include <iostream>
 #include <vector>
 
 struct Key {
@@ -20,10 +25,51 @@ struct Key {
 using RowKeys = std::vector<Key>;
 
 namespace {
-  constexpr float kFunctionKeyWidth = 1.042f;
-  constexpr float kFunctionKeyHeight = 0.8f;
-  constexpr float kSpaceWidth = 0.5f;
-  constexpr float kMultiplier = 37.5f;
+  float kFunctionKeyWidth = 1.042f;
+  float kFunctionKeyHeight = 0.8f;
+  float kSpaceWidth = 0.5f;
+}
+
+KeyButton::KeyButton(const QString& text, QWidget* parent)
+  : QPushButton(parent)
+{
+  setFocusPolicy(Qt::NoFocus);
+  setAcceptDrops(true);
+}
+
+void KeyButton::mousePressEvent(QMouseEvent *event)
+{
+  if (event->button() == Qt::LeftButton) {
+    dragStartPosition = event->pos();
+  }
+}
+
+void KeyButton::mouseMoveEvent(QMouseEvent *event)
+{
+  if (!(event->buttons() & Qt::LeftButton)) {
+    if ((event->pos() - dragStartPosition).manhattanLength()
+         < QApplication::startDragDistance()) {
+      return;
+    }
+
+    QDrag *drag = new QDrag(this);
+    QMimeData *mimeData = new QMimeData;
+    // mimeData->setText(action->text());
+    drag->setMimeData(mimeData);
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+  }
+}
+
+void KeyButton::dragEnterEvent(QDragEnterEvent *event)
+{
+}
+
+void KeyButton::dragMoveEvent(QDragMoveEvent *event)
+{
+}
+
+void KeyButton::dropEvent(QDropEvent *event)
+{
 }
 
 std::vector<RowKeys> keyboardLayout {
@@ -80,18 +126,27 @@ std::vector<RowKeys> keyboardLayout {
   },
 
   {
-    {Qt::Key_Shift, 1.3f}, {Qt::Key_QuoteLeft}, {Qt::Key_Z}, {Qt::Key_X},
+    {Qt::ShiftModifier, 1.3f}, {Qt::Key_QuoteLeft}, {Qt::Key_Z}, {Qt::Key_X},
     {Qt::Key_C}, {Qt::Key_V}, {Qt::Key_B}, {Qt::Key_N}, {Qt::Key_M},
-    {Qt::Key_Less}, {Qt::Key_Greater}, {Qt::Key_Slash}, {Qt::Key_Shift, 2.3f},
+    {Qt::Key_Less}, {Qt::Key_Greater}, {Qt::Key_Slash}, {Qt::ShiftModifier, 2.3f},
     {0, kSpaceWidth}, {0}, {Qt::Key_Up}, {0}, {0, kSpaceWidth}, {Qt::Key_1},
     {Qt::Key_2}, {Qt::Key_3}, {Qt::Key_Enter, 1.0f, 2.0f}
   },
 
   {
-    {Qt::Key_Meta, 1.5f}, {Qt::Key_Alt, 1.3f}, {Qt::Key_Control, 1.5f},
-    {Qt::Key_Space, 6.0f}, {Qt::Key_Control, 1.5f}, {Qt::Key_Alt, 1.3f},
-    {Qt::Key_Meta, 1.5f}, {0, kSpaceWidth}, {Qt::Key_Left}, {Qt::Key_Down},
-    {Qt::Key_Right}, {0, kSpaceWidth}, {Qt::Key_0, 2.0f}, {Qt::Key_Period}
+#ifdef __APPLE__
+    {Qt::MetaModifier, 1.5f}, {Qt::AltModifier, 1.3f}, {Qt::ControlModifier, 1.5f},
+#else
+    {Qt::ControlModifier, 1.5f}, {Qt::MetaModifier, 1.3f}, {Qt::AltModifier, 1.5f},
+#endif
+    {Qt::Key_Space, 6.0f},
+#ifdef __APPLE__
+    {Qt::ControlModifier, 1.5f}, {Qt::AltModifier, 1.3f}, {Qt::MetaModifier, 1.5f},
+#else
+    {Qt::AltModifier, 1.5f}, {Qt::MetaModifier, 1.3f}, {Qt::ControlModifier, 1.5f},
+#endif
+    {0, kSpaceWidth}, {Qt::Key_Left}, {Qt::Key_Down}, {Qt::Key_Right},
+    {0, kSpaceWidth}, {Qt::Key_0, 2.0f}, {Qt::Key_Period}
   }
 };
 
@@ -114,9 +169,20 @@ KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
         }
 
         QPushButton *button = new QPushButton(keySequenceString, this);
-        button->setFocusPolicy(Qt::NoFocus);
-        _buttonsMap.insert({keySequenceString, button});
+
+        _buttonsMap.insert({key.key, button});
         keyboardRowButtons.push_back(button);
+
+        for (const auto& modifier : {Qt::ShiftModifier, Qt::MetaModifier, Qt::AltModifier, Qt::ControlModifier}) {
+          if (key.key == modifier) {
+            connect(button, &QAbstractButton::clicked, [this, key, button](){
+              _modifiers.setFlag(static_cast<Qt::KeyboardModifier>(key.key), !_modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key)));
+              const bool enabled = _modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key));
+              button->setPalette(enabled ? _color : palette());
+              highlightHotkeys();
+            });
+          }
+        }
       }
     }
     _buttons.push_back(keyboardRowButtons);
@@ -147,24 +213,43 @@ void KeyboardWidget::resizeButtons()
   setMinimumSize(kMultiplier * width, kMultiplier * row);
 }
 
-#include <iostream>
-
 void KeyboardWidget::resizeEvent(QResizeEvent *event)
 {
-  std::cout << "TEST RESIZE EVENT" << std::endl;
   resizeButtons();
 }
 
-void KeyboardWidget::setHotkeys(const std::vector<QKeySequence>& hotkeys, const QColor& color)
+void KeyboardWidget::setButtonColor(const QColor& color)
 {
-  for (const auto& button : _buttonsMap) {
-    button.second->setPalette(palette());
-  }
+  _color = color;
+}
 
-  for (const QKeySequence& keySequence : hotkeys) {
-    QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
-    if (_buttonsMap.count(keySequenceString)) {
-      _buttonsMap[keySequenceString]->setPalette(color);
+void KeyboardWidget::highlightHotkeys()
+{
+  resetHighlights();
+
+  for (const QAction* action : _actions) {
+    int key = action->shortcut()[0] - static_cast<int>(_modifiers);
+    if (_buttonsMap.count(key)) {
+      _buttonsMap[key]->setPalette(_color);
+      _buttonsMap[key]->setToolTip(action->text());
     }
   }
+}
+
+void KeyboardWidget::resetHighlights()
+{
+  for (const auto& button : _buttonsMap) {
+    const bool enabled = _modifiers.testFlag(static_cast<Qt::KeyboardModifier>(button.first));
+    if (!enabled) {
+      button.second->setPalette(palette());
+      button.second->setToolTip(QString());
+    }
+  }
+}
+
+void KeyboardWidget::setActions(const std::vector<QAction*> actions)
+{
+  _actions = actions;
+
+  highlightHotkeys();
 }
