@@ -460,10 +460,11 @@ void HotkeyEditorModel::resetAll()
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
         actionLevel->setData(static_cast<int>(Column::Hotkey), actionLevel->data(static_cast<int>(Column::DefaultHotkey)));
+        QModelIndex index = createIndex(k, 1, actionLevel);
+        Q_EMIT dataChanged(index, index);
       }
     }
   }
-  Q_EMIT dataChanged(QModelIndex(), QModelIndex());
 }
 
 QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
@@ -508,6 +509,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
 
   searchLayout->addWidget(_searchToolButton);
   searchLayout->addWidget(_search);
+  searchLayout->setSpacing(0);
 
   // set up the model and view
   _view = new QTreeView(this);
@@ -528,7 +530,8 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _delegate = new HotkeyEditorDelegate(_view);
   _view->setItemDelegateForColumn(1, _delegate);
 
-  _view->setMinimumSize(250, 550);
+  // _view->setMinimumSize(250, 350);
+  _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   // _view->resizeColumnToContents(0);
   _view->setAlternatingRowColors(true);
@@ -588,7 +591,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
       _view->collapseAll();
     }
     else {
-      // _view->expandAll();
+      _view->expandAll();
     }
   });
   /* connect(_search, &QLineEdit::textChanged, [this](const QString& text){
