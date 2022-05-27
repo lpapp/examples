@@ -654,7 +654,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
-  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightHotkeys);
 
   connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
     _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
