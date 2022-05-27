@@ -16,9 +16,9 @@ MainWindow::MainWindow()
   createMenus();
 
   HotkeysMap hotkeys;
-  constexpr int maxContexts = 5;
-  constexpr int maxCategories = 5;
-  constexpr int maxActions = 10;
+  constexpr int maxContexts = 10;
+  constexpr int maxCategories = 10;
+  constexpr int maxActions = 1000;
   for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
     CategoryHotkeysMap categoryHotkeys;
     for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
