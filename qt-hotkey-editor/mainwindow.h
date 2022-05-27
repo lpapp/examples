@@ -17,13 +17,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
-protected:
-#ifndef QT_NO_CONTEXTMENU
-    void contextMenuEvent(QContextMenuEvent *event) override;
-#endif // QT_NO_CONTEXTMENU
-
 private:
     void createActions();
+    void createDummyActions();
     void createMenus();
 
     QMenu *fileMenu;

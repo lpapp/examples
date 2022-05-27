@@ -8,65 +8,37 @@
 
 MainWindow::MainWindow()
 {
-    HotkeyEditorWidget *widget = new HotkeyEditorWidget;
-    setCentralWidget(widget);
+  HotkeyEditorWidget *widget = new HotkeyEditorWidget;
+  setCentralWidget(widget);
 
-    createActions();
-    createMenus();
+  createActions();
+  createDummyActions();
+  createMenus();
 
-    QList<QAction*> actions = findChildren<QAction*>();
-    std::vector<QAction*> _actions;
-    for (QAction* action : actions) {
-      action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
-      CategoryHotkeysMap categoryHotkeys;
-      _actions.push_back(action);
-    }
-
+  HotkeysMap hotkeys;
+  constexpr int maxContexts = 5;
+  constexpr int maxCategories = 5;
+  constexpr int maxActions = 10;
+  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
     CategoryHotkeysMap categoryHotkeys;
-    categoryHotkeys.insert({QString("Category1"), _actions});
-    HotkeysMap hotkeys;
-    hotkeys.insert({QString("Context1"), categoryHotkeys});
-    hotkeys.insert({QString("Context2"), categoryHotkeys});
-    hotkeys.insert({QString("Context3"), categoryHotkeys});
-
-    /* hotkeys.insert({
-    "Global", // context key
-    {
-      {"File", {
-        {newAct->text(), newAct, newAct->toolTip(), newAct->shortcut().toString(QKeySequence::NativeText)},
-        {openAct->text(), openAct, openAct->toolTip(), openAct->shortcut().toString(QKeySequence::NativeText)},
-        {saveAct->text(), saveAct, saveAct->toolTip(), saveAct->shortcut().toString(QKeySequence::NativeText)},
-        {printAct->text(), printAct, printAct->toolTip(), printAct->shortcut().toString(QKeySequence::NativeText)},
-        {exitAct->text(), exitAct, exitAct->toolTip(), exitAct->shortcut().toString(QKeySequence::NativeText)}}
-      },
-
-      {"Edit", {
-          {undoAct->text(), undoAct, undoAct->toolTip(), undoAct->shortcut().toString(QKeySequence::NativeText)},
-        {redoAct->text(), redoAct, redoAct->toolTip(), redoAct->shortcut().toString(QKeySequence::NativeText)},
-        {cutAct->text(), cutAct, cutAct->toolTip(), cutAct->shortcut().toString(QKeySequence::NativeText)},
-        {copyAct->text(), copyAct, copyAct->toolTip(), copyAct->shortcut().toString(QKeySequence::NativeText)},
-        {pasteAct->text(), pasteAct, pasteAct->toolTip(), pasteAct->shortcut().toString(QKeySequence::NativeText)}}
+    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
+      std::vector<QAction*> _actions;
+      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
+        QAction* action = new QAction(QString("Action") + QString::number(actionIndex), this);
+        _actions.push_back(action);
       }
+
+      categoryHotkeys.insert({QString("Category") + QString::number(categoryIndex), _actions});
     }
-    }); */
+    hotkeys.insert({QString("Context") + QString::number(contextIndex), categoryHotkeys});
+  }
 
-    widget->setHotkeys(hotkeys);
+  widget->setHotkeys(hotkeys);
 
-    setWindowTitle(tr("Menus"));
-    setMinimumSize(160, 160);
-    resize(1920, 1280);
+  setMinimumSize(960, 640);
+  // setMinimumSize(160, 160);
+  // resize(1920, 1280);
 }
-
-#ifndef QT_NO_CONTEXTMENU
-void MainWindow::contextMenuEvent(QContextMenuEvent *event)
-{
-    QMenu menu(this);
-    menu.addAction(cutAct);
-    menu.addAction(copyAct);
-    menu.addAction(pasteAct);
-    menu.exec(event->globalPos());
-}
-#endif // QT_NO_CONTEXTMENU
 
 void MainWindow::createActions()
 {
@@ -177,4 +149,8 @@ void MainWindow::createMenus()
     formatMenu->addSeparator();
     formatMenu->addAction(setLineSpacingAct);
     formatMenu->addAction(setParagraphSpacingAct);
+}
+
+void MainWindow::createDummyActions()
+{
 }
