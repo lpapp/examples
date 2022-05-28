@@ -141,6 +141,12 @@ const QString& HotkeyEditorModelItem::id() const
   return m_id;
 }
 
+QAction* HotkeyEditorModelItem::action() const
+{
+  QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Hotkey));
+  return static_cast<QAction*>(actionVariant.value<void*>());
+}
+
 HotkeyEditorDelegate::HotkeyEditorDelegate(QObject *parent)
   : QStyledItemDelegate(parent)
 {
@@ -417,10 +423,12 @@ QMimeData* HotkeyEditorModel::mimeData(const QModelIndexList &indexes) const
   QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
   for (const QModelIndex &index : indexes) {
-      if (index.isValid()) {
-          QString text = data(index, Qt::DisplayRole).toString();
-          stream << text;
-      }
+    if (index.isValid()) {
+      const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
+      QString actionId = currentItem->action()->property(kIdPropertyName).toString();
+      stream << actionId;
+      std::cout << "TEST: " << actionId.toStdString() << std::endl;
+    }
   }
 
   mimeData->setData("text/plain", encodedData);

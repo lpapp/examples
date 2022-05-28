@@ -54,7 +54,7 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
     QDrag *drag = new QDrag(this);
     QMimeData *mimeData = new QMimeData;
-    // mimeData->setText(action->text());
+    mimeData->setText(text());
     drag->setMimeData(mimeData);
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
   }
@@ -62,14 +62,33 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 {
+  event->acceptProposedAction();
 }
 
 void KeyButton::dragMoveEvent(QDragMoveEvent *event)
 {
+  if (event->mimeData()->hasFormat("text/plain")) {
+    event->acceptProposedAction();
+  }
 }
 
 void KeyButton::dropEvent(QDropEvent *event)
 {
+  std::cout << "TEST DROP EVENT" << std::endl;
+  if (event->source() == this && event->proposedAction() != Qt::CopyAction) {
+    return;
+  }
+
+  event->acceptProposedAction();
+
+  const QMimeData *mime = event->mimeData();
+  if (mime->hasText()) {
+    event->ignore();
+    return;
+  }
+
+  QString actionId = mime->text();
+  std::cout << "TEST: " << actionId.toStdString() << std::endl;
 }
 
 std::vector<RowKeys> keyboardLayout {
@@ -150,7 +169,10 @@ std::vector<RowKeys> keyboardLayout {
   }
 };
 
-KeyboardWidget::KeyboardWidget(QWidget *parent) : QWidget(parent) {
+KeyboardWidget::KeyboardWidget(QWidget *parent)
+  : QWidget(parent)
+{
+  setAcceptDrops(true);
   for (auto& keyboardRow : keyboardLayout) {
     std::vector<QPushButton*> keyboardRowButtons;
     for (auto& key : keyboardRow) {
@@ -211,6 +233,11 @@ void KeyboardWidget::resizeButtons()
     ++row;
   }
   setMinimumSize(kMultiplier * width, kMultiplier * row);
+}
+
+void KeyboardWidget::dropEvent(QDropEvent *event)
+{
+  std::cout << "TEST DROP EVENT" << std::endl;
 }
 
 void KeyboardWidget::resizeEvent(QResizeEvent *event)

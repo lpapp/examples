@@ -23,7 +23,7 @@ class KeyboardWidget;
 
 static const char* kDefaultShortcutPropertyName = "defaultShortcut";
 static const char* kIdPropertyName = "id";
-static const std::string kFoundryDomainName = "foundry";
+static const std::string kDomainName = "lpapp";
 
 // List of hotkey actions for all categories
 using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;
@@ -67,6 +67,7 @@ public:
     int row() const;
     HotkeyEditorModelItem *parentItem();
     const QString& id() const;
+    QAction* action() const;
 
 private:
     std::vector<HotkeyEditorModelItem*> m_childItems;

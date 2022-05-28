@@ -103,16 +103,22 @@ HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
   constexpr int maxActions = 1000;
   for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
     CategoryHotkeysMap categoryHotkeys;
+    QString contextName = "Context" + QString::number(contextIndex);
     for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
       std::vector<QAction*> _actions;
+      QString categoryName = "Category" + QString::number(categoryIndex);
       for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
-        QAction* action = new QAction(QString("Action") + QString::number(actionIndex), this);
+        QString actionName = "Action" + QString::number(actionIndex);
+        QAction* action = new QAction(actionName, this);
+        action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
+        QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
+        action->setProperty(kIdPropertyName, stringList.join('.'));
         _actions.push_back(action);
       }
 
-      categoryHotkeys.insert({QString("Category") + QString::number(categoryIndex), _actions});
+      categoryHotkeys.insert({categoryName, _actions});
     }
-    hotkeys.insert({QString("Context") + QString::number(contextIndex), categoryHotkeys});
+    hotkeys.insert({contextName, categoryHotkeys});
   }
 
   hotkeyEditorWidget->setHotkeys(hotkeys);
