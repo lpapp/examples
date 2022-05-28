@@ -1,19 +1,19 @@
 #include "logo.h"
 
-#include <qmath.h>
+#include <cmath>
 
 Logo::Logo()
 {
   m_data.resize(2500 * 6);
 
-  const GLfloat x1 = +0.06f;
+  const GLfloat x1 = 0.06f;
   const GLfloat y1 = -0.14f;
-  const GLfloat x2 = +0.14f;
+  const GLfloat x2 = 0.14f;
   const GLfloat y2 = -0.06f;
-  const GLfloat x3 = +0.08f;
-  const GLfloat y3 = +0.00f;
-  const GLfloat x4 = +0.30f;
-  const GLfloat y4 = +0.22f;
+  const GLfloat x3 = 0.08f;
+  const GLfloat y3 = 0.00f;
+  const GLfloat x4 = 0.30f;
+  const GLfloat y4 = 0.22f;
 
   quad(x1, y1, x2, y2, y2, x2, y1, x1);
   quad(x3, y3, x4, y4, y4, x4, y3, x3);
@@ -30,16 +30,16 @@ Logo::Logo()
 
   for (int i = 0; i < NumSectors; ++i) {
     GLfloat angle = (i * 2 * M_PI) / NumSectors;
-    GLfloat angleSin = qSin(angle);
-    GLfloat angleCos = qCos(angle);
+    GLfloat angleSin = std::sin(angle);
+    GLfloat angleCos = std::cos(angle);
     const GLfloat x5 = 0.30f * angleSin;
     const GLfloat y5 = 0.30f * angleCos;
     const GLfloat x6 = 0.20f * angleSin;
     const GLfloat y6 = 0.20f * angleCos;
 
     angle = ((i + 1) * 2 * M_PI) / NumSectors;
-    angleSin = qSin(angle);
-    angleCos = qCos(angle);
+    angleSin = std::sin(angle);
+    angleCos = std::cos(angle);
     const GLfloat x7 = 0.20f * angleSin;
     const GLfloat y7 = 0.20f * angleCos;
     const GLfloat x8 = 0.30f * angleSin;

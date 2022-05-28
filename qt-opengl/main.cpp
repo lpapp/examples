@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
   MainWindow mainWindow;
   mainWindow.setAttribute(Qt::WA_TranslucentBackground);
   mainWindow.setAttribute(Qt::WA_NoSystemBackground, false);
-  mainWindow.resize(mainWindow.sizeHint());
   mainWindow.show();
 
   return app.exec();
