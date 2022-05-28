@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(helloworld VERSION 1.0.0 LANGUAGES CXX)
 
@@ -14,7 +14,10 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_executable(helloworld
+  glwidget.cpp
+  logo.cpp
   main.cpp
+  mainwindow.cpp
 )
 
 target_link_libraries(helloworld Qt::Widgets)
