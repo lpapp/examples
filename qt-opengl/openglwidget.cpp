@@ -3,8 +3,6 @@
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 
-#include <math.h>
-
 OpenGLWidget::OpenGLWidget(QWidget *parent)
   : QOpenGLWidget(parent)
 {
