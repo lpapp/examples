@@ -427,10 +427,10 @@ QMimeData* HotkeyEditorModel::mimeData(const QModelIndexList &indexes) const
       const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
       QString actionId = currentItem->action()->property(kIdPropertyName).toString();
       stream << actionId;
-      std::cout << "TEST: " << actionId.toStdString() << std::endl;
     }
   }
 
+  std::cout << "TEST MIME DATA: " << encodedData.toStdString() << std::endl;
   mimeData->setData("text/plain", encodedData);
   return mimeData;
 }
@@ -471,6 +471,29 @@ void HotkeyEditorModel::resetAll()
         QString defaultHotkey = actionLevel->data(static_cast<int>(Column::DefaultHotkey)).toString();
         actionLevel->setData(static_cast<int>(Column::Hotkey), defaultHotkey);
         if (hotkey != defaultHotkey) {
+          QModelIndex index = createIndex(k, 1, actionLevel);
+          Q_EMIT dataChanged(index, index);
+        }
+      }
+    }
+  }
+}
+
+void HotkeyEditorModel::assignHotkey(const QString& actionId, const QKeySequence& keySequence)
+{
+  std::cout << "TEST ASSIGN HOTKEY ACTION ID: " << actionId.toStdString() << std::endl;
+  for (int i = 0; i < rootItem->childCount(); ++i) {
+    HotkeyEditorModelItem* contextLevel = rootItem->child(i);
+    for (int j = 0; j < contextLevel->childCount(); ++j) {
+      HotkeyEditorModelItem* categoryLevel = contextLevel->child(j);
+      for (int k = 0; k < categoryLevel->childCount(); ++k) {
+        HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
+        QAction* action = actionLevel->action();
+        QString currentActionId = action->property(kIdPropertyName).toString();
+        std::cout << "TEST ASSIGN HOTKEY CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
+        if (currentActionId == actionId) {
+          std::cout << "TEST ASSIGN HOTKEY ACTION ID 2: " << actionId.toStdString() << std::endl;
+          action->setShortcut(keySequence);
           QModelIndex index = createIndex(k, 1, actionLevel);
           Q_EMIT dataChanged(index, index);
         }
@@ -659,6 +682,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addLayout(contextLayout);
 
   _keyboardWidget = new KeyboardWidget(this);
+  connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &HotkeyEditorModel::assignHotkey);
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
@@ -673,7 +697,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addLayout(buttonLayout);
 
   _resetAllButton = new QPushButton("Reset All", this);
-  connect(_resetAllButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::resetAll);
+  connect(_resetAllButton, &QAbstractButton::clicked, _model, &HotkeyEditorModel::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
   _resetButton = new QPushButton("Reset", this);
@@ -842,11 +866,6 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 HotkeysMap HotkeyEditorWidget::getHotkeys() const
 {
   return _model->getHotkeys();
-}
-
-void HotkeyEditorWidget::resetAll()
-{
-  _model->resetAll();
 }
 
 void HotkeyEditorWidget::reset()

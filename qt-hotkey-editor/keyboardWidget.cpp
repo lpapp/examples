@@ -96,7 +96,8 @@ void KeyButton::dropEvent(QDropEvent *event)
   }
 
   QString actionId = mime->text();
-  Q_EMIT actionDropped(actionId, text());
+  std::cout << "TEST DROP EVENT: " << actionId.split('@')[1].toStdString() << std::endl;
+  Q_EMIT actionDropped(actionId.split('@')[1], text());
   setPalette(QApplication::palette());
 }
 
