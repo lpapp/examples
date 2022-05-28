@@ -17,8 +17,7 @@ add_executable(OpenGLWindow
   glwidget.cpp
   logo.cpp
   main.cpp
-  mainwindow.cpp
-  window.cpp
+  widget.cpp
 )
 
 target_link_libraries(OpenGLWindow Qt::Widgets)

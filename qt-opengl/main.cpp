@@ -1,9 +1,7 @@
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QSurfaceFormat>
 
-#include "glwidget.h"
-#include "mainwindow.h"
+#include "widget.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,10 +14,10 @@ int main(int argc, char *argv[])
   fmt.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(fmt);
 
-  MainWindow mainWindow;
-  mainWindow.setAttribute(Qt::WA_TranslucentBackground);
-  mainWindow.setAttribute(Qt::WA_NoSystemBackground, false);
-  mainWindow.show();
+  Widget widget;
+  // widget.setAttribute(Qt::WA_TranslucentBackground);
+  widget.setAttribute(Qt::WA_NoSystemBackground, false);
+  widget.show();
 
   return app.exec();
 }
