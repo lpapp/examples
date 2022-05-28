@@ -32,7 +32,7 @@ QSize GLWidget::sizeHint() const
   return QSize(400, 400);
 }
 
-static void qNormalizeAngle(int &angle)
+static void NormalizeAngle(int &angle)
 {
   while (angle < 0) {
     angle += 360 * 16;
@@ -45,30 +45,30 @@ static void qNormalizeAngle(int &angle)
 
 void GLWidget::setXRotation(int angle)
 {
-  qNormalizeAngle(angle);
+  NormalizeAngle(angle);
   if (angle != m_xRot) {
     m_xRot = angle;
-    emit xRotationChanged(angle);
+    Q_EMIT xRotationChanged(angle);
     update();
   }
 }
 
 void GLWidget::setYRotation(int angle)
 {
-  qNormalizeAngle(angle);
+  NormalizeAngle(angle);
   if (angle != m_yRot) {
     m_yRot = angle;
-    emit yRotationChanged(angle);
+    Q_EMIT yRotationChanged(angle);
     update();
   }
 }
 
 void GLWidget::setZRotation(int angle)
 {
-  qNormalizeAngle(angle);
+  NormalizeAngle(angle);
   if (angle != m_zRot) {
     m_zRot = angle;
-    emit zRotationChanged(angle);
+    Q_EMIT zRotationChanged(angle);
     update();
   }
 }
