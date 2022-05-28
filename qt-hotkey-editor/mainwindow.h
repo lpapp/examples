@@ -22,7 +22,6 @@ private Q_SLOTS:
 
 private:
   void createActions();
-  void createDummyActions();
   void createMenus();
 
   QMenu *fileMenu;

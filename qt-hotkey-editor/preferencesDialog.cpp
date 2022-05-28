@@ -1,9 +1,55 @@
 #include "preferencesDialog.h"
 
+#include "hotkeyEditorWidget.h"
+
+#include <QtWidgets/QAction>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QTreeView>
+#include <QtWidgets/QVBoxLayout>
+
+PreferencesLayout::PreferencesLayout(QWidget* parent)
+  : QFormLayout(parent)
+{
+  setSpacing(4);
+}
+
+void PreferencesLayout::addRowWidgets(const QString& labelText, const QList<QWidget*>& widgets)
+{
+  QHBoxLayout* hBoxLayout = new QHBoxLayout();
+  hBoxLayout->setContentsMargins(0, 0, 0, 0);
+  for (QWidget* widget : widgets) {
+    hBoxLayout->addWidget(widget);
+  }
+  addRow(labelText, hBoxLayout);
+}
+
+void PreferencesLayout::addDivider(const QString& text, int row)
+{
+  QFrame* divider = new QFrame();
+  divider->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+  divider->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+  if (row >= 0) {
+    insertRow(row, text, divider);
+  }
+  else {
+    addRow(text, divider);
+  }
+
+  QWidget* labelWidget = labelForField(divider);
+  QFont labelFont = labelWidget->font();
+  labelFont.setBold(true);
+  labelWidget->setFont(labelFont);
+}
+
+void PreferencesLayout::addEmptyRow()
+{
+  addRow(tr(""), new QLabel());
+}
 
 PreferencesPageBase::PreferencesPageBase(QWidget* parent)
   : QWidget(parent)
@@ -45,6 +91,36 @@ void PreferencesPage::cancel() {
 void PreferencesPage::revert() {
 }
 
+HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
+  : PreferencesPage(parent)
+{
+  PreferencesLayout* layout = new PreferencesLayout();
+  HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget;
+
+  HotkeysMap hotkeys;
+  constexpr int maxContexts = 10;
+  constexpr int maxCategories = 10;
+  constexpr int maxActions = 1000;
+  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
+    CategoryHotkeysMap categoryHotkeys;
+    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
+      std::vector<QAction*> _actions;
+      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
+        QAction* action = new QAction(QString("Action") + QString::number(actionIndex), this);
+        _actions.push_back(action);
+      }
+
+      categoryHotkeys.insert({QString("Category") + QString::number(categoryIndex), _actions});
+    }
+    hotkeys.insert({QString("Context") + QString::number(contextIndex), categoryHotkeys});
+  }
+
+  hotkeyEditorWidget->setHotkeys(hotkeys);
+
+  layout->addRow(tr(""), hotkeyEditorWidget);
+  setLayout(layout);
+}
+
 PreferencesWidget::PreferencesWidget(QWidget* parent)
   : QWidget(parent)
 {
@@ -70,10 +146,10 @@ void PreferencesWidget::setModel(QAbstractItemModel* model)
   selectionModel->select(_model->index(0, 0), QItemSelectionModel::SelectCurrent);
 }
 
-void PreferencesWidget::addPage(int pageId, PreferencesPage* page)
+void PreferencesWidget::addPage(Page page, PreferencesPage* preferencesPage)
 {
-  _pageIdToStackIndex[pageId] = _pageStackWidget->addWidget(page);
-  page->initialize();
+  _pageToStackIndex[page] = _pageStackWidget->addWidget(preferencesPage);
+  preferencesPage->initialize();
 }
 
 void PreferencesWidget::setCurrentPage(const QModelIndex& modelIndex)
@@ -88,9 +164,9 @@ void PreferencesWidget::setExpanded(const QModelIndex& modelIndex, bool expanded
 
 void PreferencesWidget::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-  const int pageId = current.data(PreferencesPage::PageIdRole).toInt();
-  if (_pageIdToStackIndex.contains(pageId)) {
-    _pageStackWidget->setCurrentIndex(_pageIdToStackIndex[pageId]);
+  Page page = static_cast<Page>(current.data(PreferencesPage::PageIdRole).toInt());
+  if (_pageToStackIndex.contains(page)) {
+    _pageStackWidget->setCurrentIndex(_pageToStackIndex[page]);
     Q_EMIT pageChanged(current);
   }
 }
@@ -117,15 +193,13 @@ void PreferencesWidget::revertPreferences()
   } */
 }
 
-PreferencesDialog::PreferencePage PreferencesDialog::_previousPage = PreferencesDialog::eHotkeys;
+Page PreferencesDialog::_previousPage = Page::Hotkeys;
 const int PreferencesDialog::PageIdRole = Qt::UserRole + 2; // + 2 as Qt::UserRole + 1 is the default argument to setData
-
-//------------------------------------------------------------------------------
 
 PreferencesDialog::PreferencesDialog(QWidget* parent)
   : QDialog(parent, Qt::Tool)
 {
-  setAttribute(Qt::WA_DeleteOnClose,true);
+  setAttribute(Qt::WA_DeleteOnClose, true);
 
   init();
 
@@ -148,10 +222,10 @@ QString PreferencesDialog::pageTitle(Page page) const
   QString title;
   switch (page)
   {
-    case PageHot::keys: title = tr("Hotkeys"); break;
+    case Page::Hotkeys: title = tr("Hotkeys"); break;
     default:
     {
-      mFnAssertMsg(page > Page::User, "page was not found");
+      assert("Page was not found");
       break;
     }
   }
@@ -165,10 +239,10 @@ PreferencesPage* PreferencesDialog::createPageWidget(Page page)
   switch (page)
   {
     case Page::Hotkeys:
-      pageWidget = new HotkeyEditorPreferencesPage();
+      pageWidget = new HotkeysPreferencesPage();
       break;
     default:
-      mFnAssertMsg(page > ePageUser, "page was not found");
+      assert("Page was not found");
       break;
   }
   return pageWidget;
@@ -179,14 +253,14 @@ QStandardItem* PreferencesDialog::createTreeItem(Page page, QStandardItem* paren
   const QString title = pageTitle(page);
   QStandardItem* item = new QStandardItem(title);
   item->setEditable(false);
-  item->setData(page, SettingsPage::PageIdRole);
+  item->setData(static_cast<int>(page), PreferencesPage::PageIdRole);
   if (parent) {
     parent->appendRow(item);
   }
   return item;
 }
 
-QStandardItem* PreferencesDialog::createPage(PreferencePage page, QStandardItem* parent)
+QStandardItem* PreferencesDialog::createPage(Page page, QStandardItem* parent)
 {
   QStandardItem* item = nullptr;
   if (_preferencesWidget) {
@@ -198,7 +272,7 @@ QStandardItem* PreferencesDialog::createPage(PreferencePage page, QStandardItem*
 
 void PreferencesDialog::init()
 {
-  _preferencesWidget = new SettingsTreeWidget(this);
+  _preferencesWidget = new PreferencesWidget(this);
   _preferencesWidget->setFocusPolicy(Qt::ClickFocus);
 
   QStandardItemModel* standardItemModel = new QStandardItemModel(this);
@@ -210,8 +284,8 @@ void PreferencesDialog::init()
   connect(_preferencesWidget, &PreferencesWidget::pageChanged, this, &PreferencesDialog::onPageChanged);
 
   // Find the last selected page id using the PageIdRole
-  QModelIndexList matchedIndices = standardItemModel->match(standardItemModel->index(0, 0), SettingsPage::PageIdRole, _previousPage, 1, Qt::MatchRecursive);
-  if (matchedIndices.size() > 0) {
+  QModelIndexList matchedIndices = standardItemModel->match(standardItemModel->index(0, 0), PreferencesPage::PageIdRole, static_cast<int>(_previousPage), 1, Qt::MatchRecursive);
+  if (!matchedIndices.isEmpty()) {
     _preferencesWidget->setCurrentPage(matchedIndices[0]);
   }
 }
@@ -238,7 +312,7 @@ void PreferencesDialog::onPageChanged(QModelIndex index)
   _previousPage = static_cast<Page>(index.data(PreferencesPage::PageIdRole).toInt());
 }
 
-void PreferencesDialog::SetPage(PreferencePage page)
+void PreferencesDialog::SetPage(Page page)
 {
   _previousPage = page;
 }

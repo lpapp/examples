@@ -2,38 +2,14 @@
 
 #include "mainwindow.h"
 
-#include "hotkeyEditorWidget.h"
+#include "preferencesDialog.h"
 
 #include <vector>
 
 MainWindow::MainWindow()
 {
-  HotkeyEditorWidget *widget = new HotkeyEditorWidget;
-  setCentralWidget(widget);
-
   createActions();
-  createDummyActions();
   createMenus();
-
-  HotkeysMap hotkeys;
-  constexpr int maxContexts = 10;
-  constexpr int maxCategories = 10;
-  constexpr int maxActions = 1000;
-  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
-    CategoryHotkeysMap categoryHotkeys;
-    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
-      std::vector<QAction*> _actions;
-      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
-        QAction* action = new QAction(QString("Action") + QString::number(actionIndex), this);
-        _actions.push_back(action);
-      }
-
-      categoryHotkeys.insert({QString("Category") + QString::number(categoryIndex), _actions});
-    }
-    hotkeys.insert({QString("Context") + QString::number(contextIndex), categoryHotkeys});
-  }
-
-  widget->setHotkeys(hotkeys);
 
   setMinimumSize(960, 640);
   // setMinimumSize(160, 160);
@@ -156,13 +132,9 @@ void MainWindow::createMenus()
     formatMenu->addAction(setParagraphSpacingAct);
 }
 
-void MainWindow::createDummyActions()
-{
-}
-
 void MainWindow::showPreferences()
 {
-  QDialog* dialog = new QDialog(this);
+  PreferencesDialog* dialog = new PreferencesDialog(this);
   connect(dialog, &QDialog::finished, dialog, &QDialog::deleteLater);
   dialog->show();
   dialog->activateWindow();

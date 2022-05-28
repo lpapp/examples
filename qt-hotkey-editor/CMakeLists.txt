@@ -18,7 +18,7 @@ add_executable(HotkeyEditor
   keyboardWidget.cpp
   mainwindow.cpp
   main.cpp
-  preferencesdialog.cpp
+  preferencesDialog.cpp
 )
 
 target_link_libraries(HotkeyEditor Qt::Widgets)

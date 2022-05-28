@@ -2,6 +2,7 @@
 #define PREFERENCESDIALOG_H
 
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QFormLayout>
 #include <QtWidgets/QWidget>
 
 #include <QtGui/QStandardItemModel>
@@ -14,12 +15,29 @@ class QAbstractItemModel;
 class QStackedWidget;
 class QTreeView;
 
+enum class Page : uint8_t
+{
+  Hotkeys,
+
+  User
+};
+
+class PreferencesLayout : public QFormLayout
+{
+public:
+  PreferencesLayout(QWidget* parent = nullptr);
+
+  void addRowWidgets(const QString& labelText, const QList<QWidget*>& widgets);
+  void addDivider(const QString& text, int row = -1);
+  void addEmptyRow();
+};
+
 class PreferencesPageBase : public QWidget
 {
   Q_OBJECT
 
 public:
-  PreferencesPageBase(QWidget* parent=nullptr);
+  PreferencesPageBase(QWidget* parent = nullptr);
   ~PreferencesPageBase() override {}
 
 public Q_SLOTS:
@@ -37,13 +55,25 @@ public:
   static const int PageIdRole;
 
   PreferencesPage(QWidget* parent = nullptr);
-  ~PreferencesPage() override {}
+  ~PreferencesPage() override = default;
+
+  virtual void loadSettings() {}
+  virtual void saveSettings() {}
+  virtual void cancelSettings() {}
 
 public Q_SLOTS:
   void initialize() override;
   void apply() override;
   void cancel() override;
   void revert() override;
+};
+
+class HotkeysPreferencesPage : public PreferencesPage
+{
+  Q_OBJECT
+
+public:
+  HotkeysPreferencesPage(QWidget* parent = nullptr);
 };
 
 class PreferencesWidget : public QWidget
@@ -58,7 +88,7 @@ public:
   void applyPreferences();
   void cancelPreferences();
   void revertPreferences();
-  void addPage(int pageId, PreferencesPage* page);
+  void addPage(Page page, PreferencesPage* preferencesPage);
   void setCurrentPage(const QModelIndex& modelIndex);
   void setExpanded(const QModelIndex& modelIndex, bool expanded);
 
@@ -74,7 +104,7 @@ private:
   QAbstractItemModel* _model; // not owned
   QTreeView* _treeView;
   QStackedWidget* _pageStackWidget;
-  std::map<int, int> _pageIdToStackIndex;
+  std::map<Page, int> _pageToStackIndex;
 };
 
 class PreferencesDialog : public QDialog
@@ -82,14 +112,6 @@ class PreferencesDialog : public QDialog
   Q_OBJECT
 
 public:
-  enum class Page
-  {
-    Hotkeys,
-
-    // Values greater than ePageUser are reserved for user pages
-    User
-  };
-
   PreferencesDialog(QWidget* parent);
 
 public Q_SLOTS:
@@ -98,6 +120,8 @@ public Q_SLOTS:
   void revert();
 
   void onPageChanged(QModelIndex);
+
+  static void SetPage(Page page);
 
 private:
   void init();
@@ -108,7 +132,7 @@ private:
   QStandardItem* createTreeItem(Page page, QStandardItem* parent = nullptr) const;
 
   PreferencesWidget* _preferencesWidget;
-  Page _previousPage;
+  static Page _previousPage;
   static const int PageIdRole;
 };
 
