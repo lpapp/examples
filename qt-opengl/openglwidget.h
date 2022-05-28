@@ -1,5 +1,5 @@
-#ifndef GLWIDGET_H
-#define GLWIDGET_H
+#ifndef OPENGLWIDGET_H
+#define OPENGLWIDGET_H
 
 #include "logo.h"
 
@@ -12,24 +12,24 @@
 
 class QOpenGLShaderProgram;
 
-class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
+class OpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
   Q_OBJECT
 
 public:
-  GLWidget(QWidget *parent = nullptr);
-  ~GLWidget();
+  OpenGLWidget(QWidget *parent = nullptr);
+  ~OpenGLWidget();
 
   QSize minimumSizeHint() const override;
   QSize sizeHint() const override;
 
-public slots:
+public Q_SLOTS:
   void setXRotation(int angle);
   void setYRotation(int angle);
   void setZRotation(int angle);
   void cleanup();
 
-signals:
+Q_SIGNALS:
   void xRotationChanged(int angle);
   void yRotationChanged(int angle);
   void zRotationChanged(int angle);

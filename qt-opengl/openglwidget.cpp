@@ -1,12 +1,11 @@
-#include "glwidget.h"
+#include "openglwidget.h"
 
-#include <QCoreApplication>
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 
 #include <math.h>
 
-GLWidget::GLWidget(QWidget *parent)
+OpenGLWidget::OpenGLWidget(QWidget *parent)
   : QOpenGLWidget(parent)
 {
   m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
@@ -17,17 +16,17 @@ GLWidget::GLWidget(QWidget *parent)
   setFormat(fmt);
 }
 
-GLWidget::~GLWidget()
+OpenGLWidget::~OpenGLWidget()
 {
   cleanup();
 }
 
-QSize GLWidget::minimumSizeHint() const
+QSize OpenGLWidget::minimumSizeHint() const
 {
   return QSize(50, 50);
 }
 
-QSize GLWidget::sizeHint() const
+QSize OpenGLWidget::sizeHint() const
 {
   return QSize(400, 400);
 }
@@ -43,7 +42,7 @@ static void NormalizeAngle(int &angle)
   }
 }
 
-void GLWidget::setXRotation(int angle)
+void OpenGLWidget::setXRotation(int angle)
 {
   NormalizeAngle(angle);
   if (angle != m_xRot) {
@@ -53,7 +52,7 @@ void GLWidget::setXRotation(int angle)
   }
 }
 
-void GLWidget::setYRotation(int angle)
+void OpenGLWidget::setYRotation(int angle)
 {
   NormalizeAngle(angle);
   if (angle != m_yRot) {
@@ -63,7 +62,7 @@ void GLWidget::setYRotation(int angle)
   }
 }
 
-void GLWidget::setZRotation(int angle)
+void OpenGLWidget::setZRotation(int angle)
 {
   NormalizeAngle(angle);
   if (angle != m_zRot) {
@@ -73,10 +72,10 @@ void GLWidget::setZRotation(int angle)
   }
 }
 
-void GLWidget::cleanup()
+void OpenGLWidget::cleanup()
 {
   if (!m_program) {
-      return;
+    return;
   }
 
   makeCurrent();
@@ -141,7 +140,7 @@ static const char *fragmentShaderSource =
   "   gl_FragColor = vec4(col, 1.0);\n"
   "}\n";
 
-void GLWidget::initializeGL()
+void OpenGLWidget::initializeGL()
 {
   // In this example the widget's corresponding top-level window can change
   // several times during the widget's lifetime. Whenever this happens, the
@@ -150,7 +149,7 @@ void GLWidget::initializeGL()
   // aboutToBeDestroyed() signal, instead of the destructor. The emission of
   // the signal will be followed by an invocation of initializeGL() where we
   // can recreate all resources.
-  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
 
   initializeOpenGLFunctions();
   glClearColor(0, 0, 0, 0);
@@ -193,7 +192,7 @@ void GLWidget::initializeGL()
   m_program->release();
 }
 
-void GLWidget::setupVertexAttribs()
+void OpenGLWidget::setupVertexAttribs()
 {
   m_logoVbo.bind();
   QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -206,7 +205,7 @@ void GLWidget::setupVertexAttribs()
   m_logoVbo.release();
 }
 
-void GLWidget::paintGL()
+void OpenGLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
@@ -229,18 +228,18 @@ void GLWidget::paintGL()
   m_program->release();
 }
 
-void GLWidget::resizeGL(int w, int h)
+void OpenGLWidget::resizeGL(int w, int h)
 {
   m_proj.setToIdentity();
-  m_proj.perspective(45.0f, GLfloat(w) / h, 0.01f, 100.0f);
+  m_proj.perspective(45.0f, static_cast<GLfloat>(w) / h, 0.01f, 100.0f);
 }
 
-void GLWidget::mousePressEvent(QMouseEvent *event)
+void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 {
   m_lastPos = event->pos();
 }
 
-void GLWidget::mouseMoveEvent(QMouseEvent *event)
+void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
   int dx = event->x() - m_lastPos.x();
   int dy = event->y() - m_lastPos.y();
@@ -252,5 +251,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     setXRotation(m_xRot + 8 * dy);
     setZRotation(m_zRot + 8 * dx);
   }
+
   m_lastPos = event->pos();
 }

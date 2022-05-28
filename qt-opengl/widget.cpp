@@ -1,6 +1,6 @@
 #include "widget.h"
 
-#include "glwidget.h"
+#include "openglwidget.h"
 
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -10,22 +10,22 @@
 Widget::Widget(QWidget* parent)
   : QWidget(parent)
 {
-  glWidget = new GLWidget;
+  openGLWidget = new OpenGLWidget;
 
   xSlider = createSlider();
   ySlider = createSlider();
   zSlider = createSlider();
 
-  connect(xSlider, &QSlider::valueChanged, glWidget, &GLWidget::setXRotation);
-  connect(glWidget, &GLWidget::xRotationChanged, xSlider, &QSlider::setValue);
-  connect(ySlider, &QSlider::valueChanged, glWidget, &GLWidget::setYRotation);
-  connect(glWidget, &GLWidget::yRotationChanged, ySlider, &QSlider::setValue);
-  connect(zSlider, &QSlider::valueChanged, glWidget, &GLWidget::setZRotation);
-  connect(glWidget, &GLWidget::zRotationChanged, zSlider, &QSlider::setValue);
+  connect(xSlider, &QSlider::valueChanged, openGLWidget, &OpenGLWidget::setXRotation);
+  connect(openGLWidget, &OpenGLWidget::xRotationChanged, xSlider, &QSlider::setValue);
+  connect(ySlider, &QSlider::valueChanged, openGLWidget, &OpenGLWidget::setYRotation);
+  connect(openGLWidget, &OpenGLWidget::yRotationChanged, ySlider, &QSlider::setValue);
+  connect(zSlider, &QSlider::valueChanged, openGLWidget, &OpenGLWidget::setZRotation);
+  connect(openGLWidget, &OpenGLWidget::zRotationChanged, zSlider, &QSlider::setValue);
 
   QVBoxLayout* mainLayout = new QVBoxLayout;
   QHBoxLayout* container = new QHBoxLayout;
-  container->addWidget(glWidget);
+  container->addWidget(openGLWidget);
   container->addWidget(xSlider);
   container->addWidget(ySlider);
   container->addWidget(zSlider);

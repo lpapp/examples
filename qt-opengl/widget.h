@@ -4,10 +4,8 @@
 #include <QWidget>
 
 class QSlider;
-class QPushButton;
 
-class GLWidget;
-class MainWindow;
+class OpenGLWidget;
 
 class Widget : public QWidget
 {
@@ -19,7 +17,7 @@ public:
 private:
   QSlider *createSlider();
 
-  GLWidget *glWidget;
+  OpenGLWidget *openGLWidget;
   QSlider *xSlider;
   QSlider *ySlider;
   QSlider *zSlider;
