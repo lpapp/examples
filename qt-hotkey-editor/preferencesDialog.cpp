@@ -98,8 +98,8 @@ HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
   HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget;
 
   HotkeysMap hotkeys;
-  constexpr int maxContexts = 10;
-  constexpr int maxCategories = 10;
+  constexpr int maxContexts = 5;
+  constexpr int maxCategories = 3;
   constexpr int maxActions = 1000;
   for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
     CategoryHotkeysMap categoryHotkeys;

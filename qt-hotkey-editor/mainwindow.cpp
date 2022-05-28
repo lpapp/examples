@@ -8,6 +8,7 @@
 
 MainWindow::MainWindow()
 {
+  setCentralWidget(new QLabel(tr("Open the Preferences from the menu to see the shortcuts editor")));
   createActions();
   createMenus();
 
