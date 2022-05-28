@@ -12,41 +12,45 @@ class QMenu;
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    MainWindow();
+  MainWindow();
+
+private Q_SLOTS:
+  void showPreferences();
 
 private:
-    void createActions();
-    void createDummyActions();
-    void createMenus();
+  void createActions();
+  void createDummyActions();
+  void createMenus();
 
-    QMenu *fileMenu;
-    QMenu *editMenu;
-    QMenu *formatMenu;
-    QMenu *helpMenu;
-    QActionGroup *alignmentGroup;
-    QAction *newAct;
-    QAction *openAct;
-    QAction *saveAct;
-    QAction *printAct;
-    QAction *exitAct;
-    QAction *undoAct;
-    QAction *redoAct;
-    QAction *cutAct;
-    QAction *copyAct;
-    QAction *pasteAct;
-    QAction *boldAct;
-    QAction *italicAct;
-    QAction *leftAlignAct;
-    QAction *rightAlignAct;
-    QAction *justifyAct;
-    QAction *centerAct;
-    QAction *setLineSpacingAct;
-    QAction *setParagraphSpacingAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
+  QMenu *fileMenu;
+  QMenu *editMenu;
+  QMenu *formatMenu;
+  QMenu *helpMenu;
+  QActionGroup *alignmentGroup;
+  QAction *preferencesAct;
+  QAction *newAct;
+  QAction *openAct;
+  QAction *saveAct;
+  QAction *printAct;
+  QAction *exitAct;
+  QAction *undoAct;
+  QAction *redoAct;
+  QAction *cutAct;
+  QAction *copyAct;
+  QAction *pasteAct;
+  QAction *boldAct;
+  QAction *italicAct;
+  QAction *leftAlignAct;
+  QAction *rightAlignAct;
+  QAction *justifyAct;
+  QAction *centerAct;
+  QAction *setLineSpacingAct;
+  QAction *setParagraphSpacingAct;
+  QAction *aboutAct;
+  QAction *aboutQtAct;
 };
 
 #endif

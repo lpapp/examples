@@ -42,6 +42,10 @@ MainWindow::MainWindow()
 
 void MainWindow::createActions()
 {
+    preferencesAct = new QAction(tr("Preferences"), this);
+    preferencesAct->setShortcuts(QKeySequence::Preferences);
+    connect(preferencesAct, &QAction::triggered, this, &MainWindow::showPreferences);
+
     newAct = new QAction(tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
 
@@ -115,6 +119,7 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(preferencesAct);
     fileMenu->addAction(newAct);
     fileMenu->addAction(openAct);
 
@@ -153,4 +158,12 @@ void MainWindow::createMenus()
 
 void MainWindow::createDummyActions()
 {
+}
+
+void MainWindow::showPreferences()
+{
+  QDialog* dialog = new QDialog(this);
+  connect(dialog, &QDialog::finished, dialog, &QDialog::deleteLater);
+  dialog->show();
+  dialog->activateWindow();
 }
