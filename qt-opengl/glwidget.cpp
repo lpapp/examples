@@ -6,19 +6,15 @@
 
 #include <math.h>
 
-bool GLWidget::m_transparent = false;
-
 GLWidget::GLWidget(QWidget *parent)
   : QOpenGLWidget(parent)
 {
   m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
   // --transparent causes the clear color to be transparent. Therefore, on systems that
   // support it, the widget will become transparent apart from the logo.
-  if (m_transparent) {
-      QSurfaceFormat fmt = format();
-      fmt.setAlphaBufferSize(8);
-      setFormat(fmt);
-  }
+  QSurfaceFormat fmt = format();
+  fmt.setAlphaBufferSize(8);
+  setFormat(fmt);
 }
 
 GLWidget::~GLWidget()
@@ -157,7 +153,7 @@ void GLWidget::initializeGL()
   connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 
   initializeOpenGLFunctions();
-  glClearColor(0, 0, 0, m_transparent ? 0 : 1);
+  glClearColor(0, 0, 0, 0);
 
   m_program = new QOpenGLShaderProgram;
   m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);

@@ -20,9 +20,6 @@ public:
   GLWidget(QWidget *parent = nullptr);
   ~GLWidget();
 
-  static bool isTransparent() { return m_transparent; }
-  static void setTransparent(bool t) { m_transparent = t; }
-
   QSize minimumSizeHint() const override;
   QSize sizeHint() const override;
 
@@ -63,7 +60,6 @@ private:
   QMatrix4x4 m_proj;
   QMatrix4x4 m_camera;
   QMatrix4x4 m_world;
-  static bool m_transparent;
 };
 
 #endif
