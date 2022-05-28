@@ -16,10 +16,15 @@ class QAction;
 class QColor;
 class QPushButton;
 
-class KeyButton : QPushButton
+class KeyButton : public QPushButton
 {
+  Q_OBJECT
+
 public:
   KeyButton(const QString& text, QWidget* parent);
+
+Q_SIGNALS:
+  void actionDropped(const QString& actionId, const QKeySequence& keySequence);
 
 private:
   void mousePressEvent(QMouseEvent *event) override;
@@ -43,15 +48,17 @@ public:
 public Q_SLOTS:
   void highlightHotkeys();
 
+Q_SIGNALS:
+  void actionDropped(const QString& actionId, const QKeySequence& keySequence);
+
 private:
-  void dropEvent(QDropEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;
 
   void resizeButtons();
   void resetHighlights();
 
-  std::map<int, QPushButton*> _buttonsMap;
-  std::vector<std::vector<QPushButton*>> _buttons;
+  std::map<int, KeyButton*> _buttonsMap;
+  std::vector<std::vector<KeyButton*>> _buttons;
 
   Qt::KeyboardModifiers _modifiers;
   QColor _color;
