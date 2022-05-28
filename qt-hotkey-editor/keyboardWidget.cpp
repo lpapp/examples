@@ -62,11 +62,20 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 {
+  std::cout << "TEST DRAG ENTER EVENT: " << text().toStdString() << std::endl;
+  setPalette(QApplication::palette().color(QPalette::Highlight));
   event->acceptProposedAction();
+}
+
+void KeyButton::dragLeaveEvent(QDragLeaveEvent *event)
+{
+  setPalette(QApplication::palette());
+  std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
 }
 
 void KeyButton::dragMoveEvent(QDragMoveEvent *event)
 {
+  // std::cout << "TEST DRAG MOVE EVENT: " << text().toStdString() << std::endl;
   if (event->mimeData()->hasFormat("text/plain")) {
     event->acceptProposedAction();
   }
@@ -88,6 +97,7 @@ void KeyButton::dropEvent(QDropEvent *event)
 
   QString actionId = mime->text();
   Q_EMIT actionDropped(actionId, text());
+  setPalette(QApplication::palette());
 }
 
 std::vector<RowKeys> keyboardLayout {
