@@ -13,11 +13,12 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
-add_executable(helloworld
+add_executable(OpenGLWindow
   glwidget.cpp
   logo.cpp
   main.cpp
   mainwindow.cpp
+  window.cpp
 )
 
-target_link_libraries(helloworld Qt::Widgets)
+target_link_libraries(OpenGLWindow Qt::Widgets)

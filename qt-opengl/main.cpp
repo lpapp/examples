@@ -17,13 +17,8 @@ int main(int argc, char *argv[])
   QSurfaceFormat::setDefaultFormat(fmt);
 
   MainWindow mainWindow;
-
-  GLWidget::setTransparent(parser.isSet(transparentOption));
-  if (GLWidget::isTransparent()) {
-    mainWindow.setAttribute(Qt::WA_TranslucentBackground);
-    mainWindow.setAttribute(Qt::WA_NoSystemBackground, false);
-  }
-
+  mainWindow.setAttribute(Qt::WA_TranslucentBackground);
+  mainWindow.setAttribute(Qt::WA_NoSystemBackground, false);
   mainWindow.resize(mainWindow.sizeHint());
   mainWindow.show();
 
