@@ -418,20 +418,17 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
 QMimeData* HotkeyEditorModel::mimeData(const QModelIndexList &indexes) const
 {
   QMimeData *mimeData = new QMimeData;
-  QByteArray encodedData;
-
-  QDataStream stream(&encodedData, QIODevice::WriteOnly);
-
+  QStringList actionIds;
   for (const QModelIndex &index : indexes) {
     if (index.isValid()) {
       const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
       QString actionId = currentItem->action()->property(kIdPropertyName).toString();
-      stream << actionId;
+      actionIds.push_back(actionId);
     }
   }
 
-  std::cout << "TEST MIME DATA: " << encodedData.toStdString() << std::endl;
-  mimeData->setData("text/plain", encodedData);
+  std::cout << "TEST MIME DATA: " << actionIds.join(' ').toUtf8().toStdString() << std::endl;
+  mimeData->setData("text/plain", actionIds.join(' ').toUtf8());
   return mimeData;
 }
 

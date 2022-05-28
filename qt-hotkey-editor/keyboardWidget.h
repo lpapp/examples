@@ -14,6 +14,7 @@
 
 class QAction;
 class QColor;
+class QMimeData;
 class QPushButton;
 
 class KeyButton : public QPushButton
