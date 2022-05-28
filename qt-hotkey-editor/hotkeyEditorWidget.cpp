@@ -490,7 +490,7 @@ void HotkeyEditorModel::assignHotkey(const QString& actionId, const QKeySequence
         HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
         QAction* action = actionLevel->action();
         QString currentActionId = action->property(kIdPropertyName).toString();
-        std::cout << "TEST ASSIGN HOTKEY CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
+        // std::cout << "TEST ASSIGN HOTKEY CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
         if (currentActionId == actionId) {
           std::cout << "TEST ASSIGN HOTKEY ACTION ID 2: " << actionId.toStdString() << std::endl;
           action->setShortcut(keySequence);
