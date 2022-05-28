@@ -26,7 +26,7 @@ public:
 
   void add(QLayoutItem *item, Position position);
 
-ivate:
+private:
   struct ItemWrapper
   {
     ItemWrapper(QLayoutItem *i, Position p) {
