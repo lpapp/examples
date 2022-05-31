@@ -22,6 +22,7 @@
 #include <QtGui/QActionGroup>
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QDebug>
 #include <QtCore/QMimeData>
 #include <QtCore/QSortFilterProxyModel>
 
@@ -571,6 +572,10 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->setDragEnabled(true);
   _view->setAcceptDrops(true);
   _view->setDropIndicatorShown(true);
+
+  connect(_view, &QTreeView::expanded, [this](){
+    qDebug() << "TEST EXPANDED: " << sender()->metaObject();
+  });
 
   QAction *expandAllAction = new QAction(tr("expand all"), this);
   expandAllAction->setToolTip(tr("Expands all nodes"));
