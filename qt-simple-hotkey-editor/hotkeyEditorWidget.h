@@ -68,9 +68,6 @@ public:
   int columnCount(const QModelIndex& index = QModelIndex()) const override;
 
   bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
-
-  HotkeyEditorModelItem* findKeySequence(const QString& keySequenceString);
-
   void setHotkeys(const HotkeysMap& hotkeys);
 
 private:

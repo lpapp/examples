@@ -291,59 +291,12 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
       return true;
     }
 
-    HotkeyEditorModelItem* foundItem = findKeySequence(keySequenceString);
-    const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
-    if (!foundItem || currentItem == foundItem) {
-      item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
-      Q_EMIT dataChanged(index, index);
-      return true;
-    }
-
-    QMessageBox messageBox;
-    messageBox.setWindowTitle("Reassign hotkey?");
-    messageBox.setIcon(QMessageBox::Warning);
-    const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
-    const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Hotkey)).toString();
-    const QString text = QLatin1String("Keyboard hotkey \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
-    messageBox.setText(text);
-    messageBox.setInformativeText(tr("Are you sure you want to reassign this hotkey?"));
-    messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    messageBox.setDefaultButton(QMessageBox::No);
-
-    const int ret = messageBox.exec();
-    switch (ret) {
-      case QMessageBox::Yes:
-        foundItem->setData(static_cast<int>(Column::Hotkey), QVariant());
-        item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
-        Q_EMIT dataChanged(index, index);
-        return true;
-      case QMessageBox::No:
-        break;
-      default:
-        break;
-    }
+    item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
+    Q_EMIT dataChanged(index, index);
+    return true;
   }
 
   return QAbstractItemModel::setData(index, value, role);
-}
-
-HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequenceString)
-{
-  for (int i = 0; i < rootItem->childCount(); ++i) {
-    HotkeyEditorModelItem* contextLevel = rootItem->child(i);
-    for (int j = 0; j < contextLevel->childCount(); ++j) {
-      HotkeyEditorModelItem* categoryLevel = contextLevel->child(j);
-      for (int k = 0; k < categoryLevel->childCount(); ++k) {
-        HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
-        const QVariant actionLevelHotkey = actionLevel->data(static_cast<int>(Column::Hotkey));
-        if (keySequenceString == actionLevelHotkey.toString()) {
-          return actionLevel;
-        }
-      }
-    }
-  }
-
-  return nullptr;
 }
 
 HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
