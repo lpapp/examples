@@ -95,7 +95,6 @@ public:
   HotkeyEditorModelItem* findKeySequence(const QString& keySequenceString);
 
   void setHotkeys(const HotkeysMap& hotkeys);
-  HotkeysMap getHotkeys() const;
 
 private:
   void setupModelData(HotkeyEditorModelItem* parent);
@@ -129,15 +128,10 @@ class HotkeyEditorWidget : public QWidget
 
 public:
 
-  // specify the object name if you want settings for this widget to be autosaved and loaded (like the column widths)
   HotkeyEditorWidget(const char* objectName = nullptr, QWidget* parent = nullptr);
-  ~HotkeyEditorWidget() override;
+  ~HotkeyEditorWidget() override = default;
 
   void setHotkeys(const HotkeysMap& hotkeys);
-  HotkeysMap getHotkeys() const;
-
-Q_SIGNALS:
-  void hotkeysChanged();
 
 private:
   HotkeyEditorDelegate* _delegate;

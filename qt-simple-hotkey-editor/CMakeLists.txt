@@ -21,9 +21,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_executable(HotkeyEditor
   hotkeyEditorWidget.cpp
-  mainwindow.cpp
   main.cpp
-  preferencesDialog.cpp
 )
 
 target_link_libraries(HotkeyEditor Qt::Widgets)

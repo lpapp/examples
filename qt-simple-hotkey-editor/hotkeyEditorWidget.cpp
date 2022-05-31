@@ -2,7 +2,6 @@
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
@@ -11,32 +10,15 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMessageBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QSplitter>
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
 
-#include <QtGui/QActionGroup>
-
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
-#include <QtCore/QMimeData>
 #include <QtCore/QSortFilterProxyModel>
 
 #include <iostream>
-
-static HotkeyEditorExpandState sHotkeyEditorCurrentExpandState = {};
-
-static SearchToolButtonState sSearchToolButtonState = {
-  QString("Name"),
-  QString("Contains"),
-  true,
-  true,
-  true,
-  {}
-};
-
 
 HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, const QString& id, HotkeyEditorModelItem* parent)
   : m_itemData(data)
@@ -217,11 +199,6 @@ void HotkeyEditorModel::setHotkeys(const HotkeysMap& hotkeys)
   _hotkeys = hotkeys;
   setupModelData(rootItem);
   endResetModel();
-}
-
-HotkeysMap HotkeyEditorModel::getHotkeys() const
-{
-  return _hotkeys;
 }
 
 QModelIndex HotkeyEditorModel::index(int row, int column, const QModelIndex &parent) const
@@ -483,16 +460,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addWidget(_view);
 }
 
-HotkeyEditorWidget::~HotkeyEditorWidget()
-{
-}
-
 void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 {
   _model->setHotkeys(hotkeys);
-}
-
-HotkeysMap HotkeyEditorWidget::getHotkeys() const
-{
-  return _model->getHotkeys();
 }

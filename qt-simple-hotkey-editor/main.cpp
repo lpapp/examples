@@ -1,6 +1,9 @@
-#include <QApplication>
+#include "hotkeyEditorWidget.h"
 
-#include "mainwindow.h"
+#include <QtWidgets/QApplication>
+
+#include <QtGui/QAction>
+#include <QtGui/QPalette>
 
 void setApplication(QApplication& application)
 {
@@ -27,9 +30,35 @@ void setApplication(QApplication& application)
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    setApplication(app);
-    MainWindow window;
-    window.show();
-    return app.exec();
+  QApplication app(argc, argv);
+  setApplication(app);
+  HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget; 
+
+  HotkeysMap hotkeys;
+  constexpr int maxContexts = 5;
+  constexpr int maxCategories = 3;
+  constexpr int maxActions = 1000;
+  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
+    CategoryHotkeysMap categoryHotkeys;
+    QString contextName = "Context" + QString::number(contextIndex);
+    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
+      std::vector<QAction*> _actions;
+      QString categoryName = "Category" + QString::number(categoryIndex);
+      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
+        QString actionName = "Action" + QString::number(actionIndex);
+        QAction* action = new QAction(actionName, hotkeyEditorWidget);
+        action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
+        QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
+        action->setProperty(kIdPropertyName, stringList.join('.'));
+        _actions.push_back(action);
+      }
+
+      categoryHotkeys.insert({categoryName, _actions});
+    }
+    hotkeys.insert({contextName, categoryHotkeys});
+  }
+
+  hotkeyEditorWidget->setHotkeys(hotkeys);
+  hotkeyEditorWidget->show();
+  return app.exec();
 }
