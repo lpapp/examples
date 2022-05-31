@@ -23,7 +23,6 @@
 HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, const QString& id, HotkeyEditorModelItem* parent)
   : m_itemData(data)
   , m_parentItem(parent)
-  , m_id(id)
 {
 }
 
@@ -116,70 +115,10 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
   return m_parentItem;
 }
 
-const QString& HotkeyEditorModelItem::id() const
-{
-  return m_id;
-}
-
 QAction* HotkeyEditorModelItem::action() const
 {
   QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Hotkey));
   return static_cast<QAction*>(actionVariant.value<void*>());
-}
-
-HotkeyEditorDelegate::HotkeyEditorDelegate(QObject *parent)
-  : QStyledItemDelegate(parent)
-{
-  std::cout << "TEST HOTKEY EDITOR DELEGATE" << std::endl;
-}
-
-QWidget* HotkeyEditorDelegate::createEditor(QWidget* parent,
-                                            const QStyleOptionViewItem& /* option */,
-                                            const QModelIndex& /* index */) const
-{
-  std::cout << "TEST HOTKEY EDITOR DELEGATE CREATE EDITOR" << std::endl;
-  QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
-  // editor->setFocusPolicy(Qt::StrongFocus);
-  // connect(editor, &QKeySequenceEdit::editingFinished, this, &HotkeyEditorDelegate::commitAndCloseEditor);
-  return editor;
-}
-
-void HotkeyEditorDelegate::commitAndCloseEditor()
-{
-  QKeySequenceEdit *editor = qobject_cast<QKeySequenceEdit *>(sender());
-  Q_EMIT commitData(editor);
-  Q_EMIT closeEditor(editor);
-}
-
-void HotkeyEditorDelegate::setEditorData(QWidget* editor,
-                                         const QModelIndex& index) const
-{
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET EDITOR DATA" << std::endl;
-  QString value = index.model()->data(index, Qt::EditRole).toString();
-
-  QKeySequenceEdit* keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
-  keySequenceEdit->setKeySequence(value);
-}
-
-void HotkeyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
-                                        const QModelIndex &index) const
-{
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET MODEL DATA: " << model->metaObject()->className() << std::endl;
-  const QKeySequenceEdit *keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
-  if (keySequenceEdit) {
-    const QKeySequence keySequence = keySequenceEdit->keySequence();
-    QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
-    model->setData(index, keySequenceString);
-    return;
-  }
-}
-
-void HotkeyEditorDelegate::updateEditorGeometry(QWidget* editor,
-                                                const QStyleOptionViewItem& option,
-                                                const QModelIndex& /* index */) const
-{
-  std::cout << "TEST UPDATE EDITOR GEOMETRY" << std::endl;
-  editor->setGeometry(option.rect);
 }
 
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
@@ -407,19 +346,11 @@ HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequ
   return nullptr;
 }
 
-HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
+HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   QWidget(parent)
 {
-  if (objName) {
-    setObjectName(objName);
-  }
-
-  // set up the model and view
   _view = new QTreeView(this);
   _model = new HotkeyEditorModel(_view);
-
-  // TODO: Add meaningful toolbar, maybe with some delay to be less distractive?
-  // setToolTip(_model->hoverTooltipText());
 
   _filterModel = new QSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
@@ -427,36 +358,24 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
   _filterModel->setRecursiveFilteringEnabled(true);
   _filterModel->setDynamicSortFilter(true);
-
   _view->setModel(_filterModel);
 
-  _delegate = new HotkeyEditorDelegate(_view);
-  _view->setItemDelegateForColumn(1, _delegate);
-
-  // _view->setMinimumSize(250, 350);
   _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-  // _view->resizeColumnToContents(0);
   _view->setAlternatingRowColors(true);
   _view->setSelectionBehavior(QTreeView::SelectRows);
   _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
-  _view->setDragDropMode(QAbstractItemView::DragDrop);
-  _view->setDragEnabled(true);
-  _view->setAcceptDrops(true);
-  _view->setDropIndicatorShown(true);
 
   connect(_view, &QTreeView::expanded, [this](){
     qDebug() << "TEST EXPANDED: " << sender();
   });
 
-  _view->setContextMenuPolicy(Qt::ActionsContextMenu);
   _view->setAllColumnsShowFocus(true);
   _view->header()->resizeSection(0, 250);
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
   setLayout(layout);
-
   layout->addWidget(_view);
 }
 
