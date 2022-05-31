@@ -56,7 +56,7 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
     QMimeData *mimeData = new QMimeData;
     mimeData->setText(text());
     drag->setMimeData(mimeData);
-    Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+    // Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
   }
 }
 
@@ -232,7 +232,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
 void KeyboardWidget::resizeButtons()
 {
   static constexpr float kMultiplier = 37.5f;
-  const QSize currentSize = size();
+  // const QSize currentSize = size();
   float row = 0;
   float width = 0;
   for (int i = 0; i < keyboardLayout.size(); ++i) {

@@ -26,8 +26,6 @@
 
 #include <iostream>
 
-static const char* HOTKEY_EDITOR_HEADER_PREFERENCE_KEY = "headerColumns";
-
 static HotkeyEditorExpandState sHotkeyEditorCurrentExpandState = {};
 
 static SearchToolButtonState sSearchToolButtonState = {
@@ -499,7 +497,7 @@ void HotkeyEditorModel::assignHotkey(const QString& actionId, const QKeySequence
   }
 }
 
-QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
+void HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
 {
   for (const QModelIndex &selectedItem : selectedItems) {
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(selectedItem.internalPointer());
@@ -507,7 +505,6 @@ QModelIndex HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
     std::cout << "TEST RESET HOTKEY: " << item->data(static_cast<int>(Column::Name)).toString().toStdString() << "(" << item->data(static_cast<int>(Column::DefaultHotkey)).toString().toStdString() << ")" << std::endl;
     Q_EMIT dataChanged(selectedItem, selectedItem);
   }
-  return QModelIndex();
 }
 
 void HotkeyEditorModel::setHoverTooltipText(const QString& hoverTooltipText)
@@ -874,7 +871,7 @@ void HotkeyEditorWidget::reset()
     sourceSelectedItems.push_back(_filterModel->mapToSource(selectedItem));
   }
 
-  QModelIndex newItem = _model->reset(sourceSelectedItems);
+  _model->reset(sourceSelectedItems);
 }
 
 void HotkeyEditorWidget::updateExpandStates(const QModelIndex& index)

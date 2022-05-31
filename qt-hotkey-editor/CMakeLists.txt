@@ -11,6 +11,12 @@ set(CMAKE_AUTOUIC ON)
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "(Clang|GNU)")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -Wall -Wpedantic -Werror)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "/w")
+endif()
+
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_executable(HotkeyEditor

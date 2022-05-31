@@ -99,8 +99,6 @@ public:
 
   HotkeyEditorModelItem* findKeySequence(const QString& keySequenceString);
 
-  QModelIndex reset(const QModelIndexList& selectedItems);
-
   void setHoverTooltipText(const QString& hoverTooltipText);
   const QString& hoverTooltipText();
 
@@ -108,6 +106,7 @@ public:
   HotkeysMap getHotkeys() const;
 
 public Q_SLOTS:
+  void reset(const QModelIndexList& selectedItems);
   void resetAll();
   void assignHotkey(const QString& actionId, const QKeySequence& keySequence);
 
