@@ -179,21 +179,12 @@ QVariant HotkeyEditorModel::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) {
+  if (role != Qt::DisplayRole) {
     return QVariant();
   }
 
   HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
   return item->data(index.column());
-}
-
-Qt::ItemFlags HotkeyEditorModel::flags(const QModelIndex &index) const
-{
-  if (!index.isValid()) {
-    return Qt::NoItemFlags;
-  }
-
-  return QAbstractItemModel::flags(index);
 }
 
 QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation, int role) const
