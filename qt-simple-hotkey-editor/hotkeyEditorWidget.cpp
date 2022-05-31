@@ -14,7 +14,7 @@
 
 #include <iostream>
 
-HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, const QString& id, HotkeyEditorModelItem* parent)
+HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, HotkeyEditorModelItem* parent)
   : m_itemData(data)
   , m_parentItem(parent)
 {
@@ -92,7 +92,7 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
-  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")}, QString("root"));
+  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")});
 }
 
 HotkeyEditorModel::~HotkeyEditorModel()
@@ -202,11 +202,11 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
   const QString contextIdPrefix = "root";
   // Go through each context, one context - many categories each iteration
   for (const auto& contextLevel : _hotkeys) {
-    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, contextIdPrefix + contextLevel.first, parent);
+    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, parent);
     parent->appendChild(contextLevelItem);
     // Go through each category, one category - many actions each iteration
     for (const auto& categoryLevel : contextLevel.second) {
-      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction), QString()}, contextLevel.first + categoryLevel.first, contextLevelItem);
+      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction), QString()}, contextLevelItem);
       contextLevelItem->appendChild(categoryLevelItem);
       for (const auto& action : categoryLevel.second) {
         QString name = action->text();
@@ -214,7 +214,7 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
           continue;
         }
         QString defaultHotkey = action->property(kDefaultShortcutPropertyName).value<QKeySequence>().toString(QKeySequence::NativeText);
-        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action)), defaultHotkey}, categoryLevel.first + name, categoryLevelItem);
+        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action)), defaultHotkey}, categoryLevelItem);
         categoryLevelItem->appendChild(actionLevelItem);
       }
     }

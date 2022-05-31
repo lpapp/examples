@@ -30,7 +30,6 @@ class HotkeyEditorModelItem
 {
 public:
     explicit HotkeyEditorModelItem(const std::vector<QVariant>& data,
-                                   const QString& id,
                                    HotkeyEditorModelItem* parentItem = nullptr);
     ~HotkeyEditorModelItem();
 
