@@ -2,7 +2,6 @@
 
 #include "hotkeyEditorWidget.h"
 
-#include <QtWidgets/QAction>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
@@ -11,6 +10,8 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
+
+#include <QtGui/QAction>
 
 PreferencesLayout::PreferencesLayout(QWidget* parent)
   : QFormLayout(parent)

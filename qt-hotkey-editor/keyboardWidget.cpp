@@ -1,8 +1,8 @@
 #include "keyboardWidget.h"
 
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 
+#include <QtGui/QAction>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QColor>
 #include <QtGui/QDrag>
@@ -266,7 +266,7 @@ void KeyboardWidget::highlightHotkeys()
   resetHighlights();
 
   for (const QAction* action : _actions) {
-    int key = action->shortcut()[0] - static_cast<int>(_modifiers);
+    int key = action->shortcut()[0].toCombined() - static_cast<int>(_modifiers);
     if (_buttonsMap.count(key)) {
       _buttonsMap[key]->setPalette(_color);
       _buttonsMap[key]->setToolTip(action->text());

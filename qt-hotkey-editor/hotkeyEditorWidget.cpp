@@ -2,7 +2,6 @@
 
 #include "keyboardWidget.h"
 
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
@@ -19,6 +18,8 @@
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
+
+#include <QtGui/QActionGroup>
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QMimeData>

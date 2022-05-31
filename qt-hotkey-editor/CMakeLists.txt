@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "(Clang|GNU)")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -Wall -Wpedantic -Werror)
