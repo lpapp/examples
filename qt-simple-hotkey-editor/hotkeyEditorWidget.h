@@ -40,7 +40,6 @@ public:
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
-    bool setData(int column, const QVariant& value);
     int row() const;
     HotkeyEditorModelItem *parentItem();
     QAction* action() const;
@@ -66,8 +65,6 @@ public:
   QModelIndex parent(const QModelIndex& index) const override;
   int rowCount(const QModelIndex& index = QModelIndex()) const override;
   int columnCount(const QModelIndex& index = QModelIndex()) const override;
-
-  bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
   void setHotkeys(const HotkeysMap& hotkeys);
 
 private:

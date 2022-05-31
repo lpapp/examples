@@ -1,18 +1,12 @@
 #include "hotkeyEditorWidget.h"
 
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QKeySequenceEdit>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QToolButton>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QVBoxLayout>
+
+#include <QtGui/QAction>
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
@@ -90,35 +84,9 @@ QVariant HotkeyEditorModelItem::data(int column) const
   return keySequenceString;
 }
 
-bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
-{
-  if (column < 0 || column >= m_itemData.size()) {
-    return false;
-  }
-
-  if (column == static_cast<int>(Column::Hotkey)) {
-    std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
-    QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
-    if (action) {
-      action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
-    }
-  }
-  else {
-    m_itemData[column] = value;
-  }
-
-  return true;
-}
-
 HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
 {
   return m_parentItem;
-}
-
-QAction* HotkeyEditorModelItem::action() const
-{
-  QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Hotkey));
-  return static_cast<QAction*>(actionVariant.value<void*>());
 }
 
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
@@ -211,19 +179,11 @@ QVariant HotkeyEditorModel::data(const QModelIndex &index, int role) const
     return QVariant();
   }
 
-  HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
-
-  if (role == Qt::ForegroundRole
-      && index.column() == static_cast<int>(Column::Hotkey)) {
-    if (item->data(static_cast<int>(Column::Hotkey)) != item->data(static_cast<int>(Column::DefaultHotkey))) {
-      return QVariant(QApplication::palette().color(QPalette::Highlight));
-    }
-  }
-
   if (role != Qt::DisplayRole && role != Qt::EditRole) {
     return QVariant();
   }
 
+  HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
   return item->data(index.column());
 }
 
@@ -233,15 +193,7 @@ Qt::ItemFlags HotkeyEditorModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
-  Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index);
-  if (index.column() == static_cast<int>(Column::Hotkey)) {
-    modelFlags |= Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
-  }
-  else if (index.column() == static_cast<int>(Column::Name)) {
-    modelFlags |= Qt::ItemIsDragEnabled;
-  }
-
-  return modelFlags;
+  return QAbstractItemModel::flags(index);
 }
 
 QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -259,7 +211,6 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
   const QString contextIdPrefix = "root";
   // Go through each context, one context - many categories each iteration
   for (const auto& contextLevel : _hotkeys) {
-    // TODO: make it "tr()".
     HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, contextIdPrefix + contextLevel.first, parent);
     parent->appendChild(contextLevelItem);
     // Go through each category, one category - many actions each iteration
@@ -279,52 +230,20 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
   }
 }
 
-bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA" << std::endl;
-  if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Hotkey)) {
-    QString keySequenceString= value.toString();
-    HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
-    if (keySequenceString.isEmpty()) {
-      item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
-      Q_EMIT dataChanged(index, index);
-      return true;
-    }
-
-    item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
-    Q_EMIT dataChanged(index, index);
-    return true;
-  }
-
-  return QAbstractItemModel::setData(index, value, role);
-}
-
 HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   QWidget(parent)
 {
   _view = new QTreeView(this);
-  _model = new HotkeyEditorModel(_view);
-
+  _model = new HotkeyEditorModel(this);
   _filterModel = new QSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
-  _filterModel->setFilterKeyColumn(-1);
-  _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-  _filterModel->setRecursiveFilteringEnabled(true);
-  _filterModel->setDynamicSortFilter(true);
   _view->setModel(_filterModel);
-
-  _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-  _view->setAlternatingRowColors(true);
-  _view->setSelectionBehavior(QTreeView::SelectRows);
-  _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  _view->header()->resizeSection(0, 250);
 
   connect(_view, &QTreeView::expanded, [this](){
     qDebug() << "TEST EXPANDED: " << sender();
   });
-
-  _view->setAllColumnsShowFocus(true);
-  _view->header()->resizeSection(0, 250);
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
