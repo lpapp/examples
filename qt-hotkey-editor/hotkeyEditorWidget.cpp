@@ -247,7 +247,7 @@ QModelIndex HotkeyEditorModel::index(int row, int column, const QModelIndex &par
 
   HotkeyEditorModelItem *childItem = parentItem->child(row);
   if (childItem) {
-    std::cout << "TEST CREATE INDEX 3, ROW: " << row << ", COLUMN: " << column << std::endl;
+    // std::cout << "TEST CREATE INDEX 3, ROW: " << row << ", COLUMN: " << column << std::endl;
     return createIndex(row, column, childItem);
   }
 
@@ -492,7 +492,7 @@ bool HotkeyEditorModel::dropMimeData(const QMimeData *data,
     indexRow = rowCount(QModelIndex());
   }
 
-  QModelIndex modelIndex = index(indexRow, 0, QModelIndex());
+  QModelIndex modelIndex = index(indexRow, static_cast<int>(Column::Hotkey), QModelIndex());
   setData(modelIndex, data->text());
 
   return true;
