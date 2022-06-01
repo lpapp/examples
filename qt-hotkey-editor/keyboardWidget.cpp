@@ -220,7 +220,9 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
           });
         }
         else {
-          connect(button, &KeyButton::actionDropped, this, &KeyboardWidget::actionDropped);
+          connect(button, &KeyButton::actionDropped, [this](const QString& actionId, const QKeySequence& keySequence){
+            Q_EMIT actionDropped(actionId, QKeySequence(_modifiers | keySequence[0].key()));
+          });
         }
       }
     }

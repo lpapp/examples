@@ -118,7 +118,7 @@ bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
   }
 
   if (column == static_cast<int>(Column::Hotkey)) {
-    std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
+    // std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
     QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
     if (action) {
       action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
