@@ -1,9 +1,9 @@
 #include "window.h"
 
-#include "borderlayout.h"
+#include "borderLayout.h"
 
-#include <QLabel>
-#include <QTextBrowser>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTextBrowser>
 
 Window::Window()
 {

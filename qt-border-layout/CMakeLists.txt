@@ -16,7 +16,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 add_executable(BorderLayout
   main.cpp
   window.cpp
-  borderlayout.cpp
+  borderLayout.cpp
 )
 
 target_link_libraries(BorderLayout Qt::Widgets)

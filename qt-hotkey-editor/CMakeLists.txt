@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "(Clang|GNU)")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS -Wall -Wpedantic -Werror)
@@ -20,11 +20,14 @@ endif()
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_executable(HotkeyEditor
+  borderLayout.cpp
   hotkeyEditorWidget.cpp
   keyboardWidget.cpp
+  logo.cpp
   mainwindow.cpp
   main.cpp
+  openglWidget.cpp
   preferencesDialog.cpp
 )
 
-target_link_libraries(HotkeyEditor Qt::Widgets)
+target_link_libraries(HotkeyEditor Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets)

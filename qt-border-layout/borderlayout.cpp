@@ -1,4 +1,4 @@
-#include "borderlayout.h"
+#include "borderLayout.h"
 
 BorderLayout::BorderLayout(QWidget *parent, const QMargins &margins, int spacing)
   : QLayout(parent)
@@ -12,12 +12,12 @@ BorderLayout::BorderLayout(int spacing)
   setSpacing(spacing);
 }
 
-
 BorderLayout::~BorderLayout()
 {
   QLayoutItem *l;
-  while ((l = takeAt(0)))
+  while ((l = takeAt(0))) {
     delete l;
+  }
 }
 
 void BorderLayout::addItem(QLayoutItem *item)
@@ -42,12 +42,12 @@ bool BorderLayout::hasHeightForWidth() const
 
 int BorderLayout::count() const
 {
-  return list.size();
+  return items.size();
 }
 
-QLayoutItem *BorderLayout::itemAt(int index) const
+QLayoutItem* BorderLayout::itemAt(int index) const
 {
-  ItemWrapper *wrapper = list.value(index);
+  ItemWrapper* wrapper = items[index];
   return wrapper ? wrapper->item : nullptr;
 }
 
@@ -56,20 +56,18 @@ QSize BorderLayout::minimumSize() const
   return calculateSize(MinimumSize);
 }
 
-void BorderLayout::setGeometry(const QRect &rect)
+void BorderLayout::setGeometry(const QRect& rect)
 {
-  ItemWrapper *center = nullptr;
+  ItemWrapper* center = nullptr;
   int eastWidth = 0;
   int westWidth = 0;
   int northHeight = 0;
   int southHeight = 0;
   int centerHeight = 0;
-  int i;
 
   QLayout::setGeometry(rect);
 
-  for (i = 0; i < list.size(); ++i) {
-    ItemWrapper *wrapper = list.at(i);
+  for (ItemWrapper* wrapper : items) {
     QLayoutItem *item = wrapper->item;
     Position position = wrapper->position;
 
@@ -96,8 +94,7 @@ void BorderLayout::setGeometry(const QRect &rect)
 
   centerHeight = rect.height() - northHeight - southHeight;
 
-  for (i = 0; i < list.size(); ++i) {
-    ItemWrapper *wrapper = list.at(i);
+  for (ItemWrapper* wrapper : items) {
     QLayoutItem *item = wrapper->item;
     Position position = wrapper->position;
 
@@ -131,39 +128,45 @@ QSize BorderLayout::sizeHint() const
   return calculateSize(SizeHint);
 }
 
-QLayoutItem *BorderLayout::takeAt(int index)
+QLayoutItem* BorderLayout::takeAt(int index)
 {
-  if (index >= 0 && index < list.size()) {
-    ItemWrapper *layoutStruct = list.takeAt(index);
+  if (index >= 0 && index < items.size()) {
+    ItemWrapper* layoutStruct = items[index];
+    items.erase(items.begin() + index);
     return layoutStruct->item;
   }
+
   return nullptr;
 }
 
-void BorderLayout::add(QLayoutItem *item, Position position)
+void BorderLayout::add(QLayoutItem* item, Position position)
 {
-  list.append(new ItemWrapper(item, position));
+  items.push_back(new ItemWrapper(item, position));
 }
 
 QSize BorderLayout::calculateSize(SizeType sizeType) const
 {
   QSize totalSize;
 
-  for (int i = 0; i < list.size(); ++i) {
-    ItemWrapper *wrapper = list.at(i);
+  for (ItemWrapper* wrapper : items) {
     Position position = wrapper->position;
     QSize itemSize;
 
-    if (sizeType == MinimumSize)
+    if (sizeType == MinimumSize) {
       itemSize = wrapper->item->minimumSize();
-    else // (sizeType == SizeHint)
+    }
+    else { // (sizeType == SizeHint)
       itemSize = wrapper->item->sizeHint();
+    }
 
-    if (position == North || position == South || position == Center)
+    if (position == North || position == South || position == Center) {
       totalSize.rheight() += itemSize.height();
+    }
 
-    if (position == West || position == East || position == Center)
+    if (position == West || position == East || position == Center) {
       totalSize.rwidth() += itemSize.width();
+    }
   }
+
   return totalSize;
 }

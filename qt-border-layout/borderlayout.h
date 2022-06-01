@@ -9,22 +9,22 @@ class BorderLayout : public QLayout
 public:
   enum Position { West, North, South, East, Center };
 
-  explicit BorderLayout(QWidget *parent, const QMargins &margins = QMargins(), int spacing = -1);
+  explicit BorderLayout(QWidget* parent, const QMargins& margins = QMargins(), int spacing = -1);
   BorderLayout(int spacing = -1);
   ~BorderLayout();
 
-  void addItem(QLayoutItem *item) override;
-  void addWidget(QWidget *widget, Position position);
+  void addItem(QLayoutItem* item) override;
+  void addWidget(QWidget* widget, Position position);
   Qt::Orientations expandingDirections() const override;
   bool hasHeightForWidth() const override;
   int count() const override;
-  QLayoutItem *itemAt(int index) const override;
+  QLayoutItem* itemAt(int index) const override;
   QSize minimumSize() const override;
   void setGeometry(const QRect &rect) override;
   QSize sizeHint() const override;
-  QLayoutItem *takeAt(int index) override;
+  QLayoutItem* takeAt(int index) override;
 
-  void add(QLayoutItem *item, Position position);
+  void add(QLayoutItem* item, Position position);
 
 private:
   struct ItemWrapper
@@ -41,7 +41,7 @@ private:
   enum SizeType { MinimumSize, SizeHint };
   QSize calculateSize(SizeType sizeType) const;
 
-  QList<ItemWrapper *> list;
+  std::vector<ItemWrapper *> items;
 };
 
 #endif
