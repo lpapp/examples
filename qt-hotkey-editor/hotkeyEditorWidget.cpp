@@ -661,24 +661,14 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   QHBoxLayout* contextLayout = new QHBoxLayout();
   _contextComboBox = new QComboBox();
   _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  connect(_contextComboBox, &QComboBox::currentTextChanged, [this](const QString& text){
-    std::vector<QAction*> actions;
-    HotkeysMap hotkeysMap = _model->getHotkeys();
-    for (const auto& category : hotkeysMap[text]) {
-      for (const auto& action : category.second) {
-        actions.push_back(action);
-      }
-    }
-    std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
-    _keyboardWidget->setButtonColor(colors[_contextComboBox->currentIndex()]);
-    _keyboardWidget->setActions(actions);
-  });
+  connect(_contextComboBox, &QComboBox::currentTextChanged, this, &HotkeyEditorWidget::highlightHotkeys);
   contextLayout->addWidget(_contextComboBox);
   contextLayout->addStretch();
   layout->addLayout(contextLayout);
 
   _keyboardWidget = new KeyboardWidget(this);
   connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &HotkeyEditorModel::assignHotkey);
+  highlightHotkeys(_contextComboBox->currentText());
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
@@ -736,6 +726,20 @@ HotkeyEditorWidget::~HotkeyEditorWidget()
   }
 
   updateSearchToolButtonState();
+}
+
+void HotkeyEditorWidget::highlightHotkeys(const QString& text)
+{
+  std::vector<QAction*> actions;
+  HotkeysMap hotkeysMap = _model->getHotkeys();
+  for (const auto& category : hotkeysMap[text]) {
+    for (const auto& action : category.second) {
+      actions.push_back(action);
+    }
+  }
+  std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
+  _keyboardWidget->setButtonColor(colors[_contextComboBox->currentIndex()]);
+  _keyboardWidget->setActions(actions);
 }
 
 void HotkeyEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)

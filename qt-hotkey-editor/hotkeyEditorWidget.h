@@ -166,6 +166,9 @@ public Q_SLOTS:
 Q_SIGNALS:
   void hotkeysChanged();
 
+private Q_SLOTS:
+  void highlightHotkeys(const QString& text);
+
 private:
   void restoreExpandState();
 
