@@ -573,10 +573,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->setAcceptDrops(true);
   _view->setDropIndicatorShown(true);
 
-  connect(_view, &QTreeView::expanded, [this](){
-    qDebug() << "TEST EXPANDED: " << sender()->metaObject();
-  });
-
   QAction *expandAllAction = new QAction(tr("expand all"), this);
   expandAllAction->setToolTip(tr("Expands all nodes"));
   connect(expandAllAction, &QAction::triggered, _view, &QTreeView::expandAll);
