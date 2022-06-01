@@ -230,9 +230,11 @@ HotkeysMap HotkeyEditorModel::getHotkeys() const
 
 QModelIndex HotkeyEditorModel::index(int row, int column, const QModelIndex &parent) const
 {
+  // std::cout << "TEST CREATE INDEX 1, ROW: " << row << ", COLUMN: " << column << std::endl;
   if (!hasIndex(row, column, parent)) {
     return QModelIndex();
   }
+  // std::cout << "TEST CREATE INDEX 2, ROW: " << row << ", COLUMN: " << column << std::endl;
 
   HotkeyEditorModelItem *parentItem;
 
@@ -245,6 +247,7 @@ QModelIndex HotkeyEditorModel::index(int row, int column, const QModelIndex &par
 
   HotkeyEditorModelItem *childItem = parentItem->child(row);
   if (childItem) {
+    std::cout << "TEST CREATE INDEX 3, ROW: " << row << ", COLUMN: " << column << std::endl;
     return createIndex(row, column, childItem);
   }
 
@@ -369,8 +372,9 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
 
 bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA" << std::endl;
+  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Hotkey) << ")" << std::endl;
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Hotkey)) {
+    std::cout << "TEST HOTKEY EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
     QString keySequenceString= value.toString();
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
@@ -435,6 +439,63 @@ QMimeData* HotkeyEditorModel::mimeData(const QModelIndexList &indexes) const
 QStringList HotkeyEditorModel::mimeTypes() const
 {
   return {"text/plain"};
+}
+
+bool HotkeyEditorModel::canDropMimeData(const QMimeData *data,
+                                        Qt::DropAction action,
+                                        int row, int column,
+                                        const QModelIndex &parent) const
+{
+  Q_UNUSED(action);
+  Q_UNUSED(row);
+  Q_UNUSED(parent);
+
+  if (!data->hasFormat("text/plain")) {
+    return false;
+  }
+
+  // std::cout << "TEST CAN DROP MIME DATA: " << column << std::endl;
+
+  return true;
+}
+
+bool HotkeyEditorModel::dropMimeData(const QMimeData *data,
+                                     Qt::DropAction action,
+                                     int row, int column,
+                                     const QModelIndex &parent)
+{
+  if (!canDropMimeData(data, action, row, column, parent)) {
+    return false;
+  }
+
+  if (action == Qt::IgnoreAction) {
+    return true;
+  }
+
+  if (!parent.isValid()) {
+    return false;
+  }
+
+  if (!data->hasText()) {
+    return false;
+  }
+
+  std::cout << "TEST DROP MIME DATA: " << data->text().toStdString() << std::endl;
+  int indexRow;
+  if (row != -1) {
+    indexRow = row;
+  }
+  else if (parent.isValid()) {
+    indexRow = parent.row();
+  }
+  else {
+    indexRow = rowCount(QModelIndex());
+  }
+
+  QModelIndex modelIndex = index(indexRow, 0, QModelIndex());
+  setData(modelIndex, data->text());
+
+  return true;
 }
 
 HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequenceString)
