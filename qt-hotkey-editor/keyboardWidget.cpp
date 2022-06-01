@@ -42,6 +42,7 @@ void KeyButton::mousePressEvent(QMouseEvent *event)
   if (event->button() == Qt::LeftButton) {
     dragStartPosition = event->pos();
   }
+  QPushButton::mousePressEvent(event);
 }
 
 void KeyButton::mouseMoveEvent(QMouseEvent *event)
