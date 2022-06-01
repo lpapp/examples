@@ -49,7 +49,7 @@ int HotkeyEditorModelItem::row() const
   if (m_parentItem) {
     auto it = std::find(m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(), const_cast<HotkeyEditorModelItem*>(this));
     if (it != m_parentItem->m_childItems.cend()) {
-      std::distance(m_parentItem->m_childItems.cbegin(), it);
+      return std::distance(m_parentItem->m_childItems.cbegin(), it);
     }
     else {
       return -1;
@@ -231,10 +231,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   _view->setModel(_filterModel);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   _view->header()->resizeSection(0, 250);
-
-  connect(_view, &QTreeView::expanded, [this](){
-    qDebug() << "TEST EXPANDED: " << sender();
-  });
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets

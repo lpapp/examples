@@ -17,6 +17,11 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "/w")
 endif()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-fsanitize=address)
+  add_link_options(-fsanitize=address)
+endif()
+
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_executable(HotkeyEditor

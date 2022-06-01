@@ -76,7 +76,7 @@ int HotkeyEditorModelItem::row() const
   if (m_parentItem) {
     auto it = std::find(m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(), const_cast<HotkeyEditorModelItem*>(this));
     if (it != m_parentItem->m_childItems.cend()) {
-      std::distance(m_parentItem->m_childItems.cbegin(), it);
+      return std::distance(m_parentItem->m_childItems.cbegin(), it);
     }
     else {
       return -1;
