@@ -48,17 +48,20 @@ void KeyButton::mousePressEvent(QMouseEvent *event)
 void KeyButton::mouseMoveEvent(QMouseEvent *event)
 {
   if (!(event->buttons() & Qt::LeftButton)) {
-    if ((event->pos() - dragStartPosition).manhattanLength()
-         < QApplication::startDragDistance()) {
-      return;
-    }
-
-    QDrag *drag = new QDrag(this);
-    QMimeData *mimeData = new QMimeData;
-    mimeData->setText(text());
-    drag->setMimeData(mimeData);
-    // Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+    return;
   }
+
+  if ((event->pos() - dragStartPosition).manhattanLength()
+       < QApplication::startDragDistance()) {
+    return;
+  }
+
+  QDrag *drag = new QDrag(this);
+  QMimeData *mimeData = new QMimeData;
+  mimeData->setText(text());
+  drag->setMimeData(mimeData);
+  drag->exec(Qt::CopyAction);
+  // Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
 }
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
