@@ -715,7 +715,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
 
   _keyboardWidget = new KeyboardWidget(this);
   connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &HotkeyEditorModel::assignHotkey);
-  highlightHotkeys(_contextComboBox->currentText());
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
@@ -730,22 +729,16 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   layout->addLayout(buttonLayout);
 
   _resetAllButton = new QPushButton("Reset All", this);
+  _resetAllButton->setFocusPolicy(Qt::TabFocus);
   connect(_resetAllButton, &QAbstractButton::clicked, _model, &HotkeyEditorModel::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
   _resetButton = new QPushButton("Reset", this);
+  _resetButton->setFocusPolicy(Qt::TabFocus);
   connect(_resetButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::reset);
   buttonLayout->addWidget(_resetButton);
 
   buttonLayout->addStretch(0);
-
-  // _importButton = new QPushButton("Import", this);
-  // connect(_importButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::importHotkeys);
-  // buttonLayout->addWidget(_importButton);
-
-  // _exportButton = new QPushButton("Export", this);
-  // connect(_exportButton, &QAbstractButton::clicked, this, &HotkeyEditorWidget::exportHotkeys);
-  // buttonLayout->addWidget(_exportButton);
 
   if (!objectName().isEmpty()) {
     // AppSettings settings;
@@ -809,6 +802,7 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
   for (const auto& context : hotkeys) {
     _contextComboBox->addItem(context.first);
   }
+  highlightHotkeys(_contextComboBox->currentText());
 
   _searchToolButtonMenu->addSection("Search");
 

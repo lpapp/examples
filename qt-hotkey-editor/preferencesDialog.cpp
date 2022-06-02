@@ -214,6 +214,7 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
   mainLayout->addWidget(_preferencesWidget);
   QDialogButtonBox* buttonBox = new QDialogButtonBox(this);
   buttonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::RestoreDefaults);
+  buttonBox->setFocusPolicy(Qt::TabFocus);
   mainLayout->addWidget(buttonBox);
   setLayout(mainLayout);
 
