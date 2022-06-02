@@ -58,10 +58,12 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
   QDrag *drag = new QDrag(this);
   QMimeData *mimeData = new QMimeData;
-  mimeData->setText(text());
+  QKeySequence keyButtonSequence = QKeySequence::fromString(text(), QKeySequence::NativeText);
+  Qt::KeyboardModifiers modifiers = static_cast<KeyboardWidget*>(parent())->modifiers();
+  QKeySequence keySequence(modifiers | keyButtonSequence[0].key());
+  mimeData->setText(keySequence.toString(QKeySequence::NativeText));
   drag->setMimeData(mimeData);
   drag->exec(Qt::CopyAction);
-  setPalette(QApplication::palette());
 }
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
@@ -305,4 +307,9 @@ void KeyboardWidget::setActions(const std::vector<QAction*> actions)
   _actions = actions;
 
   highlightHotkeys();
+}
+
+Qt::KeyboardModifiers KeyboardWidget::modifiers() const
+{
+  return _modifiers;
 }

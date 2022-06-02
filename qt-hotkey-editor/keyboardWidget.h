@@ -46,6 +46,7 @@ public:
 	KeyboardWidget(QWidget *parent = nullptr);
   void setButtonColor(const QColor& color);
   void setActions(const std::vector<QAction*> hotkeys);
+  Qt::KeyboardModifiers modifiers() const;
 
 public Q_SLOTS:
   void highlightHotkeys();
