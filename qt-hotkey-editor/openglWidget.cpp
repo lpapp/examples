@@ -82,6 +82,7 @@ void OpenGLWidget::cleanup()
   delete m_program;
   m_program = nullptr;
   doneCurrent();
+  QObject::disconnect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
 }
 
 static const char *vertexShaderSourceCore =
