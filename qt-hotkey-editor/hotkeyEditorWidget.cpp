@@ -324,9 +324,9 @@ Qt::ItemFlags HotkeyEditorModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
   }
 
-  Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index);
+  Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
   if (index.column() == static_cast<int>(Column::Hotkey)) {
-    modelFlags |= Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
+    modelFlags |= Qt::ItemIsEditable;
   }
   else if (index.column() == static_cast<int>(Column::Name)) {
     modelFlags |= Qt::ItemIsDragEnabled;
