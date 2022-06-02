@@ -66,6 +66,11 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 {
+  if (!event->mimeData()->hasFormat("text/plain")) {
+    event->ignore();
+    return;
+  }
+
   std::cout << "TEST DRAG ENTER EVENT: " << text().toStdString() << std::endl;
   setPalette(QApplication::palette().color(QPalette::Highlight));
   event->acceptProposedAction();
@@ -73,16 +78,20 @@ void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 
 void KeyButton::dragLeaveEvent(QDragLeaveEvent *event)
 {
-  setPalette(QApplication::palette());
   std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
+  setPalette(QApplication::palette());
+  event->accept();
 }
 
 void KeyButton::dragMoveEvent(QDragMoveEvent *event)
 {
   // std::cout << "TEST DRAG MOVE EVENT: " << text().toStdString() << std::endl;
-  if (event->mimeData()->hasFormat("text/plain")) {
-    event->acceptProposedAction();
+  if (!event->mimeData()->hasFormat("text/plain")) {
+    event->ignore();
+    return;
   }
+
+  event->acceptProposedAction();
 }
 
 void KeyButton::dropEvent(QDropEvent *event)
@@ -91,13 +100,13 @@ void KeyButton::dropEvent(QDropEvent *event)
     return;
   }
 
-  event->acceptProposedAction();
-
   const QMimeData *mime = event->mimeData();
   if (!mime->hasText()) {
     event->ignore();
     return;
   }
+
+  event->acceptProposedAction();
 
   QString actionIds = mime->text();
   Q_EMIT actionDropped(actionIds, text());
