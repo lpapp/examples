@@ -708,7 +708,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   QHBoxLayout* contextLayout = new QHBoxLayout();
   _contextComboBox = new QComboBox();
   _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  connect(_contextComboBox, &QComboBox::currentTextChanged, this, &HotkeyEditorWidget::highlightHotkeys);
+  connect(_contextComboBox, &QComboBox::currentIndexChanged, this, &HotkeyEditorWidget::highlightHotkeys);
   contextLayout->addWidget(_contextComboBox);
   contextLayout->addStretch();
   layout->addLayout(contextLayout);
@@ -768,11 +768,11 @@ HotkeyEditorWidget::~HotkeyEditorWidget()
   updateSearchToolButtonState();
 }
 
-void HotkeyEditorWidget::highlightHotkeys(const QString& text)
+void HotkeyEditorWidget::highlightHotkeys(int index)
 {
   std::vector<QAction*> actions;
   HotkeysMap hotkeysMap = _model->getHotkeys();
-  for (const auto& category : hotkeysMap[text]) {
+  for (const auto& category : hotkeysMap[_contextComboBox->itemText(index)]) {
     for (const auto& action : category.second) {
       actions.push_back(action);
     }
@@ -780,7 +780,7 @@ void HotkeyEditorWidget::highlightHotkeys(const QString& text)
   std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
   QColor color = Qt::white;
   if (_contextComboBox->currentIndex() < colors.size()) {
-    color = colors[_contextComboBox->currentIndex()];
+    color = colors[index];
   }
 
   _keyboardWidget->setButtonColor(color);
@@ -802,7 +802,6 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
   for (const auto& context : hotkeys) {
     _contextComboBox->addItem(context.first);
   }
-  highlightHotkeys(_contextComboBox->currentText());
 
   _searchToolButtonMenu->addSection("Search");
 

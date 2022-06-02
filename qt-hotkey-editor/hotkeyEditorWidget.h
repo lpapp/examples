@@ -172,7 +172,7 @@ Q_SIGNALS:
   void hotkeysChanged();
 
 private Q_SLOTS:
-  void highlightHotkeys(const QString& text);
+  void highlightHotkeys(int index);
 
 private:
   void restoreExpandState();
