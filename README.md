@@ -10,6 +10,6 @@ cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake -DCMAKE_BUILD_TYPE=RelWit
 
 Or something like this for Qt 6:
 
-cmake -GNinja -DCMAKE_PREFIX_PATH=~/Qt/6.2.4/macos -DCMAKE_BUILD_TYPE=RelWithDebInfo -Bbuild/x64-Release . 
+cmake -GNinja -DCMAKE_PREFIX_PATH=~/Qt/6.3.0/macos -DCMAKE_BUILD_TYPE=RelWithDebInfo -Bbuild/x64-Release . 
 
 cmake --build build/x64-Release
