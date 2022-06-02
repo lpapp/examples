@@ -61,7 +61,7 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
   mimeData->setText(text());
   drag->setMimeData(mimeData);
   drag->exec(Qt::CopyAction);
-  // Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+  setPalette(QApplication::palette());
 }
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
