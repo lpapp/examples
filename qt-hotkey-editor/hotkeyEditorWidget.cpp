@@ -785,7 +785,12 @@ void HotkeyEditorWidget::highlightHotkeys(const QString& text)
     }
   }
   std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
-  _keyboardWidget->setButtonColor(colors[_contextComboBox->currentIndex()]);
+  QColor color = Qt::white;
+  if (_contextComboBox->currentIndex() < colors.size()) {
+    color = colors[_contextComboBox->currentIndex()];
+  }
+
+  _keyboardWidget->setButtonColor(color);
   _keyboardWidget->setActions(actions);
 }
 
