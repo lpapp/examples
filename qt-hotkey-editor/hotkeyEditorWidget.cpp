@@ -663,7 +663,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->setAllColumnsShowFocus(true);
   _view->header()->resizeSection(0, 250);
 
-  connect(_search, &QLineEdit::textChanged, _filterModel, [this](const QString& text){
+  connect(_search, &QLineEdit::textChanged, [this](const QString& text){
     _filterModel->setFilterFixedString(text);
     if (text.isEmpty()) {
       _view->collapseAll();
@@ -672,14 +672,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
       _view->expandAll();
     }
   });
-  /* connect(_search, &QLineEdit::textChanged, [this](const QString& text){
-    if (text.isEmpty()) {
-      _view->collapseAll();
-    }
-    else {
-      _view->expandAll();
-    }
-  }); */
 
   // QItemSelectionModel* selectionModel = _view->selectionModel();
   // connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &HotkeyEditorWidget::selectionChanged);
