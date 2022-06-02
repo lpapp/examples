@@ -68,6 +68,11 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 {
+  KeyButton* keyButton = qobject_cast<KeyButton*>(event->source());
+  if (keyButton) {
+    return;
+  }
+
   if (!event->mimeData()->hasFormat("text/plain")) {
     event->ignore();
     return;
