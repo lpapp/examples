@@ -454,8 +454,6 @@ bool HotkeyEditorModel::canDropMimeData(const QMimeData *data,
     return false;
   }
 
-  // std::cout << "TEST CAN DROP MIME DATA: " << column << std::endl;
-
   return true;
 }
 
@@ -480,19 +478,7 @@ bool HotkeyEditorModel::dropMimeData(const QMimeData *data,
     return false;
   }
 
-  std::cout << "TEST DROP MIME DATA: " << data->text().toStdString() << std::endl;
-  int indexRow;
-  if (row != -1) {
-    indexRow = row;
-  }
-  else if (parent.isValid()) {
-    indexRow = parent.row();
-  }
-  else {
-    indexRow = rowCount(QModelIndex());
-  }
-
-  QModelIndex modelIndex = index(indexRow, static_cast<int>(Column::Hotkey), QModelIndex());
+  QModelIndex modelIndex = index(parent.row(), static_cast<int>(Column::Hotkey), parent.parent());
   setData(modelIndex, data->text());
 
   return true;
