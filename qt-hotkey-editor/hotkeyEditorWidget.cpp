@@ -664,7 +664,25 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
   _view->header()->resizeSection(0, 250);
 
   connect(_search, &QLineEdit::textChanged, [this](const QString& text){
-    _filterModel->setFilterFixedString(text);
+    if (_matchContainsAction->isChecked()) {
+      _filterModel->setFilterFixedString(text);
+    }
+    else if (_matchExactlyAction->isChecked()) {
+      _filterModel->setFilterRegularExpression("^" + text + "$");
+    }
+    else if (_matchStartsWithAction->isChecked()) {
+      _filterModel->setFilterRegularExpression("^" + text);
+    }
+    else if (_matchEndsWithAction->isChecked()) {
+      _filterModel->setFilterRegularExpression(text + "$");
+    }
+    else if (_matchWildcardAction->isChecked()) {
+      _filterModel->setFilterWildcard(text);
+    }
+    else if (_matchRegularExpressionAction->isChecked()) {
+      _filterModel->setFilterRegularExpression(text);
+    }
+
     if (text.isEmpty()) {
       _view->collapseAll();
     }
