@@ -37,8 +37,9 @@ protected:
   void initializeGL() override;
   void paintGL() override;
   void resizeGL(int width, int height) override;
-  void mousePressEvent(QMouseEvent *event) override;
-  void mouseMoveEvent(QMouseEvent *event) override;
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
 
 private:
   void setupVertexAttribs();
@@ -51,7 +52,7 @@ private:
   Logo m_logo;
   QOpenGLVertexArrayObject m_vao;
   QOpenGLBuffer m_logoVbo;
-  QOpenGLShaderProgram *m_program = nullptr;
+  QOpenGLShaderProgram* m_program = nullptr;
   int m_projMatrixLoc = 0;
   int m_mvMatrixLoc = 0;
   int m_normalMatrixLoc = 0;

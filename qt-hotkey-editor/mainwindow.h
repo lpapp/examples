@@ -23,6 +23,7 @@ private Q_SLOTS:
 private:
   void createActions();
   void createMenus();
+  void keyPressEvent(QKeyEvent* event) override;
 
   QMenu *fileMenu;
   QMenu *editMenu;

@@ -3,7 +3,9 @@
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 
-OpenGLWidget::OpenGLWidget(QWidget *parent)
+#include <iostream>
+
+OpenGLWidget::OpenGLWidget(QWidget* parent)
   : QOpenGLWidget(parent)
 {
   m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
@@ -12,6 +14,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
   QSurfaceFormat fmt = format();
   fmt.setAlphaBufferSize(8);
   setFormat(fmt);
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -252,4 +255,25 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
   }
 
   m_lastPos = event->pos();
+}
+
+void OpenGLWidget::keyPressEvent(QKeyEvent* event)
+{
+  switch (event->keyCombination().toCombined()) {
+  case Qt::Key_Q:
+    std::cout << "TEST SELECT" << std::endl;
+    break;
+  case Qt::Key_W:
+    std::cout << "TEST TRANSLATE" << std::endl;
+    break;
+  case Qt::Key_E:
+    std::cout << "TEST ROTATE" << std::endl;
+    break;
+  case Qt::Key_R:
+    std::cout << "TEST SCALE" << std::endl;
+    break;
+  default:
+    event->ignore();
+    break;
+  }
 }

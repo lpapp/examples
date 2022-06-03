@@ -10,6 +10,8 @@
 #include <QMenu>
 #include <QMenuBar>
 
+#include <iostream>
+
 MainWindow::MainWindow()
 {
   BorderLayout* layout = new BorderLayout;
@@ -154,4 +156,9 @@ void MainWindow::showPreferences()
   connect(dialog, &QDialog::finished, dialog, &QDialog::deleteLater);
   dialog->show();
   dialog->activateWindow();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+  std::cout << "TEST KEY PRESS EVENT" << std::endl;
 }
