@@ -95,26 +95,12 @@ void PreferencesPage::revert() {
 HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
   : PreferencesPage(parent)
 {
-  PreferencesLayout* layout = new PreferencesLayout();
-  HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget;
-  HotkeysMap hotkeys;
-
-  std::vector<QAction*> registeredActions = ActionManager::registeredActions();
-  QString actionId = registeredActions[0]->property(kIdPropertyName).toString();
-  QString registeredContext = actionId.split('.')[1];
-  QString registeredCategory = actionId.split('.')[2];
-  CategoryHotkeysMap registeredCategoryHotkeys;
-  registeredCategoryHotkeys.insert({registeredCategory, registeredActions});
-  hotkeys.insert({registeredContext, registeredCategoryHotkeys});
-
   constexpr int maxContexts = 5;
   constexpr int maxCategories = 3;
   constexpr int maxActions = 1000;
   for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
-    CategoryHotkeysMap categoryHotkeys;
     QString contextName = "Context" + QString::number(contextIndex);
     for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
-      std::vector<QAction*> _actions;
       QString categoryName = "Category" + QString::number(categoryIndex);
       for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
         QString actionName = "Action" + QString::number(actionIndex);
@@ -122,15 +108,36 @@ HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
         action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
         QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
         action->setProperty(kIdPropertyName, stringList.join('.'));
-        _actions.push_back(action);
         ActionManager::registerAction(action);
       }
-
-      categoryHotkeys.insert({categoryName, _actions});
     }
-    hotkeys.insert({contextName, categoryHotkeys});
   }
 
+  HotkeysMap hotkeys;
+  std::vector<QAction*> registeredActions = ActionManager::registeredActions();
+  for (QAction* action : registeredActions) {
+    QString actionId = action->property(kIdPropertyName).toString();
+    QString context = actionId.split('.')[1];
+    QString category = actionId.split('.')[2];
+
+    CategoryHotkeysMap categoryHotkeys;
+    if (hotkeys.count(context)) {
+      categoryHotkeys = hotkeys[context];
+    }
+
+    std::vector<QAction*> actions;
+    if (categoryHotkeys.count(category)) {
+      actions = categoryHotkeys[category];
+    }
+
+    actions.push_back(action);
+
+    categoryHotkeys.insert_or_assign(category, actions);
+    hotkeys.insert_or_assign(context, categoryHotkeys);
+  }
+
+  PreferencesLayout* layout = new PreferencesLayout();
+  HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget;
   hotkeyEditorWidget->setHotkeys(hotkeys);
 
   layout->addRow(tr(""), hotkeyEditorWidget);
