@@ -1,4 +1,5 @@
 add_executable(HotkeyEditor
+  actionManager.cpp
   borderLayout.cpp
   hotkeyEditorWidget.cpp
   keyboardWidget.cpp
