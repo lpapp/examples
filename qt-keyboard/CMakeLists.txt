@@ -4,4 +4,4 @@ add_executable(Keyboard
   keyboardWidget.cpp
 )
 
-target_link_libraries(Keyboard Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(Keyboard Qt::Core Qt::Gui Qt::Widgets)

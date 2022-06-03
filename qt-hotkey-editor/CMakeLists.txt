@@ -9,4 +9,4 @@ add_executable(HotkeyEditor
   preferencesDialog.cpp
 )
 
-target_link_libraries(HotkeyEditor Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets)
+target_link_libraries(HotkeyEditor Qt::Widgets Qt::OpenGL Qt::OpenGLWidgets)

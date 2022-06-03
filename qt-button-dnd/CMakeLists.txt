@@ -3,4 +3,4 @@ add_executable(ButtonDnd
   main.cpp
 )
 
-target_link_libraries(ButtonDnd Qt6::Widgets)
+target_link_libraries(ButtonDnd Qt::Widgets)
