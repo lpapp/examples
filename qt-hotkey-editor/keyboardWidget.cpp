@@ -39,6 +39,7 @@ KeyButton::KeyButton(const QString& text, QWidget* parent)
 
 void KeyButton::mousePressEvent(QMouseEvent *event)
 {
+  std::cout << "TEST MOUSE PRESS EVENT" << std::endl;
   if (event->button() == Qt::LeftButton) {
     dragStartPosition = event->pos();
   }
@@ -47,6 +48,7 @@ void KeyButton::mousePressEvent(QMouseEvent *event)
 
 void KeyButton::mouseMoveEvent(QMouseEvent *event)
 {
+  std::cout << "TEST MOUSE MOVE EVENT" << std::endl;
   if (!(event->buttons() & Qt::LeftButton)) {
     return;
   }
@@ -64,12 +66,14 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
   mimeData->setText(keySequence.toString(QKeySequence::NativeText));
   drag->setMimeData(mimeData);
   drag->exec(Qt::CopyAction);
+  setDown(false);
 }
 
 void KeyButton::dragEnterEvent(QDragEnterEvent *event)
 {
   KeyButton* keyButton = qobject_cast<KeyButton*>(event->source());
   if (keyButton) {
+    event->ignore();
     return;
   }
 
@@ -87,7 +91,6 @@ void KeyButton::dragLeaveEvent(QDragLeaveEvent *event)
 {
   std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
   setPalette(QApplication::palette());
-  event->accept();
 }
 
 void KeyButton::dragMoveEvent(QDragMoveEvent *event)
