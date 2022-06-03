@@ -1,32 +1,30 @@
-# Prerequisites
-*.d
+CMakeCache.txt
+.python-version
+CMakeUserPresets.json
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+*.patch
+*.log
+*.autosave
 
-# Precompiled Headers
-*.gch
-*.pch
+build*/
+.vscode/
+./conan/
+CMakeFiles/
+venv/
 
-# Compiled Dynamic libraries
-*.so
+*.pyc
+*.swp
+.*.swp
+*.swo
+.*.swo
+*.swn
+.*.swn
+*.swl
+.*.swl
+*.swm
+.*.swm
+*.orig
+*.DS_Store
 *.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+*.user
+nohup.out
