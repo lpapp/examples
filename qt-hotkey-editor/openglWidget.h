@@ -3,14 +3,11 @@
 
 #include "logo.h"
 
-#include <QtOpenGLWidgets/QOpenGLWidget>
-
-#include <QtOpenGL/QOpenGLBuffer>
-#include <QtOpenGL/QOpenGLVertexArrayObject>
-
-#include <QtGui/QOpenGLFunctions>
-
-#include <QtGui/QMatrix4x4>
+#include <QMatrix4x4>
+#include <QOpenGLBuffer>
+#include <QOpenGLFunctions>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLWidget>
 
 class QOpenGLShaderProgram;
 

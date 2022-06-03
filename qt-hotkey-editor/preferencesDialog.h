@@ -1,13 +1,11 @@
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QWidget>
-
-#include <QtGui/QStandardItemModel>
-
-#include <QtCore/QModelIndex>
+#include <QDialog>
+#include <QFormLayout>
+#include <QModelIndex>
+#include <QStandardItemModel>
+#include <QWidget>
 
 #include <map>
 

@@ -2,29 +2,26 @@
 
 #include "keyboardWidget.h"
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QKeySequenceEdit>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QSplitter>
-#include <QtWidgets/QToolButton>
-#include <QtWidgets/QTreeView>
-#include <QtWidgets/QVBoxLayout>
-
-#include <QtGui/QActionGroup>
-
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QDebug>
-#include <QtCore/QMimeData>
-#include <QtCore/QSortFilterProxyModel>
+#include <QAbstractItemModel>
+#include <QActionGroup>
+#include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QKeySequenceEdit>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QPushButton>
+#include <QSortFilterProxyModel>
+#include <QSplitter>
+#include <QToolButton>
+#include <QTreeView>
+#include <QVBoxLayout>
 
 #include <iostream>
 

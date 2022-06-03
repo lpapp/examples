@@ -2,16 +2,15 @@
 
 #include "hotkeyEditorWidget.h"
 
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QStackedWidget>
-#include <QtWidgets/QTreeView>
-#include <QtWidgets/QVBoxLayout>
-
-#include <QtGui/QAction>
+#include <QAction>
+#include <QDialogButtonBox>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QTreeView>
+#include <QVBoxLayout>
 
 PreferencesLayout::PreferencesLayout(QWidget* parent)
   : QFormLayout(parent)

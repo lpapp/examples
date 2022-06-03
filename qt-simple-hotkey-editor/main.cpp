@@ -1,9 +1,8 @@
 #include "hotkeyEditorWidget.h"
 
-#include <QtWidgets/QApplication>
-
-#include <QtGui/QAction>
-#include <QtGui/QPalette>
+#include <QAction>
+#include <QApplication>
+#include <QPalette>
 
 void setApplication(QApplication& application)
 {

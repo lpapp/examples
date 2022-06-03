@@ -1,6 +1,6 @@
 #include "keyboardWidget.h"
 
-#include <QtCore/QString>
+#include <QString>
 
 struct Key {
   int key;

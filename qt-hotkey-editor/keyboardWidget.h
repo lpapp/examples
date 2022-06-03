@@ -1,13 +1,11 @@
 #ifndef KEYBOARDWIDGET_H
 #define KEYBOARDWIDGET_H
 
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QWidget>
-
-#include <QtGui/QKeySequence>
-
-#include <QtCore/QPoint>
-#include <QtCore/QString>
+#include <QKeySequence>
+#include <QPoint>
+#include <QPushButton>
+#include <QString>
+#include <QWidget>
 
 #include <map>
 #include <vector>
@@ -15,7 +13,6 @@
 class QAction;
 class QColor;
 class QMimeData;
-class QPushButton;
 
 class KeyButton : public QPushButton
 {

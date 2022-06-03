@@ -1,10 +1,9 @@
 #ifndef HOTKEYEDITORWIDGET_H
 #define HOTKEYEDITORWIDGET_H
 
-#include <QtWidgets/QStyledItemDelegate>
-#include <QtWidgets/QWidget>
-
-#include <QtCore/QString>
+#include <QString>
+#include <QStyledItemDelegate>
+#include <QWidget>
 
 #include <string>
 #include <unordered_map>

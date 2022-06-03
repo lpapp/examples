@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QKeySequenceEdit>
 
-#include "QtWidgets/pyside2_qtwidgets_python.h"
+#include "pyside2_qtwidgets_python.h"
 
 int main(int argc, char *argv[])
 {

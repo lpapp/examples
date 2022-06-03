@@ -4,14 +4,11 @@
 #include "openglWidget.h"
 #include "preferencesDialog.h"
 
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
-
-#include <QtGui/QAction>
-#include <QtGui/QActionGroup>
-
-#include <vector>
+#include <QAction>
+#include <QActionGroup>
+#include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 
 MainWindow::MainWindow()
 {

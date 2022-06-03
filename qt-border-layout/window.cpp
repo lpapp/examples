@@ -2,8 +2,8 @@
 
 #include "borderLayout.h"
 
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QTextBrowser>
+#include <QLabel>
+#include <QTextBrowser>
 
 Window::Window()
 {

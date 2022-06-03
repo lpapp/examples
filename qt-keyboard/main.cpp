@@ -1,6 +1,5 @@
-#include <QtWidgets/QApplication>
-
-#include <QtGui/QPalette>
+#include <QApplication>
+#include <QPalette>
 
 #include "mainwindow.h"
 

@@ -1,10 +1,9 @@
 #ifndef HOTKEYEDITORWIDGET_H
 #define HOTKEYEDITORWIDGET_H
 
-#include <QtWidgets/QWidget>
-
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QString>
+#include <QAbstractItemModel>
+#include <QString>
+#include <QWidget>
 
 #include <string>
 

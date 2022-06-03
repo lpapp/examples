@@ -1,10 +1,9 @@
 #ifndef PUSHBUTTON_H
 #define PUSHBUTTON_H
 
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QWidget>
-
-#include <QtCore/QPoint>
+#include <QPoint>
+#include <QPushButton>
+#include <QWidget>
 
 class QString;
 

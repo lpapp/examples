@@ -1,17 +1,15 @@
 #include "keyboardWidget.h"
 
-#include <QtWidgets/QApplication>
-
-#include <QtGui/QAction>
-#include <QtGui/QGuiApplication>
-#include <QtGui/QColor>
-#include <QtGui/QDrag>
-#include <QtGui/QKeySequence>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QPalette>
-
-#include <QtCore/QMimeData>
-#include <QtCore/QString>
+#include <QAction>
+#include <QApplication>
+#include <QGuiApplication>
+#include <QColor>
+#include <QDrag>
+#include <QKeySequence>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QPalette>
+#include <QString>
 
 #include <iostream>
 #include <vector>

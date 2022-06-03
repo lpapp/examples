@@ -1,16 +1,13 @@
 #include "hotkeyEditorWidget.h"
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QKeySequenceEdit>
-#include <QtWidgets/QTreeView>
-#include <QtWidgets/QVBoxLayout>
-
-#include <QtGui/QAction>
-
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QDebug>
-#include <QtCore/QSortFilterProxyModel>
+#include <QAbstractItemModel>
+#include <QAction>
+#include <QApplication>
+#include <QHeaderView>
+#include <QKeySequenceEdit>
+#include <QSortFilterProxyModel>
+#include <QTreeView>
+#include <QVBoxLayout>
 
 #include <iostream>
 

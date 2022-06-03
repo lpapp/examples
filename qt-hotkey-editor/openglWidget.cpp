@@ -1,8 +1,7 @@
 #include "openglWidget.h"
 
+#include <QMouseEvent>
 #include <QOpenGLShaderProgram>
-
-#include <QtGui/QMouseEvent>
 
 OpenGLWidget::OpenGLWidget(QWidget *parent)
   : QOpenGLWidget(parent)

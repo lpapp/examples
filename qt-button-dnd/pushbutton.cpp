@@ -1,12 +1,10 @@
 #include "pushbutton.h"
 
-#include <QtWidgets/QApplication>
-
-#include <QtGui/QDrag>
-#include <QtGui/QMouseEvent>
-
-#include <QtCore/QMimeData>
-#include <QtCore/QString>
+#include <QApplication>
+#include <QDrag>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QString>
 
 #include <iostream>
 
