@@ -1,5 +1,6 @@
 #include "hotkeyEditorWidget.h"
 
+#include "actionManager.h"
 #include "keyboardWidget.h"
 
 #include <QAbstractItemModel>
@@ -341,7 +342,7 @@ QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
-void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem *parent)
+void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem* parent)
 {
   QAction* nullAction = nullptr;
   const QString contextIdPrefix = "root";

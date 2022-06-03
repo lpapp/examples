@@ -42,6 +42,7 @@ protected:
   void keyPressEvent(QKeyEvent* event) override;
 
 private:
+  void createActions();
   void setupVertexAttribs();
 
   bool m_core;
@@ -60,6 +61,11 @@ private:
   QMatrix4x4 m_proj;
   QMatrix4x4 m_camera;
   QMatrix4x4 m_world;
+
+  QAction* _selectAction;
+  QAction* _translateAction;
+  QAction* _rotateAction;
+  QAction* _scaleAction;
 };
 
 #endif

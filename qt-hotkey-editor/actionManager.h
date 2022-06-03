@@ -1,24 +1,24 @@
 #ifndef ACTIONMANAGER_H
 #define ACTIONMANAGER_H
 
-#include <QAction>
-#include <QObject>
-
+#include <string>
 #include <vector>
 
-class ActionManager : public QObject
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
+static const char* kIdPropertyName = "id";
+static const std::string kDomainName = "lpapp";
+
+class QAction;
+
+class ActionManager
 {
-  Q_OBJECT
+  ActionManager() = delete;
+  ~ActionManager() = delete;
 
 public:
-  ActionManager(QObject* parent);
-  ~ActionManager() override = default;
 
-  void registerAction(QAction* action);
-  std::vector<QAction*> registeredActions() const;
-
-private:
-  std::vector<QAction*> _actions;
+  static void registerAction(QAction* action);
+  static std::vector<QAction*> registeredActions();
 };
 
 #endif
