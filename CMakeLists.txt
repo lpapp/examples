@@ -23,7 +23,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_subdirectory(qt)
 add_subdirectory(qt-button-dnd)
-add_subdirectory(qt-hotkey-editor)
+add_subdirectory(qt-shortcut-editor)
 add_subdirectory(qt-keyboard)
 add_subdirectory(qt-opengl)
 add_subdirectory(qt-simple-hotkey-editor)
