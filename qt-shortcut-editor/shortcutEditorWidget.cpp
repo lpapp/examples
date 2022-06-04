@@ -220,9 +220,9 @@ void ShortcutEditorModel::setHotkeys()
   endResetModel();
 }
 
-HotkeysMap ShortcutEditorModel::getHotkeys() const
+ActionsMap ShortcutEditorModel::getActionsMap() const
 {
-  return _hotkeys;
+  return _actionsMap;
 }
 
 QModelIndex ShortcutEditorModel::index(int row, int column, const QModelIndex &parent) const
@@ -349,33 +349,34 @@ QVariant ShortcutEditorModel::headerData(int section, Qt::Orientation orientatio
 
 void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
 {
-  _hotkeys.clear();
+  _actionsMap.clear();
   std::vector<QAction*> registeredActions = ActionManager::registeredActions();
   for (QAction* action : registeredActions) {
     QString actionId = action->property(kIdPropertyName).toString();
-    QString context = actionId.split('.')[1];
-    QString category = actionId.split('.')[2];
+    QStringList actionIdSections = actionId.split('.');
+    QString context = actionIdSections[1];
+    QString category = actionIdSections[2];
 
-    CategoryHotkeysMap categoryHotkeys;
-    if (_hotkeys.count(context)) {
-      categoryHotkeys = _hotkeys[context];
+    CategoryActionsMap categoryActionsMap;
+    if (_actionsMap.count(context)) {
+      categoryActionsMap = _actionsMap[context];
     }
 
     std::vector<QAction*> actions;
-    if (categoryHotkeys.count(category)) {
-      actions = categoryHotkeys[category];
+    if (categoryActionsMap.count(category)) {
+      actions = categoryActionsMap[category];
     }
 
     actions.push_back(action);
 
-    categoryHotkeys.insert_or_assign(category, actions);
-    _hotkeys.insert_or_assign(context, categoryHotkeys);
+    categoryActionsMap.insert_or_assign(category, actions);
+    _actionsMap.insert_or_assign(context, categoryActionsMap);
   }
 
   QAction* nullAction = nullptr;
   const QString contextIdPrefix = "root";
   // Go through each context, one context - many categories each iteration
-  for (const auto& contextLevel : _hotkeys) {
+  for (const auto& contextLevel : _actionsMap) {
     // TODO: make it "tr()".
     ShortcutEditorModelItem* contextLevelItem = new ShortcutEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction)}, contextIdPrefix + contextLevel.first, parent);
     parent->appendChild(contextLevelItem);
@@ -417,13 +418,13 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     }
 
     QMessageBox messageBox;
-    messageBox.setWindowTitle("Reassign hotkey?");
+    messageBox.setWindowTitle("Reassign shortcut?");
     messageBox.setIcon(QMessageBox::Warning);
     const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
     const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Shortcut)).toString();
-    const QString text = QLatin1String("Keyboard hotkey \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
+    const QString text = QLatin1String("Keyboard shortcut \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
     messageBox.setText(text);
-    messageBox.setInformativeText(tr("Are you sure you want to reassign this hotkey?"));
+    messageBox.setInformativeText(tr("Are you sure you want to reassign this shortcut?"));
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     messageBox.setDefaultButton(QMessageBox::No);
 
@@ -517,8 +518,8 @@ ShortcutEditorModelItem* ShortcutEditorModel::findKeySequence(const QString& key
       ShortcutEditorModelItem* categoryLevel = contextLevel->child(j);
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         ShortcutEditorModelItem* actionLevel = categoryLevel->child(k);
-        const QVariant actionLevelHotkey = actionLevel->data(static_cast<int>(Column::Shortcut));
-        if (keySequenceString == actionLevelHotkey.toString()) {
+        const QVariant actionLevelShortcut = actionLevel->data(static_cast<int>(Column::Shortcut));
+        if (keySequenceString == actionLevelShortcut.toString()) {
           return actionLevel;
         }
       }
@@ -549,7 +550,7 @@ void ShortcutEditorModel::resetAll()
   }
 }
 
-void ShortcutEditorModel::assignHotkey(const QString& actionId, const QKeySequence& keySequence)
+void ShortcutEditorModel::assignShortcut(const QString& actionId, const QKeySequence& keySequence)
 {
   std::cout << "TEST ASSIGN HOTKEY ACTION ID: " << actionId.toStdString() << std::endl;
   for (int i = 0; i < rootItem->childCount(); ++i) {
@@ -612,7 +613,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   _searchToolButton->setPopupMode(QToolButton::InstantPopup);
 
   _search = new QLineEdit(this);
-  _search->setPlaceholderText("Search Hotkeys");
+  _search->setPlaceholderText("Search Shortcuts");
   _search->setClearButtonEnabled(true);
 
   searchLayout->addWidget(_searchToolButton);
@@ -754,7 +755,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   layout->addLayout(contextLayout);
 
   _keyboardWidget = new KeyboardWidget(this);
-  connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &ShortcutEditorModel::assignHotkey);
+  connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &ShortcutEditorModel::assignShortcut);
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
@@ -813,7 +814,7 @@ ShortcutEditorWidget::~ShortcutEditorWidget()
 void ShortcutEditorWidget::highlightHotkeys(int index)
 {
   std::vector<QAction*> actions;
-  HotkeysMap hotkeysMap = _model->getHotkeys();
+  ActionsMap hotkeysMap = _model->getActionsMap();
   for (const auto& category : hotkeysMap[_contextComboBox->itemText(index)]) {
     for (const auto& action : category.second) {
       actions.push_back(action);
@@ -841,7 +842,7 @@ void ShortcutEditorWidget::setHotkeys()
   _model->setHotkeys();
 
   _contextComboBox->clear();
-  for (const auto& context : _model->getHotkeys()) {
+  for (const auto& context : _model->getActionsMap()) {
     _contextComboBox->addItem(context.first);
   }
 
@@ -854,7 +855,7 @@ void ShortcutEditorWidget::setHotkeys()
   _nameAction->setChecked(sSearchToolButtonState._actionGroupName == _nameAction->text());
   actionGroup->addAction(_nameAction);
 
-  _hotkeyAction = _searchToolButtonMenu->addAction(tr("Hotkey"));
+  _hotkeyAction = _searchToolButtonMenu->addAction(tr("Shortcut"));
   _hotkeyAction->setCheckable(true);
   _hotkeyAction->setChecked(sSearchToolButtonState._actionGroupName == _hotkeyAction->text());
   actionGroup->addAction(_hotkeyAction);
@@ -876,7 +877,7 @@ void ShortcutEditorWidget::setHotkeys()
 
   _searchToolButtonMenu->addSeparator();
 
-  for (const auto& context : _model->getHotkeys()) { 
+  for (const auto& context : _model->getActionsMap()) { 
     QAction* contextAction = _searchToolButtonMenu->addAction(context.first);
     contextAction->setCheckable(true);
     std::string stdContextName = context.first.toStdString();
@@ -887,7 +888,7 @@ void ShortcutEditorWidget::setHotkeys()
     contextActions.push_back(contextAction);
     /* connect(contextAction, &QAction::triggered, [this, &hotkeys, &context](const bool triggered){
       std::vector<QKeySequence> hotkeyVector;
-      HotkeysMap hotkeysMap = _model->getHotkeys();
+      ActionsMap hotkeysMap = _model->getHotkeys();
       for (const auto& category : hotkeysMap[context.first]) {
         for (const auto& action : category.second) {
           hotkeyVector.push_back(action->shortcut());
@@ -899,7 +900,7 @@ void ShortcutEditorWidget::setHotkeys()
     }); */
   }
 
-  _searchToolButtonMenu->addSection("Hotkey");
+  _searchToolButtonMenu->addSection("Shortcut");
 
   _defaultHotkeyAction = _searchToolButtonMenu->addAction(tr("Default Shortcut"));
   _defaultHotkeyAction->setCheckable(true);
@@ -1038,16 +1039,3 @@ void ShortcutEditorWidget::updateSearchToolButtonState()
     sSearchToolButtonState._actionGroupName = _hotkeyAction->text();
   }
 }
-
-void ShortcutEditorWidget::importHotkeys()
-{
-}
-
-void ShortcutEditorWidget::exportHotkeys()
-{
-}
-
-// TODO: do we need this method at all? Do not think we need anything specific that needs changing when the selection changes?
-// void ShortcutEditorWidget::selectionChanged()
-// {
-// }

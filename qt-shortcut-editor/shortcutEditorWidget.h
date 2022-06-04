@@ -20,11 +20,11 @@ class QTreeView;
 
 class KeyboardWidget;
 
-// List of hotkey actions for all categories
-using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;
+// List of actions for all categories
+using CategoryActionsMap = std::map<QString, std::vector<QAction*>>;
 
 // List of categories for all contexts
-using HotkeysMap = std::map<QString, CategoryHotkeysMap>;
+using ActionsMap = std::map<QString, CategoryActionsMap>;
 
 using ShortcutEditorExpandState = std::unordered_map<std::string, bool>;
 
@@ -102,18 +102,18 @@ public:
   const QString& hoverTooltipText();
 
   void setHotkeys();
-  HotkeysMap getHotkeys() const;
+  ActionsMap getActionsMap() const;
 
 public Q_SLOTS:
   void reset(const QModelIndexList& selectedItems);
   void resetAll();
-  void assignHotkey(const QString& actionId, const QKeySequence& keySequence);
+  void assignShortcut(const QString& actionId, const QKeySequence& keySequence);
 
 private:
   void setupModelData(ShortcutEditorModelItem* parent);
 
   ShortcutEditorModelItem* rootItem;
-  HotkeysMap _hotkeys;
+  ActionsMap _actionsMap;
   QString _hoverTooltip;
 };
 
@@ -155,11 +155,6 @@ public Q_SLOTS:
 
   void expandRecursively(const QModelIndex& index, bool fromExpandState = false);
   void updateExpandStates(const QModelIndex&);
-
-  void importHotkeys();
-  void exportHotkeys();
-
-  // void selectionChanged();
 
 Q_SIGNALS:
   void hotkeysChanged();
