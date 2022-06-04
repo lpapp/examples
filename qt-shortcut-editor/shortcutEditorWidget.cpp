@@ -421,8 +421,8 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     messageBox.setWindowTitle("Reassign shortcut?");
     messageBox.setIcon(QMessageBox::Warning);
     const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
-    const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Shortcut)).toString();
-    const QString text = QLatin1String("Keyboard shortcut \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
+    const QString foundShortcutString = foundItem->data(static_cast<int>(Column::Shortcut)).toString();
+    const QString text = QLatin1String("Keyboard shortcut \"") + foundShortcutString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
     messageBox.setText(text);
     messageBox.setInformativeText(tr("Are you sure you want to reassign this shortcut?"));
     messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -814,8 +814,8 @@ ShortcutEditorWidget::~ShortcutEditorWidget()
 void ShortcutEditorWidget::highlightHotkeys(int index)
 {
   std::vector<QAction*> actions;
-  ActionsMap hotkeysMap = _model->getActionsMap();
-  for (const auto& category : hotkeysMap[_contextComboBox->itemText(index)]) {
+  ActionsMap actionsMap = _model->getActionsMap();
+  for (const auto& category : actionsMap[_contextComboBox->itemText(index)]) {
     for (const auto& action : category.second) {
       actions.push_back(action);
     }
@@ -855,10 +855,10 @@ void ShortcutEditorWidget::setHotkeys()
   _nameAction->setChecked(sSearchToolButtonState._actionGroupName == _nameAction->text());
   actionGroup->addAction(_nameAction);
 
-  _hotkeyAction = _searchToolButtonMenu->addAction(tr("Shortcut"));
-  _hotkeyAction->setCheckable(true);
-  _hotkeyAction->setChecked(sSearchToolButtonState._actionGroupName == _hotkeyAction->text());
-  actionGroup->addAction(_hotkeyAction);
+  _shortcutAction = _searchToolButtonMenu->addAction(tr("Shortcut"));
+  _shortcutAction->setCheckable(true);
+  _shortcutAction->setChecked(sSearchToolButtonState._actionGroupName == _shortcutAction->text());
+  actionGroup->addAction(_shortcutAction);
 
   _searchToolButtonMenu->addSection("Context");
 
@@ -888,8 +888,8 @@ void ShortcutEditorWidget::setHotkeys()
     contextActions.push_back(contextAction);
     /* connect(contextAction, &QAction::triggered, [this, &hotkeys, &context](const bool triggered){
       std::vector<QKeySequence> hotkeyVector;
-      ActionsMap hotkeysMap = _model->getHotkeys();
-      for (const auto& category : hotkeysMap[context.first]) {
+      ActionsMap actionsMap = _model->getActionsMap();
+      for (const auto& category : actionsMap[context.first]) {
         for (const auto& action : category.second) {
           hotkeyVector.push_back(action->shortcut());
         }
@@ -902,13 +902,13 @@ void ShortcutEditorWidget::setHotkeys()
 
   _searchToolButtonMenu->addSection("Shortcut");
 
-  _defaultHotkeyAction = _searchToolButtonMenu->addAction(tr("Default Shortcut"));
-  _defaultHotkeyAction->setCheckable(true);
-  _defaultHotkeyAction->setChecked(sSearchToolButtonState._defaultHotkeyChecked);
+  _defaultShortcutAction = _searchToolButtonMenu->addAction(tr("Default Shortcut"));
+  _defaultShortcutAction->setCheckable(true);
+  _defaultShortcutAction->setChecked(sSearchToolButtonState._defaultShortcutChecked);
 
-  _nonDefaultHotkeyAction = _searchToolButtonMenu->addAction(tr("Non-default Shortcut"));
-  _nonDefaultHotkeyAction->setCheckable(true);
-  _nonDefaultHotkeyAction->setChecked(sSearchToolButtonState._nonDefaultHotkeyChecked);
+  _nonDefaultShortcutAction = _searchToolButtonMenu->addAction(tr("Non-default Shortcut"));
+  _nonDefaultShortcutAction->setCheckable(true);
+  _nonDefaultShortcutAction->setChecked(sSearchToolButtonState._nonDefaultShortcutChecked);
 
   _searchToolButtonMenu->addSection("Match");
 
@@ -1006,8 +1006,8 @@ void ShortcutEditorWidget::expandRecursively(const QModelIndex& index, bool from
 void ShortcutEditorWidget::updateSearchToolButtonState()
 {
   sSearchToolButtonState._allContexts = _allContextsAction->isChecked();
-  sSearchToolButtonState._defaultHotkeyChecked = _defaultHotkeyAction->isChecked();
-  sSearchToolButtonState._nonDefaultHotkeyChecked = _nonDefaultHotkeyAction->isChecked();
+  sSearchToolButtonState._defaultShortcutChecked = _defaultShortcutAction->isChecked();
+  sSearchToolButtonState._nonDefaultShortcutChecked = _nonDefaultShortcutAction->isChecked();
 
   for (const auto& contextAction : contextActions) {
     sSearchToolButtonState._contextActionsState[contextAction->text().toStdString()] = contextAction->isChecked();
@@ -1035,7 +1035,7 @@ void ShortcutEditorWidget::updateSearchToolButtonState()
   if (_nameAction->isChecked()) {
     sSearchToolButtonState._actionGroupName = _nameAction->text();
   }
-  else if (_hotkeyAction->isChecked()) {
-    sSearchToolButtonState._actionGroupName = _hotkeyAction->text();
+  else if (_shortcutAction->isChecked()) {
+    sSearchToolButtonState._actionGroupName = _shortcutAction->text();
   }
 }
