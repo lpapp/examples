@@ -246,7 +246,7 @@ QString PreferencesDialog::pageTitle(Page page) const
   QString title;
   switch (page)
   {
-    case Page::Hotkeys: title = tr("Hotkeys"); break;
+    case Page::Hotkeys: title = tr("Keyboard shortcuts"); break;
     default:
     {
       assert("Page was not found");

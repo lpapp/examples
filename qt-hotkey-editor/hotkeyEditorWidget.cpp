@@ -203,7 +203,7 @@ void HotkeyEditorDelegate::updateEditorGeometry(QWidget* editor,
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
-  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")}, QString("root"));
+  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Shortcut")}, QString("root"));
   _hoverTooltip =
     "Define the keyboard shortcuts for any action available";
 }
@@ -798,7 +798,7 @@ void HotkeyEditorWidget::highlightHotkeys(int index)
 void HotkeyEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
 {
   _model->setHoverTooltipText(hoverTooltipText);
-  // TODO: Add meaningful toolbar, maybe with some delay to be less distractive?
+  // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
   // setToolTip(_model->hoverTooltipText());
 }
 
