@@ -96,7 +96,7 @@ QVariant HotkeyEditorModelItem::data(int column) const
   }
 
   QVariant columnVariant = m_itemData.at(column);
-  if (column != static_cast<int>(Column::Hotkey) || columnVariant.canConvert<QString>()) {
+  if (column != static_cast<int>(Column::Shortcut) || columnVariant.canConvert<QString>()) {
     return columnVariant;
   }
 
@@ -115,7 +115,7 @@ bool HotkeyEditorModelItem::setData(int column, const QVariant& value)
     return false;
   }
 
-  if (column == static_cast<int>(Column::Hotkey)) {
+  if (column == static_cast<int>(Column::Shortcut)) {
     // std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
     QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
     if (action) {
@@ -141,7 +141,7 @@ const QString& HotkeyEditorModelItem::id() const
 
 QAction* HotkeyEditorModelItem::action() const
 {
-  QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Hotkey));
+  QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Shortcut));
   return static_cast<QAction*>(actionVariant.value<void*>());
 }
 
@@ -302,8 +302,14 @@ QVariant HotkeyEditorModel::data(const QModelIndex &index, int role) const
   HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
 
   if (role == Qt::ForegroundRole
-      && index.column() == static_cast<int>(Column::Hotkey)) {
-    if (item->data(static_cast<int>(Column::Hotkey)) != item->data(static_cast<int>(Column::DefaultHotkey))) {
+      && index.column() == static_cast<int>(Column::Shortcut)) {
+    QAction* action = item->action();
+    if (!action) {
+      return QVariant();
+    }
+
+    QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+    if (action->shortcut() != defaultShortcut) {
       return QVariant(QApplication::palette().color(QPalette::Highlight));
     }
   }
@@ -322,7 +328,7 @@ Qt::ItemFlags HotkeyEditorModel::flags(const QModelIndex &index) const
   }
 
   Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
-  if (index.column() == static_cast<int>(Column::Hotkey)) {
+  if (index.column() == static_cast<int>(Column::Shortcut)) {
     modelFlags |= Qt::ItemIsEditable;
   }
   else if (index.column() == static_cast<int>(Column::Name)) {
@@ -371,19 +377,18 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem* parent)
   // Go through each context, one context - many categories each iteration
   for (const auto& contextLevel : _hotkeys) {
     // TODO: make it "tr()".
-    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction), QString()}, contextIdPrefix + contextLevel.first, parent);
+    HotkeyEditorModelItem* contextLevelItem = new HotkeyEditorModelItem({contextLevel.first, QVariant::fromValue(nullAction)}, contextIdPrefix + contextLevel.first, parent);
     parent->appendChild(contextLevelItem);
     // Go through each category, one category - many actions each iteration
     for (const auto& categoryLevel : contextLevel.second) {
-      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction), QString()}, contextLevel.first + categoryLevel.first, contextLevelItem);
+      HotkeyEditorModelItem* categoryLevelItem = new HotkeyEditorModelItem({categoryLevel.first, QVariant::fromValue(nullAction)}, contextLevel.first + categoryLevel.first, contextLevelItem);
       contextLevelItem->appendChild(categoryLevelItem);
       for (const auto& action : categoryLevel.second) {
         QString name = action->text();
         if (name.isEmpty() || action == nullptr) {
           continue;
         }
-        QString defaultHotkey = action->property(kDefaultShortcutPropertyName).value<QKeySequence>().toString(QKeySequence::NativeText);
-        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action)), defaultHotkey}, categoryLevel.first + name, categoryLevelItem);
+        HotkeyEditorModelItem* actionLevelItem = new HotkeyEditorModelItem({name, QVariant::fromValue(reinterpret_cast<void*>(action))}, categoryLevel.first + name, categoryLevelItem);
         categoryLevelItem->appendChild(actionLevelItem);
       }
     }
@@ -392,13 +397,13 @@ void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem* parent)
 
 bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Hotkey) << ")" << std::endl;
-  if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Hotkey)) {
+  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Shortcut) << ")" << std::endl;
+  if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Shortcut)) {
     std::cout << "TEST HOTKEY EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
     QString keySequenceString= value.toString();
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
-      item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
+      item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -406,7 +411,7 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
     HotkeyEditorModelItem* foundItem = findKeySequence(keySequenceString);
     const HotkeyEditorModelItem *currentItem = static_cast<HotkeyEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
-      item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
+      item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -415,7 +420,7 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
     messageBox.setWindowTitle("Reassign hotkey?");
     messageBox.setIcon(QMessageBox::Warning);
     const QString foundNameString = foundItem->data(static_cast<int>(Column::Name)).toString();
-    const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Hotkey)).toString();
+    const QString foundHotkeyString = foundItem->data(static_cast<int>(Column::Shortcut)).toString();
     const QString text = QLatin1String("Keyboard hotkey \"") + foundHotkeyString + QLatin1String("\" is already assigned to \"") + foundNameString + QLatin1String("\".");
     messageBox.setText(text);
     messageBox.setInformativeText(tr("Are you sure you want to reassign this hotkey?"));
@@ -425,8 +430,8 @@ bool HotkeyEditorModel::setData(const QModelIndex& index, const QVariant& value,
     const int ret = messageBox.exec();
     switch (ret) {
       case QMessageBox::Yes:
-        foundItem->setData(static_cast<int>(Column::Hotkey), QVariant());
-        item->setData(static_cast<int>(Column::Hotkey), keySequenceString);
+        foundItem->setData(static_cast<int>(Column::Shortcut), QVariant());
+        item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
         Q_EMIT dataChanged(index, index);
         return true;
       case QMessageBox::No:
@@ -498,7 +503,7 @@ bool HotkeyEditorModel::dropMimeData(const QMimeData *data,
     return false;
   }
 
-  QModelIndex modelIndex = index(parent.row(), static_cast<int>(Column::Hotkey), parent.parent());
+  QModelIndex modelIndex = index(parent.row(), static_cast<int>(Column::Shortcut), parent.parent());
   setData(modelIndex, data->text());
 
   return true;
@@ -512,7 +517,7 @@ HotkeyEditorModelItem* HotkeyEditorModel::findKeySequence(const QString& keySequ
       HotkeyEditorModelItem* categoryLevel = contextLevel->child(j);
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
-        const QVariant actionLevelHotkey = actionLevel->data(static_cast<int>(Column::Hotkey));
+        const QVariant actionLevelHotkey = actionLevel->data(static_cast<int>(Column::Shortcut));
         if (keySequenceString == actionLevelHotkey.toString()) {
           return actionLevel;
         }
@@ -531,10 +536,11 @@ void HotkeyEditorModel::resetAll()
       HotkeyEditorModelItem* categoryLevel = contextLevel->child(j);
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         HotkeyEditorModelItem* actionLevel = categoryLevel->child(k);
-        QString hotkey = actionLevel->data(static_cast<int>(Column::Hotkey)).toString();
-        QString defaultHotkey = actionLevel->data(static_cast<int>(Column::DefaultHotkey)).toString();
-        actionLevel->setData(static_cast<int>(Column::Hotkey), defaultHotkey);
-        if (hotkey != defaultHotkey) {
+        QAction* action = actionLevel->action();
+        QKeySequence shortcut = action->shortcut();
+        QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+        if (shortcut != defaultShortcut) {
+          action->setShortcut(defaultShortcut);
           QModelIndex index = createIndex(k, 1, actionLevel);
           Q_EMIT dataChanged(index, index);
         }
@@ -570,8 +576,12 @@ void HotkeyEditorModel::reset(const QModelIndexList& selectedItems)
 {
   for (const QModelIndex &selectedItem : selectedItems) {
     HotkeyEditorModelItem *item = static_cast<HotkeyEditorModelItem*>(selectedItem.internalPointer());
-    item->setData(static_cast<int>(Column::Hotkey), item->data(static_cast<int>(Column::DefaultHotkey)));
-    std::cout << "TEST RESET HOTKEY: " << item->data(static_cast<int>(Column::Name)).toString().toStdString() << "(" << item->data(static_cast<int>(Column::DefaultHotkey)).toString().toStdString() << ")" << std::endl;
+    QAction* action = item->action();
+    QKeySequence shortcut = action->shortcut();
+    QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+    if (shortcut != defaultShortcut) {
+      action->setShortcut(defaultShortcut);
+    }
     Q_EMIT dataChanged(selectedItem, selectedItem);
   }
 }

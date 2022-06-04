@@ -85,7 +85,7 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
-  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey"), tr("")});
+  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey"), QString()});
 }
 
 HotkeyEditorModel::~HotkeyEditorModel()

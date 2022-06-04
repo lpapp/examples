@@ -30,8 +30,7 @@ using HotkeyEditorExpandState = std::unordered_map<std::string, bool>;
 
 enum class Column : uint8_t {
   Name,
-  Hotkey,
-  DefaultHotkey
+  Shortcut
 };
 
 struct SearchToolButtonState
