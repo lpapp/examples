@@ -85,7 +85,7 @@ HotkeyEditorModelItem *HotkeyEditorModelItem::parentItem()
 HotkeyEditorModel::HotkeyEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
-  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey")});
+  rootItem = new HotkeyEditorModelItem({tr("Name"), tr("Hotkey"), tr("")});
 }
 
 HotkeyEditorModel::~HotkeyEditorModel()
@@ -224,7 +224,6 @@ HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   _view->header()->resizeSection(0, 250);
-  _view->expandAll();
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
