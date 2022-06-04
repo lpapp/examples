@@ -148,14 +148,14 @@ QAction* ShortcutEditorModelItem::action() const
 ShortcutEditorDelegate::ShortcutEditorDelegate(QObject *parent)
   : QStyledItemDelegate(parent)
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE" << std::endl;
+  std::cout << "TEST SHORTCUT EDITOR DELEGATE" << std::endl;
 }
 
 QWidget* ShortcutEditorDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& /* option */,
                                             const QModelIndex& /* index */) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE CREATE EDITOR" << std::endl;
+  std::cout << "TEST SHORTCUT EDITOR DELEGATE CREATE EDITOR" << std::endl;
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
   // editor->setFocusPolicy(Qt::StrongFocus);
   // connect(editor, &QKeySequenceEdit::editingFinished, this, &ShortcutEditorDelegate::commitAndCloseEditor);
@@ -172,7 +172,7 @@ void ShortcutEditorDelegate::commitAndCloseEditor()
 void ShortcutEditorDelegate::setEditorData(QWidget* editor,
                                          const QModelIndex& index) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET EDITOR DATA" << std::endl;
+  std::cout << "TEST SHORTCUT EDITOR DELEGATE SET EDITOR DATA" << std::endl;
   QString value = index.model()->data(index, Qt::EditRole).toString();
 
   QKeySequenceEdit* keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
@@ -182,7 +182,7 @@ void ShortcutEditorDelegate::setEditorData(QWidget* editor,
 void ShortcutEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                         const QModelIndex &index) const
 {
-  std::cout << "TEST HOTKEY EDITOR DELEGATE SET MODEL DATA: " << model->metaObject()->className() << std::endl;
+  std::cout << "TEST SHORTCUT EDITOR DELEGATE SET MODEL DATA: " << model->metaObject()->className() << std::endl;
   const QKeySequenceEdit *keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
   if (keySequenceEdit) {
     const QKeySequence keySequence = keySequenceEdit->keySequence();
@@ -213,7 +213,7 @@ ShortcutEditorModel::~ShortcutEditorModel()
   delete rootItem;
 }
 
-void ShortcutEditorModel::setHotkeys()
+void ShortcutEditorModel::setActions()
 {
   beginResetModel();
   setupModelData(rootItem);
@@ -398,9 +398,9 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
 
 bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-  std::cout << "TEST HOTKEY EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Shortcut) << ")" << std::endl;
+  std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Shortcut) << ")" << std::endl;
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Shortcut)) {
-    std::cout << "TEST HOTKEY EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
+    std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
     QString keySequenceString= value.toString();
     ShortcutEditorModelItem *item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
@@ -552,7 +552,7 @@ void ShortcutEditorModel::resetAll()
 
 void ShortcutEditorModel::assignShortcut(const QString& actionId, const QKeySequence& keySequence)
 {
-  std::cout << "TEST ASSIGN HOTKEY ACTION ID: " << actionId.toStdString() << std::endl;
+  std::cout << "TEST ASSIGN SHORTCUT ACTION ID: " << actionId.toStdString() << std::endl;
   for (int i = 0; i < rootItem->childCount(); ++i) {
     ShortcutEditorModelItem* contextLevel = rootItem->child(i);
     for (int j = 0; j < contextLevel->childCount(); ++j) {
@@ -561,9 +561,9 @@ void ShortcutEditorModel::assignShortcut(const QString& actionId, const QKeySequ
         ShortcutEditorModelItem* actionLevel = categoryLevel->child(k);
         QAction* action = actionLevel->action();
         QString currentActionId = action->property(kIdPropertyName).toString();
-        // std::cout << "TEST ASSIGN HOTKEY CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
+        // std::cout << "TEST ASSIGN SHORTCUT CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
         if (currentActionId == actionId) {
-          std::cout << "TEST ASSIGN HOTKEY ACTION ID 2: " << actionId.toStdString() << std::endl;
+          std::cout << "TEST ASSIGN SHORTCUT ACTION ID 2: " << actionId.toStdString() << std::endl;
           action->setShortcut(keySequence);
           QModelIndex index = createIndex(k, 1, actionLevel);
           Q_EMIT dataChanged(index, index);
@@ -749,7 +749,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   QHBoxLayout* contextLayout = new QHBoxLayout();
   _contextComboBox = new QComboBox();
   _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  connect(_contextComboBox, &QComboBox::currentIndexChanged, this, &ShortcutEditorWidget::highlightHotkeys);
+  connect(_contextComboBox, &QComboBox::currentIndexChanged, this, &ShortcutEditorWidget::highlightShortcuts);
   contextLayout->addWidget(_contextComboBox);
   contextLayout->addStretch();
   layout->addLayout(contextLayout);
@@ -759,7 +759,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   layout->addWidget(_keyboardWidget);
-  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightHotkeys);
+  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightShortcuts);
 
   connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
     _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
@@ -784,7 +784,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   if (!objectName().isEmpty()) {
     // AppSettings settings;
     // settings.beginGroup(objectName());
-    /*QByteArray headerColumns = settings.value(HOTKEY_EDITOR_HEADER_PREFERENCE_KEY + sPlatformStrings[sCurrentPlaform]).toByteArray();
+    /*QByteArray headerColumns = settings.value(SHORTCUT_EDITOR_HEADER_PREFERENCE_KEY + sPlatformStrings[sCurrentPlaform]).toByteArray();
     if (!headerColumns.isEmpty()) {
       treeHeader->restoreState(headerColumns);
     }*/
@@ -796,7 +796,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(const char* objName, QWidget* parent)
   // update the selection, so that the buttons are in the right state
   // selectionChanged();
 
-  setHotkeys();
+  setActions();
 }
 
 ShortcutEditorWidget::~ShortcutEditorWidget()
@@ -805,13 +805,13 @@ ShortcutEditorWidget::~ShortcutEditorWidget()
     /* QHeaderView* treeHeader = _view->horizontalHeader();
     AppSettings settings;
     settings.beginGroup(objectName());
-    settings.setValue(HOTKEY_EDITOR_HEADER_PREFERENCE_KEY, treeHeader->saveState()); */
+    settings.setValue(SHORTCUT_EDITOR_HEADER_PREFERENCE_KEY, treeHeader->saveState()); */
   }
 
   updateSearchToolButtonState();
 }
 
-void ShortcutEditorWidget::highlightHotkeys(int index)
+void ShortcutEditorWidget::highlightShortcuts(int index)
 {
   std::vector<QAction*> actions;
   ActionsMap actionsMap = _model->getActionsMap();
@@ -837,9 +837,9 @@ void ShortcutEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
   // setToolTip(_model->hoverTooltipText());
 }
 
-void ShortcutEditorWidget::setHotkeys()
+void ShortcutEditorWidget::setActions()
 {
-  _model->setHotkeys();
+  _model->setActions();
 
   _contextComboBox->clear();
   for (const auto& context : _model->getActionsMap()) {

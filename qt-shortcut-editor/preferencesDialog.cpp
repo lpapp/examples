@@ -92,7 +92,7 @@ void PreferencesPage::cancel() {
 void PreferencesPage::revert() {
 }
 
-HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
+KeyboardShortcutsPreferencesPage::KeyboardShortcutsPreferencesPage(QWidget* parent)
   : PreferencesPage(parent)
 {
   constexpr int maxContexts = 5;
@@ -191,7 +191,7 @@ void PreferencesWidget::revertPreferences()
   } */
 }
 
-Page PreferencesDialog::_previousPage = Page::Hotkeys;
+Page PreferencesDialog::_previousPage = Page::KeyboardShortcuts;
 const int PreferencesDialog::PageIdRole = Qt::UserRole + 2; // + 2 as Qt::UserRole + 1 is the default argument to setData
 
 PreferencesDialog::PreferencesDialog(QWidget* parent)
@@ -219,14 +219,13 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 QString PreferencesDialog::pageTitle(Page page) const
 {
   QString title;
-  switch (page)
-  {
-    case Page::Hotkeys: title = tr("Keyboard shortcuts"); break;
+  switch (page) {
+    case Page::KeyboardShortcuts:
+      title = tr("Keyboard shortcuts");
+      break;
     default:
-    {
       assert("Page was not found");
       break;
-    }
   }
 
   return title;
@@ -235,10 +234,9 @@ QString PreferencesDialog::pageTitle(Page page) const
 PreferencesPage* PreferencesDialog::createPageWidget(Page page)
 {
   PreferencesPage* pageWidget = nullptr;
-  switch (page)
-  {
-    case Page::Hotkeys:
-      pageWidget = new HotkeysPreferencesPage();
+  switch (page) {
+    case Page::KeyboardShortcuts:
+      pageWidget = new KeyboardShortcutsPreferencesPage();
       break;
     default:
       assert("Page was not found");
@@ -275,8 +273,8 @@ void PreferencesDialog::init()
   _preferencesWidget->setFocusPolicy(Qt::ClickFocus);
 
   QStandardItemModel* standardItemModel = new QStandardItemModel(this);
-  QStandardItem* hotkeysItem = createPage(Page::Hotkeys, nullptr);
-  standardItemModel->appendRow(hotkeysItem);
+  QStandardItem* keyboardShortcutsItem = createPage(Page::KeyboardShortcuts, nullptr);
+  standardItemModel->appendRow(keyboardShortcutsItem);
 
   _preferencesWidget->setModel(standardItemModel);
 

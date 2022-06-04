@@ -42,11 +42,11 @@ class KeyboardWidget : public QWidget
 public:
 	KeyboardWidget(QWidget *parent = nullptr);
   void setButtonColor(const QColor& color);
-  void setActions(const std::vector<QAction*> hotkeys);
+  void setActions(const std::vector<QAction*> actions);
   Qt::KeyboardModifiers modifiers() const;
 
 public Q_SLOTS:
-  void highlightHotkeys();
+  void highlightShortcuts();
 
 Q_SIGNALS:
   void actionDropped(const QString& actionId, const QKeySequence& keySequence);

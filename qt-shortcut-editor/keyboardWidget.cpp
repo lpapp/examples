@@ -236,7 +236,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
             _modifiers.setFlag(static_cast<Qt::KeyboardModifier>(key.key), !_modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key)));
             const bool enabled = _modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key));
             button->setPalette(enabled ? _color : palette());
-            highlightHotkeys();
+            highlightShortcuts();
           });
         }
         else {
@@ -284,7 +284,7 @@ void KeyboardWidget::setButtonColor(const QColor& color)
   _color = color;
 }
 
-void KeyboardWidget::highlightHotkeys()
+void KeyboardWidget::highlightShortcuts()
 {
   resetHighlights();
 
@@ -312,7 +312,7 @@ void KeyboardWidget::setActions(const std::vector<QAction*> actions)
 {
   _actions = actions;
 
-  highlightHotkeys();
+  highlightShortcuts();
 }
 
 Qt::KeyboardModifiers KeyboardWidget::modifiers() const

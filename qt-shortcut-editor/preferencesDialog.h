@@ -15,7 +15,7 @@ class QTreeView;
 
 enum class Page : uint8_t
 {
-  Hotkeys,
+  KeyboardShortcuts,
 
   User
 };
@@ -66,12 +66,12 @@ public Q_SLOTS:
   void revert() override;
 };
 
-class HotkeysPreferencesPage : public PreferencesPage
+class KeyboardShortcutsPreferencesPage : public PreferencesPage
 {
   Q_OBJECT
 
 public:
-  HotkeysPreferencesPage(QWidget* parent = nullptr);
+  KeyboardShortcutsPreferencesPage(QWidget* parent = nullptr);
 };
 
 class PreferencesWidget : public QWidget

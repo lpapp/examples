@@ -1,5 +1,5 @@
-#ifndef HOTKEYEDITORWIDGET_H
-#define HOTKEYEDITORWIDGET_H
+#ifndef SHORTCUTEDITORWIDGET_H
+#define SHORTCUTEDITORWIDGET_H
 
 #include <QString>
 #include <QStyledItemDelegate>
@@ -101,7 +101,7 @@ public:
   void setHoverTooltipText(const QString& hoverTooltipText);
   const QString& hoverTooltipText();
 
-  void setHotkeys();
+  void setActions();
   ActionsMap getActionsMap() const;
 
 public Q_SLOTS:
@@ -148,7 +148,7 @@ public:
 
   void setHoverTooltipText(const QString& hoverTooltipText);
 
-  void setHotkeys();
+  void setActions();
 
 public Q_SLOTS:
   void reset();
@@ -156,11 +156,8 @@ public Q_SLOTS:
   void expandRecursively(const QModelIndex& index, bool fromExpandState = false);
   void updateExpandStates(const QModelIndex&);
 
-Q_SIGNALS:
-  void hotkeysChanged();
-
 private Q_SLOTS:
-  void highlightHotkeys(int index);
+  void highlightShortcuts(int index);
 
 private:
   void restoreExpandState();
