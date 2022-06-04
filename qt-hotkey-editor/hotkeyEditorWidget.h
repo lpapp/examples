@@ -102,7 +102,7 @@ public:
   void setHoverTooltipText(const QString& hoverTooltipText);
   const QString& hoverTooltipText();
 
-  void setHotkeys(const HotkeysMap& hotkeys);
+  void setHotkeys();
   HotkeysMap getHotkeys() const;
 
 public Q_SLOTS:
@@ -149,8 +149,7 @@ public:
 
   void setHoverTooltipText(const QString& hoverTooltipText);
 
-  void setHotkeys(const HotkeysMap& hotkeys);
-  HotkeysMap getHotkeys() const;
+  void setHotkeys();
 
 public Q_SLOTS:
   void reset();

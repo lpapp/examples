@@ -113,33 +113,8 @@ HotkeysPreferencesPage::HotkeysPreferencesPage(QWidget* parent)
     }
   }
 
-  HotkeysMap hotkeys;
-  std::vector<QAction*> registeredActions = ActionManager::registeredActions();
-  for (QAction* action : registeredActions) {
-    QString actionId = action->property(kIdPropertyName).toString();
-    QString context = actionId.split('.')[1];
-    QString category = actionId.split('.')[2];
-
-    CategoryHotkeysMap categoryHotkeys;
-    if (hotkeys.count(context)) {
-      categoryHotkeys = hotkeys[context];
-    }
-
-    std::vector<QAction*> actions;
-    if (categoryHotkeys.count(category)) {
-      actions = categoryHotkeys[category];
-    }
-
-    actions.push_back(action);
-
-    categoryHotkeys.insert_or_assign(category, actions);
-    hotkeys.insert_or_assign(context, categoryHotkeys);
-  }
-
   PreferencesLayout* layout = new PreferencesLayout();
   HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget;
-  hotkeyEditorWidget->setHotkeys(hotkeys);
-
   layout->addRow(tr(""), hotkeyEditorWidget);
   setLayout(layout);
 }

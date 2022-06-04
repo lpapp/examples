@@ -213,10 +213,9 @@ HotkeyEditorModel::~HotkeyEditorModel()
   delete rootItem;
 }
 
-void HotkeyEditorModel::setHotkeys(const HotkeysMap& hotkeys)
+void HotkeyEditorModel::setHotkeys()
 {
   beginResetModel();
-  _hotkeys = hotkeys;
   setupModelData(rootItem);
   endResetModel();
 }
@@ -344,6 +343,29 @@ QVariant HotkeyEditorModel::headerData(int section, Qt::Orientation orientation,
 
 void HotkeyEditorModel::setupModelData(HotkeyEditorModelItem* parent)
 {
+  _hotkeys.clear();
+  std::vector<QAction*> registeredActions = ActionManager::registeredActions();
+  for (QAction* action : registeredActions) {
+    QString actionId = action->property(kIdPropertyName).toString();
+    QString context = actionId.split('.')[1];
+    QString category = actionId.split('.')[2];
+
+    CategoryHotkeysMap categoryHotkeys;
+    if (_hotkeys.count(context)) {
+      categoryHotkeys = _hotkeys[context];
+    }
+
+    std::vector<QAction*> actions;
+    if (categoryHotkeys.count(category)) {
+      actions = categoryHotkeys[category];
+    }
+
+    actions.push_back(action);
+
+    categoryHotkeys.insert_or_assign(category, actions);
+    _hotkeys.insert_or_assign(context, categoryHotkeys);
+  }
+
   QAction* nullAction = nullptr;
   const QString contextIdPrefix = "root";
   // Go through each context, one context - many categories each iteration
@@ -762,6 +784,8 @@ HotkeyEditorWidget::HotkeyEditorWidget(const char* objName, QWidget* parent) :
 
   // update the selection, so that the buttons are in the right state
   // selectionChanged();
+
+  setHotkeys();
 }
 
 HotkeyEditorWidget::~HotkeyEditorWidget()
@@ -802,12 +826,12 @@ void HotkeyEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
   // setToolTip(_model->hoverTooltipText());
 }
 
-void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
+void HotkeyEditorWidget::setHotkeys()
 {
-  _model->setHotkeys(hotkeys);
+  _model->setHotkeys();
 
   _contextComboBox->clear();
-  for (const auto& context : hotkeys) {
+  for (const auto& context : _model->getHotkeys()) {
     _contextComboBox->addItem(context.first);
   }
 
@@ -842,7 +866,7 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
 
   _searchToolButtonMenu->addSeparator();
 
-  for (const auto& context : hotkeys) { 
+  for (const auto& context : _model->getHotkeys()) { 
     QAction* contextAction = _searchToolButtonMenu->addAction(context.first);
     contextAction->setCheckable(true);
     std::string stdContextName = context.first.toStdString();
@@ -914,11 +938,6 @@ void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
   // make sure the button states are properly updated
   // TODO: do we need this?
   // selectionChanged();
-}
-
-HotkeysMap HotkeyEditorWidget::getHotkeys() const
-{
-  return _model->getHotkeys();
 }
 
 void HotkeyEditorWidget::reset()
