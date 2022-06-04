@@ -9,7 +9,6 @@
 
 class QAction;
 class QModelIndex;
-class QSortFilterProxyModel;
 class QTreeView;
 
 static const char* kDefaultShortcutPropertyName = "defaultShortcut";
@@ -79,11 +78,8 @@ public:
   HotkeyEditorWidget(QWidget* parent = nullptr);
   ~HotkeyEditorWidget() override = default;
 
-  void setHotkeys(const HotkeysMap& hotkeys);
-
 private:
   HotkeyEditorModel* _model;
-  QSortFilterProxyModel* _filterModel;
   QTreeView* _view;
 };
 

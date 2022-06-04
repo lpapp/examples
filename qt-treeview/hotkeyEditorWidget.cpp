@@ -1,11 +1,7 @@
 #include "hotkeyEditorWidget.h"
 
-#include <QAbstractItemModel>
 #include <QAction>
-#include <QApplication>
 #include <QHeaderView>
-#include <QKeySequenceEdit>
-#include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <QVBoxLayout>
 
@@ -228,14 +224,21 @@ HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   _view->setSelectionMode(QAbstractItemView::ExtendedSelection);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   _view->header()->resizeSection(0, 250);
+  _view->expandAll();
 
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
   setLayout(layout);
   layout->addWidget(_view);
-}
 
-void HotkeyEditorWidget::setHotkeys(const HotkeysMap& hotkeys)
-{
+  HotkeysMap hotkeys;
+  std::vector<QAction*> actions;
+  for (int actionIndex = 0; actionIndex < 5; ++actionIndex) {
+    QAction* action = new QAction("Action" + QString::number(actionIndex), this);
+    actions.push_back(action);
+  }
+  CategoryHotkeysMap categoryHotkeys;
+  categoryHotkeys.insert({"Category", actions});
+  hotkeys.insert({"Context", categoryHotkeys});
   _model->setHotkeys(hotkeys);
 }
