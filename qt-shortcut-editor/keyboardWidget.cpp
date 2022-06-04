@@ -118,7 +118,6 @@ void KeyButton::dropEvent(QDropEvent *event)
 
   QString actionIds = mime->text();
   Q_EMIT actionDropped(actionIds, text());
-  setPalette(QApplication::palette());
 }
 
 std::vector<RowKeys> keyboardLayout {
