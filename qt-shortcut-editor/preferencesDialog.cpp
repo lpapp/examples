@@ -95,24 +95,6 @@ void PreferencesPage::revert() {
 KeyboardShortcutsPreferencesPage::KeyboardShortcutsPreferencesPage(QWidget* parent)
   : PreferencesPage(parent)
 {
-  constexpr int maxContexts = 5;
-  constexpr int maxCategories = 3;
-  constexpr int maxActions = 1000;
-  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
-    QString contextName = "Context" + QString::number(contextIndex);
-    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
-      QString categoryName = "Category" + QString::number(categoryIndex);
-      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
-        QString actionName = "Action" + QString::number(actionIndex);
-        QAction* action = new QAction(actionName, this);
-        action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
-        QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
-        action->setProperty(kIdPropertyName, stringList.join('.'));
-        ActionManager::registerAction(action);
-      }
-    }
-  }
-
   PreferencesLayout* layout = new PreferencesLayout();
   ShortcutEditorWidget* shortcutEditorWidget = new ShortcutEditorWidget;
   layout->addRow(tr(""), shortcutEditorWidget);

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include "actionManager.h"
 #include "borderLayout.h"
 #include "openglWidget.h"
 #include "preferencesDialog.h"
@@ -30,6 +31,24 @@ MainWindow::MainWindow()
 
   setMinimumSize(960, 640);
   resize(1920, 1280);
+
+  constexpr int maxContexts = 5;
+  constexpr int maxCategories = 3;
+  constexpr int maxActions = 1000;
+  for (int contextIndex = 0; contextIndex < maxContexts; ++contextIndex) {
+    QString contextName = "Context" + QString::number(contextIndex);
+    for (int categoryIndex = 0; categoryIndex < maxCategories; ++categoryIndex) {
+      QString categoryName = "Category" + QString::number(categoryIndex);
+      for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
+        QString actionName = "Action" + QString::number(actionIndex);
+        QAction* action = new QAction(actionName, this);
+        action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
+        QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
+        action->setProperty(kIdPropertyName, stringList.join('.'));
+        ActionManager::registerAction(action);
+      }
+    }
+  }
 }
 
 void MainWindow::createActions()
