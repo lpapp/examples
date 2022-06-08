@@ -57,7 +57,7 @@ void ShortcutEditorModelItem::appendChild(ShortcutEditorModelItem *item)
 
 ShortcutEditorModelItem *ShortcutEditorModelItem::child(int row)
 {
-  if (row < 0 || row >= m_childItems.size()) {
+  if (row < 0 || static_cast<size_t>(row) >= m_childItems.size()) {
     return nullptr;
   }
 
@@ -91,7 +91,7 @@ int ShortcutEditorModelItem::columnCount() const
 
 QVariant ShortcutEditorModelItem::data(int column) const
 {
-  if (column < 0 || column >= m_itemData.size()) {
+  if (column < 0 || static_cast<size_t>(column) >= m_itemData.size()) {
     return QVariant();
   }
 
@@ -111,7 +111,7 @@ QVariant ShortcutEditorModelItem::data(int column) const
 
 bool ShortcutEditorModelItem::setData(int column, const QVariant& value)
 {
-  if (column < 0 || column >= m_itemData.size()) {
+  if (column < 0 || static_cast<size_t>(column) >= m_itemData.size()) {
     return false;
   }
 
@@ -468,14 +468,10 @@ QStringList ShortcutEditorModel::mimeTypes() const
 }
 
 bool ShortcutEditorModel::canDropMimeData(const QMimeData *data,
-                                        Qt::DropAction action,
-                                        int row, int column,
-                                        const QModelIndex &parent) const
+                                        Qt::DropAction /*action*/,
+                                        int /*row*/, int /*column*/,
+                                        const QModelIndex& /*parent*/) const
 {
-  Q_UNUSED(action);
-  Q_UNUSED(row);
-  Q_UNUSED(parent);
-
   if (!data->hasFormat("text/plain")) {
     return false;
   }
@@ -822,7 +818,7 @@ void ShortcutEditorWidget::highlightShortcuts(int index)
   }
   std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
   QColor color = Qt::white;
-  if (_contextComboBox->currentIndex() < colors.size()) {
+  if (static_cast<size_t>(_contextComboBox->currentIndex()) < colors.size()) {
     color = colors[index];
   }
 

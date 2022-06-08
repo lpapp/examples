@@ -85,7 +85,7 @@ void KeyButton::dragEnterEvent(QDragEnterEvent *event)
   event->acceptProposedAction();
 }
 
-void KeyButton::dragLeaveEvent(QDragLeaveEvent *event)
+void KeyButton::dragLeaveEvent(QDragLeaveEvent* /*event*/)
 {
   std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
   setPalette(QApplication::palette());
@@ -257,9 +257,9 @@ void KeyboardWidget::resizeButtons()
   // const QSize currentSize = size();
   float row = 0;
   float width = 0;
-  for (int i = 0; i < keyboardLayout.size(); ++i) {
+  for (size_t i = 0; i < keyboardLayout.size(); ++i) {
     float column = 0;
-    for (int j = 0, buttonColumn = 0; j < keyboardLayout[i].size(); ++j) {
+    for (size_t j = 0, buttonColumn = 0; j < keyboardLayout[i].size(); ++j) {
       Key key = keyboardLayout[i][j];
       if (key.key) {
         _buttons[i][buttonColumn++]->setGeometry(kMultiplier * column, kMultiplier * row,
@@ -273,7 +273,7 @@ void KeyboardWidget::resizeButtons()
   setMinimumSize(kMultiplier * width, kMultiplier * row);
 }
 
-void KeyboardWidget::resizeEvent(QResizeEvent *event)
+void KeyboardWidget::resizeEvent(QResizeEvent* /*event*/)
 {
   resizeButtons();
 }

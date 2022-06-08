@@ -142,7 +142,7 @@ void PreferencesWidget::setExpanded(const QModelIndex& modelIndex, bool expanded
   _treeView->setExpanded(modelIndex, expanded);
 }
 
-void PreferencesWidget::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+void PreferencesWidget::onSelectionChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
   Page page = static_cast<Page>(current.data(PreferencesPage::PageIdRole).toInt());
   if (_pageToStackIndex.contains(page)) {

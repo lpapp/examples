@@ -29,7 +29,7 @@ void HotkeyEditorModelItem::appendChild(HotkeyEditorModelItem *item)
 
 HotkeyEditorModelItem *HotkeyEditorModelItem::child(int row)
 {
-  if (row < 0 || row >= m_childItems.size()) {
+  if (row < 0 || static_cast<size_t>(row) >= m_childItems.size()) {
     return nullptr;
   }
 
@@ -63,7 +63,7 @@ int HotkeyEditorModelItem::columnCount() const
 
 QVariant HotkeyEditorModelItem::data(int column) const
 {
-  if (column < 0 || column >= m_itemData.size()) {
+  if (column < 0 || static_cast<size_t>(column) >= m_itemData.size()) {
     return QVariant();
   }
 

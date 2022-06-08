@@ -176,8 +176,3 @@ void MainWindow::showPreferences()
   dialog->show();
   dialog->activateWindow();
 }
-
-void MainWindow::keyPressEvent(QKeyEvent* event)
-{
-  std::cout << "TEST KEY PRESS EVENT" << std::endl;
-}

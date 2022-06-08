@@ -47,7 +47,7 @@ int BorderLayout::count() const
 
 QLayoutItem* BorderLayout::itemAt(int index) const
 {
-  if (index >= items.size()) {
+  if (static_cast<size_t>(index) >= items.size()) {
     return nullptr;
   }
 
@@ -134,7 +134,7 @@ QSize BorderLayout::sizeHint() const
 
 QLayoutItem* BorderLayout::takeAt(int index)
 {
-  if (index >= 0 && index < items.size()) {
+  if (index >= 0 && static_cast<size_t>(index) < items.size()) {
     ItemWrapper* layoutStruct = items[index];
     items.erase(items.begin() + index);
     return layoutStruct->item;
