@@ -60,7 +60,11 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
   QMimeData *mimeData = new QMimeData;
   QKeySequence keyButtonSequence = QKeySequence::fromString(text(), QKeySequence::NativeText);
   Qt::KeyboardModifiers modifiers = static_cast<KeyboardWidget*>(parent())->modifiers();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  QKeySequence keySequence(modifiers | keyButtonSequence[0]);
+#else
   QKeySequence keySequence(modifiers | keyButtonSequence[0].key());
+#endif
   mimeData->setText(keySequence.toString(QKeySequence::NativeText));
   drag->setMimeData(mimeData);
   drag->exec(Qt::CopyAction);
@@ -240,7 +244,11 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
         }
         else {
           connect(button, &KeyButton::actionDropped, [this](const QString& actionId, const QKeySequence& keySequence){
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+            Q_EMIT actionDropped(actionId, QKeySequence(_modifiers | keySequence[0]));
+#else
             Q_EMIT actionDropped(actionId, QKeySequence(_modifiers | keySequence[0].key()));
+#endif
           });
         }
       }
