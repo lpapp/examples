@@ -296,7 +296,11 @@ void KeyboardWidget::highlightShortcuts()
   resetHighlights();
 
   for (const QAction* action : _actions) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    int key = action->shortcut()[0] - static_cast<int>(_modifiers);
+#else
     int key = action->shortcut()[0].toCombined() - static_cast<int>(_modifiers);
+#endif
     if (_buttonsMap.count(key)) {
       _buttonsMap[key]->setPalette(_color);
       _buttonsMap[key]->setToolTip(action->text());

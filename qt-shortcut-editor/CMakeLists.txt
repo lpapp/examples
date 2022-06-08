@@ -10,4 +10,4 @@ add_executable(ShortcutEditor
   preferencesDialog.cpp
 )
 
-target_link_libraries(ShortcutEditor Qt::Widgets Qt::OpenGL Qt::OpenGLWidgets)
+target_link_libraries(ShortcutEditor Qt::Widgets Qt::OpenGL $<$<TARGET_EXISTS:Qt::OpenGLWidgets>:Qt::OpenGLWidgets>)

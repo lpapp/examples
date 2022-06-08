@@ -2,6 +2,7 @@
 
 #include "actionManager.h"
 
+#include <QAction>
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 
@@ -273,8 +274,13 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  int dx = event->x() - m_lastPos.x();
+  int dy = event->y() - m_lastPos.y();
+#else
   int dx = event->position().x() - m_lastPos.x();
   int dy = event->position().y() - m_lastPos.y();
+#endif
 
   if (event->buttons() & Qt::LeftButton) {
     setXRotation(m_xRot + 8 * dy);
@@ -289,17 +295,33 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
-  int eventShortcutCombined = event->keyCombination().toCombined();
+  int eventShortcutCombined = event->key();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  if (eventShortcutCombined == _selectAction->shortcut()[0]) {
+#else
   if (eventShortcutCombined == _selectAction->shortcut()[0].toCombined()) {
+#endif
     std::cout << "TEST SELECT" << std::endl;
   }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  else if (eventShortcutCombined == _translateAction->shortcut()[0]) {
+#else
   else if (eventShortcutCombined == _translateAction->shortcut()[0].toCombined()) {
+#endif
     std::cout << "TEST TRANSLATE" << std::endl;
   }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  else if (eventShortcutCombined == _rotateAction->shortcut()[0]) {
+#else
   else if (eventShortcutCombined == _rotateAction->shortcut()[0].toCombined()) {
+#endif
     std::cout << "TEST ROTATE" << std::endl;
   }
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  else if (eventShortcutCombined == _scaleAction->shortcut()[0]) {
+#else
   else if (eventShortcutCombined == _scaleAction->shortcut()[0].toCombined()) {
+#endif
     std::cout << "TEST SCALE" << std::endl;
   }
   else {

@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets OpenGL OpenGLWidgets)
 if (NOT Qt6_FOUND)
   find_package(Qt5 5.15 REQUIRED COMPONENTS Widgets OpenGL REQUIRED)
 endif()

@@ -240,8 +240,13 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  int dx = event->x() - m_lastPos.x();
+  int dy = event->y() - m_lastPos.y();
+#else
   int dx = event->position().x() - m_lastPos.x();
   int dy = event->position().y() - m_lastPos.y();
+#endif
 
   if (event->buttons() & Qt::LeftButton) {
     setXRotation(m_xRot + 8 * dy);
