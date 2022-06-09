@@ -51,22 +51,22 @@ public:
                                    ShortcutEditorModelItem* parentItem = nullptr);
     ~ShortcutEditorModelItem();
 
-    void appendChild(ShortcutEditorModelItem *child);
+    void appendChild(ShortcutEditorModelItem* child);
 
-    ShortcutEditorModelItem *child(int row);
+    ShortcutEditorModelItem* child(int row);
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
     bool setData(int column, const QVariant& value);
     int row() const;
-    ShortcutEditorModelItem *parentItem();
+    ShortcutEditorModelItem* parentItem();
     const QString& id() const;
     QAction* action() const;
 
 private:
     std::vector<ShortcutEditorModelItem*> m_childItems;
     std::vector<QVariant> m_itemData;
-    ShortcutEditorModelItem *m_parentItem;
+    ShortcutEditorModelItem* m_parentItem;
     QString m_id;
 };
 
@@ -88,13 +88,13 @@ public:
 
   bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
-  QMimeData* mimeData(const QModelIndexList &indexes) const override;
+  QMimeData* mimeData(const QModelIndexList& indexes) const override;
   QStringList mimeTypes() const override;
 
-  bool canDropMimeData(const QMimeData *data, Qt::DropAction action, int row,
-                       int column, const QModelIndex &parent) const override;
-  bool dropMimeData(const QMimeData *data, Qt::DropAction action,
-                    int row, int column, const QModelIndex &parent) override;
+  bool canDropMimeData(const QMimeData* data, Qt::DropAction action, int row,
+                       int column, const QModelIndex& parent) const override;
+  bool dropMimeData(const QMimeData* data, Qt::DropAction action,
+                    int row, int column, const QModelIndex& parent) override;
 
   ShortcutEditorModelItem* findKeySequence(const QString& keySequenceString);
 
@@ -123,7 +123,7 @@ class ShortcutEditorDelegate : public QStyledItemDelegate
 
 public:
   ShortcutEditorDelegate(QObject* parent = nullptr);
-  QWidget *createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                         const QModelIndex& index) const override;
 
   void commitAndCloseEditor();
@@ -141,9 +141,7 @@ class ShortcutEditorWidget : public QWidget
   Q_OBJECT
 
 public:
-
-  // specify the object name if you want settings for this widget to be autosaved and loaded (like the column widths)
-  ShortcutEditorWidget(const char* objectName = nullptr, QWidget* parent = nullptr);
+  ShortcutEditorWidget(QWidget* parent = nullptr);
   ~ShortcutEditorWidget() override;
 
   void setHoverTooltipText(const QString& hoverTooltipText);

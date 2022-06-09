@@ -35,7 +35,7 @@ KeyButton::KeyButton(const QString& text, QWidget* parent)
   setAcceptDrops(true);
 }
 
-void KeyButton::mousePressEvent(QMouseEvent *event)
+void KeyButton::mousePressEvent(QMouseEvent* event)
 {
   std::cout << "TEST MOUSE PRESS EVENT" << std::endl;
   if (event->button() == Qt::LeftButton) {
@@ -44,7 +44,7 @@ void KeyButton::mousePressEvent(QMouseEvent *event)
   QPushButton::mousePressEvent(event);
 }
 
-void KeyButton::mouseMoveEvent(QMouseEvent *event)
+void KeyButton::mouseMoveEvent(QMouseEvent* event)
 {
   std::cout << "TEST MOUSE MOVE EVENT" << std::endl;
   if (!(event->buttons() & Qt::LeftButton)) {
@@ -56,8 +56,8 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
     return;
   }
 
-  QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  QDrag* drag = new QDrag(this);
+  QMimeData* mimeData = new QMimeData;
   QKeySequence keyButtonSequence = QKeySequence::fromString(text(), QKeySequence::NativeText);
   Qt::KeyboardModifiers modifiers = static_cast<KeyboardWidget*>(parent())->modifiers();
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -71,7 +71,7 @@ void KeyButton::mouseMoveEvent(QMouseEvent *event)
   setDown(false);
 }
 
-void KeyButton::dragEnterEvent(QDragEnterEvent *event)
+void KeyButton::dragEnterEvent(QDragEnterEvent* event)
 {
   KeyButton* keyButton = qobject_cast<KeyButton*>(event->source());
   if (keyButton) {
@@ -95,7 +95,7 @@ void KeyButton::dragLeaveEvent(QDragLeaveEvent* /*event*/)
   setPalette(QApplication::palette());
 }
 
-void KeyButton::dragMoveEvent(QDragMoveEvent *event)
+void KeyButton::dragMoveEvent(QDragMoveEvent* event)
 {
   // std::cout << "TEST DRAG MOVE EVENT: " << text().toStdString() << std::endl;
   if (!event->mimeData()->hasFormat("text/plain")) {
@@ -106,13 +106,13 @@ void KeyButton::dragMoveEvent(QDragMoveEvent *event)
   event->acceptProposedAction();
 }
 
-void KeyButton::dropEvent(QDropEvent *event)
+void KeyButton::dropEvent(QDropEvent* event)
 {
   if (event->source() == this && event->proposedAction() != Qt::CopyAction) {
     return;
   }
 
-  const QMimeData *mime = event->mimeData();
+  const QMimeData* mime = event->mimeData();
   if (!mime->hasText()) {
     event->ignore();
     return;
@@ -202,7 +202,7 @@ std::vector<RowKeys> keyboardLayout {
   }
 };
 
-KeyboardWidget::KeyboardWidget(QWidget *parent)
+KeyboardWidget::KeyboardWidget(QWidget* parent)
   : QWidget(parent)
 {
   setAcceptDrops(true);
@@ -223,7 +223,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent)
           }
         }
 
-        KeyButton *button = new KeyButton(keySequenceString, this);
+        KeyButton* button = new KeyButton(keySequenceString, this);
 
         _buttonsMap.insert({key.key, button});
         keyboardRowButtons.push_back(button);

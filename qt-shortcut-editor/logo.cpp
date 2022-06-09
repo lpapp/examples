@@ -52,9 +52,9 @@ Logo::Logo()
   }
 }
 
-void Logo::add(const QVector3D &v, const QVector3D &n)
+void Logo::add(const QVector3D& v, const QVector3D& n)
 {
-  GLfloat *p = m_data.data() + m_count;
+  GLfloat* p = m_data.data() + m_count;
   *p++ = v.x();
   *p++ = v.y();
   *p++ = v.z();

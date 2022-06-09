@@ -25,7 +25,7 @@ void setApplication(QApplication& application)
     application.setStyle("Fusion");
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
     setApplication(app);

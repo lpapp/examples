@@ -20,7 +20,7 @@ public:
   int count() const override;
   QLayoutItem* itemAt(int index) const override;
   QSize minimumSize() const override;
-  void setGeometry(const QRect &rect) override;
+  void setGeometry(const QRect& rect) override;
   QSize sizeHint() const override;
   QLayoutItem* takeAt(int index) override;
 
@@ -29,19 +29,19 @@ public:
 private:
   struct ItemWrapper
   {
-    ItemWrapper(QLayoutItem *i, Position p) {
+    ItemWrapper(QLayoutItem* i, Position p) {
       item = i;
       position = p;
     }
 
-    QLayoutItem *item;
+    QLayoutItem* item;
     Position position;
   };
 
   enum SizeType { MinimumSize, SizeHint };
   QSize calculateSize(SizeType sizeType) const;
 
-  std::vector<ItemWrapper *> items;
+  std::vector<ItemWrapper*> items;
 };
 
 #endif

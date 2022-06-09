@@ -1,6 +1,6 @@
 #include "borderLayout.h"
 
-BorderLayout::BorderLayout(QWidget *parent, const QMargins &margins, int spacing)
+BorderLayout::BorderLayout(QWidget* parent, const QMargins& margins, int spacing)
   : QLayout(parent)
 {
   setContentsMargins(margins);
@@ -14,18 +14,18 @@ BorderLayout::BorderLayout(int spacing)
 
 BorderLayout::~BorderLayout()
 {
-  QLayoutItem *l;
+  QLayoutItem* l;
   while ((l = takeAt(0))) {
     delete l;
   }
 }
 
-void BorderLayout::addItem(QLayoutItem *item)
+void BorderLayout::addItem(QLayoutItem* item)
 {
   add(item, West);
 }
 
-void BorderLayout::addWidget(QWidget *widget, Position position)
+void BorderLayout::addWidget(QWidget* widget, Position position)
 {
   add(new QWidgetItem(widget), position);
 }
@@ -72,7 +72,7 @@ void BorderLayout::setGeometry(const QRect& rect)
   QLayout::setGeometry(rect);
 
   for (ItemWrapper* wrapper : items) {
-    QLayoutItem *item = wrapper->item;
+    QLayoutItem* item = wrapper->item;
     Position position = wrapper->position;
 
     if (position == North) {
@@ -99,7 +99,7 @@ void BorderLayout::setGeometry(const QRect& rect)
   centerHeight = rect.height() - northHeight - southHeight;
 
   for (ItemWrapper* wrapper : items) {
-    QLayoutItem *item = wrapper->item;
+    QLayoutItem* item = wrapper->item;
     Position position = wrapper->position;
 
     if (position == West) {

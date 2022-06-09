@@ -118,7 +118,7 @@ void OpenGLWidget::cleanup()
   QObject::disconnect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &OpenGLWidget::cleanup);
 }
 
-static const char *vertexShaderSourceCore =
+static const char* vertexShaderSourceCore =
   "#version 150\n"
   "in vec4 vertex;\n"
   "in vec3 normal;\n"
@@ -133,7 +133,7 @@ static const char *vertexShaderSourceCore =
   "   gl_Position = projMatrix * mvMatrix * vertex;\n"
   "}\n";
 
-static const char *fragmentShaderSourceCore =
+static const char* fragmentShaderSourceCore =
   "#version 150\n"
   "in highp vec3 vert;\n"
   "in highp vec3 vertNormal;\n"
@@ -147,7 +147,7 @@ static const char *fragmentShaderSourceCore =
   "   fragColor = vec4(col, 1.0);\n"
   "}\n";
 
-static const char *vertexShaderSource =
+static const char* vertexShaderSource =
   "attribute vec4 vertex;\n"
   "attribute vec3 normal;\n"
   "varying vec3 vert;\n"
@@ -161,7 +161,7 @@ static const char *vertexShaderSource =
   "   gl_Position = projMatrix * mvMatrix * vertex;\n"
   "}\n";
 
-static const char *fragmentShaderSource =
+static const char* fragmentShaderSource =
   "varying highp vec3 vert;\n"
   "varying highp vec3 vertNormal;\n"
   "uniform highp vec3 lightPos;\n"
@@ -228,13 +228,13 @@ void OpenGLWidget::initializeGL()
 void OpenGLWidget::setupVertexAttribs()
 {
   m_logoVbo.bind();
-  QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+  QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
   f->glEnableVertexAttribArray(0);
   f->glEnableVertexAttribArray(1);
   f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
                            nullptr);
   f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-                           reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+                           reinterpret_cast<void*>(3 * sizeof(GLfloat)));
   m_logoVbo.release();
 }
 

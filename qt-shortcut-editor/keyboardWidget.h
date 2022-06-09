@@ -25,12 +25,12 @@ Q_SIGNALS:
   void actionDropped(const QString& actionId, const QKeySequence& keySequence);
 
 private:
-  void mousePressEvent(QMouseEvent *event) override;
-  void mouseMoveEvent(QMouseEvent *event) override;
-  void dragEnterEvent(QDragEnterEvent *event) override;
-  void dragLeaveEvent(QDragLeaveEvent *event) override;
-  void dragMoveEvent(QDragMoveEvent *event) override;
-  void dropEvent(QDropEvent *event) override;
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void dragEnterEvent(QDragEnterEvent* event) override;
+  void dragLeaveEvent(QDragLeaveEvent* event) override;
+  void dragMoveEvent(QDragMoveEvent* event) override;
+  void dropEvent(QDropEvent* event) override;
 
   QPoint dragStartPosition;
 };
@@ -40,7 +40,7 @@ class KeyboardWidget : public QWidget
 	Q_OBJECT
 
 public:
-	KeyboardWidget(QWidget *parent = nullptr);
+	KeyboardWidget(QWidget* parent = nullptr);
   void setButtonColor(const QColor& color);
   void setActions(const std::vector<QAction*> actions);
   Qt::KeyboardModifiers modifiers() const;
@@ -52,7 +52,7 @@ Q_SIGNALS:
   void actionDropped(const QString& actionId, const QKeySequence& keySequence);
 
 private:
-  void resizeEvent(QResizeEvent *event) override;
+  void resizeEvent(QResizeEvent* event) override;
 
   void resizeButtons();
   void resetHighlights();
