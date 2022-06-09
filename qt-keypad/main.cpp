@@ -1,14 +1,23 @@
 #include <QApplication>
+#include <QKeyEvent>
 #include <QKeySequence>
 #include <QMainWindow>
 #include <QShortcut>
 
 #include <iostream>
 
+class MainWindow : public QMainWindow
+{
+  public:
+    void keyPressEvent(QKeyEvent *event) override {
+      std::cout << std::hex << event->modifiers() << std::endl;
+    }
+};
+
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
-  QMainWindow window;
+  MainWindow window;
 
   QShortcut keypadHome(QKeySequence("Num+7"), &window);
   QObject::connect(&keypadHome, &QShortcut::activated, []() {
