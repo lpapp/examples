@@ -616,7 +616,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   _view = new QTreeView(this);
   _model = new ShortcutEditorModel(_view);
 
-  // TODO: Add meaningful toolbar, maybe with some delay to be less distractive?
+  // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
   // setToolTip(_model->hoverTooltipText());
 
   _filterModel = new QSortFilterProxyModel(this);
@@ -632,7 +632,6 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   _view->setItemDelegateForColumn(1, _delegate);
 
   // _view->setMinimumSize(250, 350);
-  _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   // _view->resizeColumnToContents(0);
   _view->setAlternatingRowColors(true);
