@@ -1,7 +1,10 @@
+#include <QAction>
 #include <QApplication>
 #include <QKeyEvent>
 #include <QKeySequence>
 #include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
 #include <QShortcut>
 
 #include <iostream>
@@ -9,8 +12,17 @@
 class MainWindow : public QMainWindow
 {
   public:
+    MainWindow(QWidget* parent = nullptr) : QMainWindow(parent) {
+      QAction* exitAct = new QAction(tr("Exit"), this);
+      exitAct->setShortcut(QKeySequence(Qt::Key_Right));
+      connect(exitAct, &QAction::triggered, this, &QWidget::close);
+      QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+      fileMenu->addAction(exitAct);
+    }
+
     void keyPressEvent(QKeyEvent *event) override {
       std::cout << std::hex << event->modifiers() << std::endl;
+      QMainWindow::keyPressEvent(event);
     }
 };
 
