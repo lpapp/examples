@@ -9,7 +9,7 @@
 
 class QAction;
 
-static const char* kDefaultShortcutPropertyName = "defaultShortcuts";
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
 static const char* kIdPropertyName = "id";
 // TODO: add an override for registering third-party actions with a string
 // parameter to differentiate them from foundry and other third-party actions
@@ -36,6 +36,7 @@ public:
   static QAction* registerAction(const std::string& name, const std::vector<int>& shortcuts, const std::string& context, const std::string& category);
 
   static std::string getId(QAction* action);
+  static QKeySequence getDefaultShortcut(QAction* action);
   static QList<QKeySequence> getDefaultShortcuts(QAction* action);
 };
 

@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
+
 std::vector<QAction*> _actions;
 
 std::vector<QAction*> ActionManager::registeredActions()
@@ -89,7 +91,12 @@ std::string ActionManager::getId(QAction* action)
   return action->property(kIdPropertyName).toString().toStdString();
 }
 
+QKeySequence ActionManager::getDefaultShortcut(QAction* action)
+{
+  return action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+}
+
 QList<QKeySequence> ActionManager::getDefaultShortcuts(QAction* action)
 {
-  return action->property(kDefaultShortcutPropertyName).value<QList<QKeySequence>>();
+  return action->property(kDefaultShortcutsPropertyName).value<QList<QKeySequence>>();
 }
