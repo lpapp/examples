@@ -35,6 +35,7 @@ public:
 
   static QAction* registerAction(const std::string& name, const std::vector<int>& shortcuts, const std::string& context, const std::string& category);
 
+  static QAction* getAction(const std::string& id);
   static std::string getId(QAction* action);
   static QKeySequence getDefaultShortcut(QAction* action);
   static QList<QKeySequence> getDefaultShortcuts(QAction* action);

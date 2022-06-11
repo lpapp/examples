@@ -5,11 +5,13 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
 
 std::vector<QAction*> _actions;
+std::unordered_map<std::string, QAction*> _idActionHash;
 
 std::vector<QAction*> ActionManager::registeredActions()
 {
@@ -20,6 +22,7 @@ void ActionManager::registerAction(QAction* action)
 {
   action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
   _actions.push_back(action);
+  _idActionHash.insert({getId(action), action});
 }
 
 void EncodeString(std::string& text)
@@ -84,6 +87,11 @@ QAction* ActionManager::registerAction(const std::string& name, const std::vecto
   action->setShortcuts(keySequences);
   registerAction(action, context, category);
   return action;
+}
+
+QAction* ActionManager::getAction(const std::string& id)
+{
+  return _idActionHash[id];
 }
 
 std::string ActionManager::getId(QAction* action)

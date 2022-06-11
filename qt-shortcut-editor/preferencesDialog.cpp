@@ -120,6 +120,12 @@ void PreferencesPage::revert()
 KeyboardShortcutsPreferencesPage::KeyboardShortcutsPreferencesPage(QWidget* parent)
   : PreferencesPage(parent)
 {
+  loadSettings();
+
+  for (const auto& entry : _savedActionShortcutMap) {
+    ActionManager::getAction(entry.first)->setShortcut(QKeySequence::fromString(QString::fromStdString(entry.second)));
+  }
+
   PreferencesLayout* layout = new PreferencesLayout();
   ShortcutEditorWidget* shortcutEditorWidget = new ShortcutEditorWidget;
   layout->addRow(tr(""), shortcutEditorWidget);
