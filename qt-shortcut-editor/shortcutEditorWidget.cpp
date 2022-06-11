@@ -865,18 +865,11 @@ void ShortcutEditorWidget::setActions()
     }
     contextAction->setChecked(sSearchToolButtonState._contextActionsState[stdContextName]);
     contextActions.push_back(contextAction);
-    /* connect(contextAction, &QAction::triggered, [this, &hotkeys, &context](const bool triggered){
-      std::vector<QKeySequence> hotkeyVector;
-      ActionsMap actionsMap = _model->getActionsMap();
-      for (const auto& category : actionsMap[context.first]) {
-        for (const auto& action : category.second) {
-          hotkeyVector.push_back(action->shortcut());
-        }
+    connect(contextAction, &QAction::triggered, [this](const bool triggered) {
+      if (!triggered) {
+        _allContextsAction->setChecked(false);
       }
-      std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
-      _keyboardWidget->setButtonColor(colors[std::distance(hotkeys.begin(), hotkeys.find(context.first))]);
-      _keyboardWidget->setHotkeys(hotkeyVector);
-    }); */
+    });
   }
 
   _searchToolButtonMenu->addSection("Shortcut");
