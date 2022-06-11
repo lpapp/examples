@@ -7,6 +7,7 @@
 #include <QStandardItemModel>
 #include <QWidget>
 
+#include <string>
 #include <map>
 
 class QAbstractItemModel;
@@ -75,6 +76,9 @@ public:
 
   void loadSettings() override;
   void saveSettings() override;
+
+private:
+  std::map<std::string, std::string> _savedActionShortcutMap;
 };
 
 class PreferencesWidget : public QWidget

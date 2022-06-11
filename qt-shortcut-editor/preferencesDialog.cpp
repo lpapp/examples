@@ -156,6 +156,32 @@ void KeyboardShortcutsPreferencesPage::loadSettings()
 {
   QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
   std::string data = settings.value(kShortcutEditorKey).toString().toStdString();
+  const char* s = data.c_str();
+  std::string actionId;
+  std::string shortcut;
+  for (bool shortcutSection = false; *s != 0; ++s) {
+    if (shortcutSection && *s == ';' && *(s + 1) == ';') {
+      ++s;
+      shortcutSection = false;
+      _savedActionShortcutMap.insert({actionId, shortcut});
+      actionId.clear();
+      shortcut.clear();
+    }
+    else if (*s == ';') {
+      if (!shortcutSection) {
+        shortcutSection = true;
+      }
+    }
+    else
+    {
+      if (shortcutSection) {
+        shortcut.push_back(*s);
+      }
+      else {
+        actionId.push_back(*s);
+      }
+    }
+  }
 }
 
 PreferencesWidget::PreferencesWidget(QWidget* parent)
