@@ -10,6 +10,15 @@
 
 static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
 
+enum class Id {
+  Domain,
+  Context,
+  Category,
+  Name
+};
+
+static const char kIdDelimiter = '.';
+
 std::vector<QAction*> _actions;
 std::unordered_map<std::string, QAction*> _idActionHash;
 
@@ -97,6 +106,11 @@ QAction* ActionManager::getAction(const std::string& id)
 std::string ActionManager::getId(QAction* action)
 {
   return action->property(kIdPropertyName).toString().toStdString();
+}
+
+std::string ActionManager::getContext(QAction* action)
+{
+  return action->property(kIdPropertyName).toString().split(kIdDelimiter)[static_cast<int>(Id::Context)].toStdString();
 }
 
 QKeySequence ActionManager::getDefaultShortcut(QAction* action)

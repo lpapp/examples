@@ -401,7 +401,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
   std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Shortcut) << ")" << std::endl;
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Shortcut)) {
     std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
-    QString keySequenceString= value.toString();
+    QString keySequenceString = value.toString();
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
       item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
@@ -409,7 +409,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
       return true;
     }
 
-    ShortcutEditorModelItem* foundItem = findKeySequence(keySequenceString);
+    ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(item->action()));
     const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
       item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
@@ -506,10 +506,14 @@ bool ShortcutEditorModel::dropMimeData(const QMimeData* data,
   return true;
 }
 
-ShortcutEditorModelItem* ShortcutEditorModel::findKeySequence(const QString& keySequenceString)
+ShortcutEditorModelItem* ShortcutEditorModel::findShortcut(const QString& keySequenceString, const std::string& context)
 {
   for (int i = 0; i < rootItem->childCount(); ++i) {
     ShortcutEditorModelItem* contextLevel = rootItem->child(i);
+    if (contextLevel->data(static_cast<int>(Column::Name)).toString().toStdString() != context) {
+      continue;
+    }
+
     for (int j = 0; j < contextLevel->childCount(); ++j) {
       ShortcutEditorModelItem* categoryLevel = contextLevel->child(j);
       for (int k = 0; k < categoryLevel->childCount(); ++k) {

@@ -37,6 +37,7 @@ public:
 
   static QAction* getAction(const std::string& id);
   static std::string getId(QAction* action);
+  static std::string getContext(QAction* action);
   static QKeySequence getDefaultShortcut(QAction* action);
   static QList<QKeySequence> getDefaultShortcuts(QAction* action);
 };

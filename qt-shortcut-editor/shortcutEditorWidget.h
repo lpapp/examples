@@ -96,7 +96,7 @@ public:
   bool dropMimeData(const QMimeData* data, Qt::DropAction action,
                     int row, int column, const QModelIndex& parent) override;
 
-  ShortcutEditorModelItem* findKeySequence(const QString& keySequenceString);
+  ShortcutEditorModelItem* findShortcut(const QString& shortcut, const std::string& context);
 
   void setHoverTooltipText(const QString& hoverTooltipText);
   const QString& hoverTooltipText();
