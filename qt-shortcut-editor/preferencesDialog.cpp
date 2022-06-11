@@ -15,6 +15,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
+#include <sstream>
+
 PreferencesLayout::PreferencesLayout(QWidget* parent)
   : QFormLayout(parent)
 {
@@ -128,7 +130,8 @@ const QString kShortcutEditorKey = "shortcutEditor";
 void KeyboardShortcutsPreferencesPage::saveSettings()
 {
   QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
-  std::string data = "\"";
+  std::stringstream ss;
+  ss << "\"";
   for (const auto& action : ActionManager::registeredActions()) {
     QString shortcutString = action->shortcut().toString();
     QKeySequence defaultShortcut = ActionManager::getDefaultShortcuts(action)[0];
@@ -140,13 +143,13 @@ void KeyboardShortcutsPreferencesPage::saveSettings()
     // Note: Support serialising multiple custom shortcuts in the future if the
     // need arises. It feels sufficient for now to only be able to customise
     // the primary. This simplifies the software a bit.
-    data.push_back(ActionManager::getId(action));
-    data.push_back(";");
-    data.push_back(shortcutString.toStdString());
-    data.push_back(";;");
+    ss << ActionManager::getId(action);
+    ss << ";";
+    ss << shortcutString.toStdString();
+    ss << ";;";
   }
-  data.push_back("\"");
-  settings.setValue(kShortcutEditorKey, QString::fromStdString(data));
+  ss << "\"";
+  settings.setValue(kShortcutEditorKey, QString::fromStdString(ss.str()));
 }
 
 void KeyboardShortcutsPreferencesPage::loadSettings()
