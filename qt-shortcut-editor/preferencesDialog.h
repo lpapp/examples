@@ -55,9 +55,9 @@ public:
   PreferencesPage(QWidget* parent = nullptr);
   ~PreferencesPage() override = default;
 
-  virtual void loadSettings() {}
-  virtual void saveSettings() {}
-  virtual void cancelSettings() {}
+  virtual void loadSettings();
+  virtual void saveSettings();
+  virtual void cancelSettings();
 
 public Q_SLOTS:
   void initialize() override;
@@ -72,6 +72,9 @@ class KeyboardShortcutsPreferencesPage : public PreferencesPage
 
 public:
   KeyboardShortcutsPreferencesPage(QWidget* parent = nullptr);
+
+  void loadSettings() override;
+  void saveSettings() override;
 };
 
 class PreferencesWidget : public QWidget

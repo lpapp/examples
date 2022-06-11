@@ -4,11 +4,13 @@
 #include "shortcutEditorWidget.h"
 
 #include <QAction>
+#include <QCoreApplication>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
+#include <QSettings>
 #include <QStackedWidget>
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -80,16 +82,36 @@ PreferencesPage::PreferencesPage(QWidget* parent)
 {
 }
 
-void PreferencesPage::initialize() {
+void PreferencesPage::saveSettings()
+{
 }
 
-void PreferencesPage::apply() {
+void PreferencesPage::loadSettings()
+{
 }
 
-void PreferencesPage::cancel() {
+void PreferencesPage::cancelSettings()
+{
 }
 
-void PreferencesPage::revert() {
+void PreferencesPage::initialize()
+{
+  loadSettings();
+}
+
+void PreferencesPage::apply()
+{
+  saveSettings();
+}
+
+void PreferencesPage::cancel()
+{
+  cancelSettings();
+}
+
+void PreferencesPage::revert()
+{
+  loadSettings();
 }
 
 KeyboardShortcutsPreferencesPage::KeyboardShortcutsPreferencesPage(QWidget* parent)
@@ -99,6 +121,38 @@ KeyboardShortcutsPreferencesPage::KeyboardShortcutsPreferencesPage(QWidget* pare
   ShortcutEditorWidget* shortcutEditorWidget = new ShortcutEditorWidget;
   layout->addRow(tr(""), shortcutEditorWidget);
   setLayout(layout);
+}
+
+const QString kShortcutEditorKey = "shortcutEditor";
+
+void KeyboardShortcutsPreferencesPage::saveSettings()
+{
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
+  std::string data = "\"";
+  for (const auto& action : ActionManager::registeredActions()) {
+    QString shortcutString = action->shortcut().toString();
+    QKeySequence defaultShortcut = ActionManager::getDefaultShortcuts(action)[0];
+    QString defaultShortcutString = defaultShortcut.toString();
+    if (shortcutString == defaultShortcutString) {
+      continue;
+    }
+
+    // Note: Support serialising multiple custom shortcuts in the future if the
+    // need arises. It feels sufficient for now to only be able to customise
+    // the primary. This simplifies the software a bit.
+    data.push_back(ActionManager::getId(action));
+    data.push_back(";");
+    data.push_back(shortcutString.toStdString());
+    data.push_back(";;");
+  }
+  data.push_back("\"");
+  settings.setValue(kShortcutEditorKey, QString::fromStdString(data));
+}
+
+void KeyboardShortcutsPreferencesPage::loadSettings()
+{
+  QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
+  std::string data = settings.value(kShortcutEditorKey).toString().toStdString();
 }
 
 PreferencesWidget::PreferencesWidget(QWidget* parent)
