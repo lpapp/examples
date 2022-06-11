@@ -28,6 +28,8 @@ void setApplication(QApplication& application)
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("lpapp");
+    QCoreApplication::setApplicationName("ShortcutEditor");
     setApplication(app);
     MainWindow window;
     window.show();
