@@ -352,10 +352,8 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   _actionsMap.clear();
   std::vector<QAction*> registeredActions = ActionManager::registeredActions();
   for (QAction* action : registeredActions) {
-    QString actionId = action->property(kIdPropertyName).toString();
-    QStringList actionIdSections = actionId.split('.');
-    QString context = actionIdSections[1];
-    QString category = actionIdSections[2];
+    QString context = QString::fromStdString(ActionManager::getContext(action));
+    QString category = QString::fromStdString(ActionManager::getCategory(action));
 
     CategoryActionsMap categoryActionsMap;
     if (_actionsMap.count(context)) {
@@ -452,7 +450,7 @@ QMimeData* ShortcutEditorModel::mimeData(const QModelIndexList& indexes) const
   for (const QModelIndex& index : indexes) {
     if (index.isValid()) {
       const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
-      QString actionId = currentItem->action()->property(kIdPropertyName).toString();
+      QString actionId = QString::fromStdString(ActionManager::getId(currentItem->action()));
       actionIds.push_back(actionId);
     }
   }
@@ -560,7 +558,7 @@ void ShortcutEditorModel::assignShortcut(const QString& actionId, const QKeySequ
       for (int k = 0; k < categoryLevel->childCount(); ++k) {
         ShortcutEditorModelItem* actionLevel = categoryLevel->child(k);
         QAction* action = actionLevel->action();
-        QString currentActionId = action->property(kIdPropertyName).toString();
+        QString currentActionId = QString::fromStdString(ActionManager::getId(action));
         // std::cout << "TEST ASSIGN SHORTCUT CURRENT ACTION ID: " << currentActionId.toStdString() << std::endl;
         if (currentActionId == actionId) {
           std::cout << "TEST ASSIGN SHORTCUT ACTION ID 2: " << actionId.toStdString() << std::endl;

@@ -28,29 +28,12 @@ OpenGLWidget::~OpenGLWidget()
 
 void OpenGLWidget::createActions()
 {
-  _selectAction = new QAction(tr("Select"), this);
-  _selectAction->setShortcut(tr("Q"));
-  QStringList stringList{QString::fromStdString(kDomainName), "CenterWidget", "Transform", _selectAction->text()};
-  _selectAction->setProperty(kIdPropertyName, stringList.join('.'));
-  ActionManager::registerAction(_selectAction);
-
-  _translateAction = new QAction(tr("Translate"), this);
-  _translateAction->setShortcut(tr("W"));
-  stringList[3] = _translateAction->text();
-  _translateAction->setProperty(kIdPropertyName, stringList.join('.'));
-  ActionManager::registerAction(_translateAction);
-
-  _rotateAction = new QAction(tr("Rotate"), this);
-  _rotateAction->setShortcut(tr("E"));
-  stringList[3] = _rotateAction->text();
-  _rotateAction->setProperty(kIdPropertyName, stringList.join('.'));
-  ActionManager::registerAction(_rotateAction);
-
-  _scaleAction = new QAction(tr("Scale"), this);
-  _scaleAction->setShortcut(tr("R"));
-  stringList[3] = _scaleAction->text();
-  _scaleAction->setProperty(kIdPropertyName, stringList.join('.'));
-  ActionManager::registerAction(_scaleAction);
+  const std::string context = "CenterWidget";
+  const std::string category = "Transform";
+  _selectAction = ActionManager::registerAction("Select", "Q", context, category);
+  _translateAction = ActionManager::registerAction("Translate", "W", context, category);
+  _rotateAction = ActionManager::registerAction("Rotate", "E", context, category);
+  _scaleAction = ActionManager::registerAction("Scale", "R", context, category);
 }
 
 QSize OpenGLWidget::minimumSizeHint() const

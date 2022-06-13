@@ -8,7 +8,13 @@
 #include <unordered_map>
 #include <vector>
 
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
 static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
+static const char* kIdPropertyName = "id";
+// TODO: add an override for registering third-party actions with a string
+// parameter to differentiate them from foundry and other third-party actions
+// created via plugins and python interfaces.
+static const std::string kDomainName = "foundry";
 
 enum class Id {
   Domain,
@@ -111,6 +117,11 @@ std::string ActionManager::getId(QAction* action)
 std::string ActionManager::getContext(QAction* action)
 {
   return action->property(kIdPropertyName).toString().split(kIdDelimiter)[static_cast<int>(Id::Context)].toStdString();
+}
+
+std::string ActionManager::getCategory(QAction* action)
+{
+  return action->property(kIdPropertyName).toString().split(kIdDelimiter)[static_cast<int>(Id::Category)].toStdString();
 }
 
 QKeySequence ActionManager::getDefaultShortcut(QAction* action)
