@@ -36,7 +36,7 @@ void ActionManager::registerAction(QAction* action)
 
 void EncodeString(std::string& text)
 {
-  text.erase(std::remove_if(text.begin(), text.end(), std::isspace), text.end());
+  text.erase(std::remove_if(text.begin(), text.end(), [](char c) { return std::isspace(c); }), text.end());
 }
 
 void ActionManager::registerAction(QAction* action, const std::string& context, const std::string& category)
