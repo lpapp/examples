@@ -595,6 +595,49 @@ const QString& ShortcutEditorModel::hoverTooltipText()
   return _hoverTooltip;
 }
 
+ShortcutEditorSortFilterProxyModel::ShortcutEditorSortFilterProxyModel(QObject* parent)
+  : QSortFilterProxyModel(parent)
+{
+}
+
+bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
+                                              const QModelIndex &sourceParent) const
+{
+  QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+  ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
+  QAction* action = item->action();
+
+  QString actionName = sourceModel()->data(index).toString();
+
+  if (!action) {
+    if (!_contexts.count(actionName.toStdString())) {
+      return false;
+    }
+    else {
+      // TODO: Handle the category line indices
+    }
+  }
+  else {
+    const std::string context = ActionManager::getContext(action);
+    if (!_contexts.count(context)) {
+      return false;
+    }
+  }
+
+  return actionName.contains(filterRegularExpression());
+}
+
+void ShortcutEditorSortFilterProxyModel::updateContext(const std::string& context, bool checked)
+{
+  if (checked) {
+    _contexts.insert(context);
+  }
+  else {
+    _contexts.erase(context);
+  }
+  invalidateFilter();
+}
+
 ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   QWidget(parent)
 {
@@ -621,7 +664,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
   // setToolTip(_model->hoverTooltipText());
 
-  _filterModel = new QSortFilterProxyModel(this);
+  _filterModel = new ShortcutEditorSortFilterProxyModel(this);
   _filterModel->setSourceModel(_model);
   _filterModel->setFilterKeyColumn(-1);
   _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -847,7 +890,7 @@ void ShortcutEditorWidget::setActions()
       return;
     }
 
-    for (QAction* action : contextActions) {
+    for (QAction* action : _contextActions) {
       action->setChecked(triggered);
     }
   });
@@ -862,11 +905,16 @@ void ShortcutEditorWidget::setActions()
       sSearchToolButtonState._contextActionsState[stdContextName] = true;
     }
     contextAction->setChecked(sSearchToolButtonState._contextActionsState[stdContextName]);
-    contextActions.push_back(contextAction);
-    connect(contextAction, &QAction::triggered, [this](const bool triggered) {
+    _contextActions.push_back(contextAction);
+    _filterModel->updateContext(contextAction->text().toStdString(), true);
+    connect(contextAction, &QAction::triggered, [this, contextAction](const bool triggered) {
       if (!triggered) {
         _allContextsAction->setChecked(false);
       }
+      if (std::all_of(_contextActions.cbegin(), _contextActions.cend(), [](QAction* action){ return action->isChecked(); })) {
+        _allContextsAction->setChecked(true);
+      }
+      _filterModel->updateContext(contextAction->text().toStdString(), triggered);
     });
   }
 
@@ -979,7 +1027,7 @@ void ShortcutEditorWidget::updateSearchToolButtonState()
   sSearchToolButtonState._defaultShortcutChecked = _defaultShortcutAction->isChecked();
   sSearchToolButtonState._nonDefaultShortcutChecked = _nonDefaultShortcutAction->isChecked();
 
-  for (const auto& contextAction : contextActions) {
+  for (const auto& contextAction : _contextActions) {
     sSearchToolButtonState._contextActionsState[contextAction->text().toStdString()] = contextAction->isChecked();
   }
 

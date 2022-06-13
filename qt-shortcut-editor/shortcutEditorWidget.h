@@ -1,12 +1,14 @@
 #ifndef SHORTCUTEDITORWIDGET_H
 #define SHORTCUTEDITORWIDGET_H
 
+#include <QSortFilterProxyModel>
 #include <QString>
 #include <QStyledItemDelegate>
 #include <QWidget>
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 class QAction;
 class QCheckBox;
@@ -14,7 +16,6 @@ class QComboBox;
 class QLineEdit;
 class QMenu;
 class QPushButton;
-class QSortFilterProxyModel;
 class QToolButton;
 class QTreeView;
 
@@ -117,6 +118,21 @@ private:
   QString _hoverTooltip;
 };
 
+class ShortcutEditorSortFilterProxyModel : public QSortFilterProxyModel
+{
+  Q_OBJECT
+
+public:
+  ShortcutEditorSortFilterProxyModel(QObject *parent = 0);
+
+public Q_SLOTS:
+  void updateContext(const std::string& context, bool checked);
+
+private:
+  bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+  std::unordered_set<std::string> _contexts;
+};
+
 class ShortcutEditorDelegate : public QStyledItemDelegate
 {
   Q_OBJECT
@@ -164,7 +180,7 @@ private:
 
   ShortcutEditorDelegate* _delegate;
   ShortcutEditorModel* _model;
-  QSortFilterProxyModel* _filterModel;
+  ShortcutEditorSortFilterProxyModel* _filterModel;
   QToolButton* _searchToolButton;
   QMenu* _searchToolButtonMenu;
   QLineEdit* _search;
@@ -180,7 +196,7 @@ private:
   QAction* _nameAction;
   QAction* _shortcutAction;
   QAction* _allContextsAction;
-  std::vector<QAction*> contextActions;
+  std::vector<QAction*> _contextActions;
   QAction* _defaultShortcutAction;
   QAction* _nonDefaultShortcutAction;
   QAction* _matchContainsAction;
