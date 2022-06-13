@@ -12,9 +12,9 @@ static const char* kDefaultShortcutPropertyName = "defaultShortcut";
 static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
 static const char* kIdPropertyName = "id";
 // TODO: add an override for registering third-party actions with a string
-// parameter to differentiate them from foundry and other third-party actions
-// created via plugins and python interfaces.
-static const std::string kDomainName = "foundry";
+// parameter to differentiate them from the default domain and other
+// third-party actions created via plugins and python interfaces.
+static const std::string kDomainName = "lpapp";
 
 enum class Id {
   Domain,
