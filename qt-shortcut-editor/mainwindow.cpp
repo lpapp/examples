@@ -42,10 +42,7 @@ MainWindow::MainWindow()
       for (int actionIndex = 0; actionIndex < maxActions; ++actionIndex) {
         QString actionName = "Action" + QString::number(actionIndex);
         QAction* action = new QAction(actionName, this);
-        action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
-        QStringList stringList{QString::fromStdString(kDomainName), contextName, categoryName, actionName};
-        action->setProperty(kIdPropertyName, stringList.join('.'));
-        ActionManager::registerAction(action);
+        ActionManager::registerAction(action, contextName.toStdString(), categoryName.toStdString());
       }
     }
   }

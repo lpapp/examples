@@ -308,7 +308,7 @@ QVariant ShortcutEditorModel::data(const QModelIndex& index, int role) const
       return QVariant();
     }
 
-    QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+    QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
     if (action->shortcut() != defaultShortcut) {
       return QVariant(QApplication::palette().color(QPalette::Highlight));
     }
@@ -539,7 +539,7 @@ void ShortcutEditorModel::resetAll()
         ShortcutEditorModelItem* actionLevel = categoryLevel->child(k);
         QAction* action = actionLevel->action();
         QKeySequence shortcut = action->shortcut();
-        QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+        QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
         if (shortcut != defaultShortcut) {
           action->setShortcut(defaultShortcut);
           QModelIndex index = createIndex(k, 1, actionLevel);
@@ -579,7 +579,7 @@ void ShortcutEditorModel::reset(const QModelIndexList& selectedItems)
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(selectedItem.internalPointer());
     QAction* action = item->action();
     QKeySequence shortcut = action->shortcut();
-    QKeySequence defaultShortcut = action->property(kDefaultShortcutPropertyName).value<QKeySequence>();
+    QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
     if (shortcut != defaultShortcut) {
       action->setShortcut(defaultShortcut);
     }
