@@ -159,8 +159,8 @@ QWidget* ShortcutEditorDelegate::createEditor(QWidget* parent,
 {
   std::cout << "TEST SHORTCUT EDITOR DELEGATE CREATE EDITOR" << std::endl;
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
-  // editor->setFocusPolicy(Qt::StrongFocus);
-  // connect(editor, &QKeySequenceEdit::editingFinished, this, &ShortcutEditorDelegate::commitAndCloseEditor);
+  editor->setFocusPolicy(Qt::StrongFocus);
+  connect(editor, &QKeySequenceEdit::editingFinished, this, &ShortcutEditorDelegate::commitAndCloseEditor);
   return editor;
 }
 
@@ -757,6 +757,7 @@ void ShortcutEditorWidget::createTreeView()
 
   _view->setContextMenuPolicy(Qt::ActionsContextMenu);
   _view->setAllColumnsShowFocus(true);
+  _view->setFocusPolicy(Qt::StrongFocus);
   _view->header()->resizeSection(0, 250);
 
   QAction* undoAction = _model->undoStack()->createUndoAction(this);
