@@ -337,7 +337,7 @@ Qt::ItemFlags ShortcutEditorModel::flags(const QModelIndex& index) const
     return Qt::NoItemFlags;
   }
 
-  Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
+  Qt::ItemFlags modelFlags = QAbstractItemModel::flags(index) | Qt::ItemIsDropEnabled;
   if (index.column() == static_cast<int>(Column::Shortcut)) {
     modelFlags |= Qt::ItemIsEditable;
   }
