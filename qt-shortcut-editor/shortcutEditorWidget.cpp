@@ -37,6 +37,25 @@ static SearchToolButtonState sSearchToolButtonState = {
   {}
 };
 
+AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newShortcut, QUndoCommand *parent)
+  : QUndoCommand(parent)
+  , _action(action)
+  , _oldShortcut(action->shortcut())
+  , _newShortcut(newShortcut)
+{
+  setText(QObject::tr("Assign %1 from %2 to %3 for %3")
+      .arg(action->text()).arg(_oldShortcut.toString()).arg(_newShortcut.toString()));
+}
+
+void AssignShortcutCommand::undo()
+{
+  _action->setShortcut(_newShortcut);
+}
+
+void AssignShortcutCommand::redo()
+{
+  _action->setShortcut(_oldShortcut);
+}
 
 ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant>& data, const QString& id, ShortcutEditorModelItem* parent)
   : m_itemData(data)

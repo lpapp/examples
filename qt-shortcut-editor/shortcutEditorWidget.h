@@ -4,6 +4,7 @@
 #include <QSortFilterProxyModel>
 #include <QString>
 #include <QStyledItemDelegate>
+#include <QUndoCommand>
 #include <QWidget>
 
 #include <string>
@@ -43,6 +44,21 @@ struct SearchToolButtonState
   bool _defaultShortcutChecked;
   bool _nonDefaultShortcutChecked;
   std::map<std::string, bool> _contextActionsState;
+};
+
+class AssignShortcutCommand : public QUndoCommand
+{
+public:
+  AssignShortcutCommand(QAction* action, QKeySequence newShortcut, QUndoCommand* parent = nullptr);
+  ~AssignShortcutCommand() = default;
+
+  void undo() override;
+  void redo() override;
+
+private:
+  QAction* _action;
+  QKeySequence _oldShortcut;
+  QKeySequence _newShortcut;
 };
 
 class ShortcutEditorModelItem
