@@ -203,6 +203,7 @@ void ShortcutEditorDelegate::updateEditorGeometry(QWidget* editor,
 ShortcutEditorModel::ShortcutEditorModel(QObject* parent)
   : QAbstractItemModel(parent)
 {
+  std::cout << "TEST SHORTCUT EDITOR MODEL CONSTRUCTOR" << std::endl;
   rootItem = new ShortcutEditorModelItem({tr("Name"), tr("Shortcut")}, QString("root"));
   _hoverTooltip =
     "Define the keyboard shortcuts for any action available";
@@ -210,6 +211,7 @@ ShortcutEditorModel::ShortcutEditorModel(QObject* parent)
 
 ShortcutEditorModel::~ShortcutEditorModel()
 {
+  std::cout << "TEST SHORTCUT EDITOR MODEL DESTRUCTOR" << std::endl;
   delete rootItem;
 }
 
@@ -635,11 +637,65 @@ void ShortcutEditorSortFilterProxyModel::updateContext(const std::string& contex
   else {
     _contexts.erase(context);
   }
+
   invalidateFilter();
 }
 
 ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   QWidget(parent)
+{
+  std::cout << "TEST SHORTCUT EDITOR WIDGET CONSTRUCTOR" << std::endl;
+
+  _model = new ShortcutEditorModel(this);
+  createFilterModel();
+  _delegate = new ShortcutEditorDelegate(this);
+  createTreeView();
+
+  // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
+  // setToolTip(_model->hoverTooltipText());
+
+  _keyboardWidget = new KeyboardWidget(this);
+  connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &ShortcutEditorModel::assignShortcut);
+  // TODO: make it dynamically expanding
+  // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightShortcuts);
+
+  createLayout();
+
+  setupTreeViewFiltering();
+
+  setActions();
+}
+
+ShortcutEditorWidget::~ShortcutEditorWidget()
+{
+  updateSearchToolButtonState();
+}
+
+void ShortcutEditorWidget::createLayout()
+{
+  QVBoxLayout* layout = new QVBoxLayout();
+  layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
+  layout->addLayout(createSearchLayout());
+  layout->addWidget(_view);
+  layout->addLayout(createKeyboardExpandLayout());
+  layout->addLayout(createContextLayout());
+  layout->addWidget(_keyboardWidget);
+  layout->addLayout(createButtonLayout());
+  setLayout(layout);
+}
+
+void ShortcutEditorWidget::createFilterModel()
+{
+  _filterModel = new ShortcutEditorSortFilterProxyModel(this);
+  _filterModel->setSourceModel(_model);
+  _filterModel->setFilterKeyColumn(-1);
+  _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  _filterModel->setRecursiveFilteringEnabled(true);
+  _filterModel->setDynamicSortFilter(true);
+}
+
+QHBoxLayout* ShortcutEditorWidget::createSearchLayout()
 {
   QHBoxLayout* searchLayout = new QHBoxLayout();
 
@@ -657,26 +713,17 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   searchLayout->addWidget(_search);
   searchLayout->setSpacing(0);
 
-  // set up the model and view
+  return searchLayout;
+}
+
+void ShortcutEditorWidget::createTreeView()
+{
   _view = new QTreeView(this);
-  _model = new ShortcutEditorModel(_view);
-
-  // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
-  // setToolTip(_model->hoverTooltipText());
-
-  _filterModel = new ShortcutEditorSortFilterProxyModel(this);
-  _filterModel->setSourceModel(_model);
-  _filterModel->setFilterKeyColumn(-1);
-  _filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-  _filterModel->setRecursiveFilteringEnabled(true);
-  _filterModel->setDynamicSortFilter(true);
-
   _view->setModel(_filterModel);
-
-  _delegate = new ShortcutEditorDelegate(_view);
   _view->setItemDelegateForColumn(1, _delegate);
 
   // _view->setMinimumSize(250, 350);
+  // _view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   // _view->resizeColumnToContents(0);
   _view->setAlternatingRowColors(true);
@@ -687,12 +734,24 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   _view->setAcceptDrops(true);
   _view->setDropIndicatorShown(true);
 
-  QAction* expandAllAction = new QAction(tr("expand all"), this);
+  createTreeViewContextMenuActions();
+
+  _view->setContextMenuPolicy(Qt::ActionsContextMenu);
+  _view->setAllColumnsShowFocus(true);
+  _view->header()->resizeSection(0, 250);
+
+  connect(_view, &QTreeView::collapsed, this, &ShortcutEditorWidget::updateExpandStates);
+  connect(_view, &QTreeView::expanded, this, &ShortcutEditorWidget::updateExpandStates);
+}
+
+void ShortcutEditorWidget::createTreeViewContextMenuActions()
+{
+  QAction *expandAllAction = new QAction(tr("expand all"), this);
   expandAllAction->setToolTip(tr("Expands all nodes"));
   connect(expandAllAction, &QAction::triggered, _view, &QTreeView::expandAll);
   _view->insertAction(nullptr, expandAllAction);
 
-  QAction* expandRecursivelyAction = new QAction(tr("expand recursively"), this);
+  QAction *expandRecursivelyAction = new QAction(tr("expand recursively"), this);
   expandRecursivelyAction->setToolTip(tr("Expands the selected nodes recursively"));
   connect(expandRecursivelyAction, &QAction::triggered, [this](){
     for (const auto& selectedIndex : _view->selectionModel()->selectedIndexes()) {
@@ -703,7 +762,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   });
   _view->insertAction(nullptr, expandRecursivelyAction);
 
-  QAction* expandAction = new QAction(tr("expand selection"), this);
+  QAction *expandAction = new QAction(tr("expand selection"), this);
   expandAction->setToolTip(tr("Expands the selected nodes"));
   connect(expandAction, &QAction::triggered, [this](){
     for (const auto& selectedIndex : _view->selectionModel()->selectedIndexes()) {
@@ -712,12 +771,12 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   });
   _view->insertAction(nullptr, expandAction);
 
-  QAction* collapseAllAction = new QAction(tr("collapse all"), this);
+  QAction *collapseAllAction = new QAction(tr("collapse all"), this);
   collapseAllAction->setToolTip(tr("Collapses all nodes"));
   connect(collapseAllAction, &QAction::triggered, _view, &QTreeView::collapseAll);
   _view->insertAction(nullptr, collapseAllAction);
 
-  QAction* collapseAction = new QAction(tr("collapse selection"), this);
+  QAction *collapseAction = new QAction(tr("collapse selection"), this);
   collapseAction->setToolTip(tr("Collapses the selected nodes"));
   connect(collapseAction, &QAction::triggered, [this](){
     for (const auto& selectedIndex : _view->selectionModel()->selectedIndexes()) {
@@ -725,11 +784,10 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
     }
   });
   _view->insertAction(nullptr, collapseAction);
+}
 
-  _view->setContextMenuPolicy(Qt::ActionsContextMenu);
-  _view->setAllColumnsShowFocus(true);
-  _view->header()->resizeSection(0, 250);
-
+void ShortcutEditorWidget::setupTreeViewFiltering()
+{
   connect(_search, &QLineEdit::textChanged, [this](const QString& text){
     if (_matchContainsAction->isChecked()) {
       _filterModel->setFilterFixedString(text);
@@ -757,17 +815,10 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
       _view->expandAll();
     }
   });
+}
 
-  // QItemSelectionModel* selectionModel = _view->selectionModel();
-  // connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &ShortcutEditorWidget::selectionChanged);
-
-  QVBoxLayout* layout = new QVBoxLayout();
-  layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
-  setLayout(layout);
-
-  layout->addLayout(searchLayout);
-  layout->addWidget(_view);
-
+QHBoxLayout* ShortcutEditorWidget::createKeyboardExpandLayout()
+{
   QHBoxLayout* keyboardExpandLayout = new QHBoxLayout();
   _keyboardExpandToolButton = new QToolButton(this);
   QIcon keyboardExpandIcon;
@@ -780,33 +831,21 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   keyboardExpandLayout->addWidget(_keyboardExpandToolButton);
   keyboardExpandLayout->addWidget(new QLabel(tr("Keyboard"), this));
 
-  layout->addLayout(keyboardExpandLayout);
-
-  QHBoxLayout* contextLayout = new QHBoxLayout();
-  _contextComboBox = new QComboBox();
-  _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  connect(_contextComboBox, &QComboBox::currentIndexChanged, this, &ShortcutEditorWidget::highlightShortcuts);
-  contextLayout->addWidget(_contextComboBox);
-  contextLayout->addStretch();
-  layout->addLayout(contextLayout);
-
-  _keyboardWidget = new KeyboardWidget(this);
-  connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &ShortcutEditorModel::assignShortcut);
-  // TODO: make it dynamically expanding
-  // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  layout->addWidget(_keyboardWidget);
-  connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightShortcuts);
-
   connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
     _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
     _contextComboBox->setVisible(!_contextComboBox->isVisible());
   }); 
 
+  return keyboardExpandLayout;
+}
+
+QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
+{
   QHBoxLayout* buttonLayout = new QHBoxLayout();
-  layout->addLayout(buttonLayout);
 
   _resetAllButton = new QPushButton("Reset All", this);
   _resetAllButton->setFocusPolicy(Qt::TabFocus);
+  connect(_resetAllButton, &QAbstractButton::clicked, [this]() { std::cout << "TEST RESET ALL CLICKED ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;});
   connect(_resetAllButton, &QAbstractButton::clicked, _model, &ShortcutEditorModel::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
@@ -816,19 +855,19 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   buttonLayout->addWidget(_resetButton);
 
   buttonLayout->addStretch(0);
-
-  connect(_view, &QTreeView::collapsed, this, &ShortcutEditorWidget::updateExpandStates);
-  connect(_view, &QTreeView::expanded, this, &ShortcutEditorWidget::updateExpandStates);
-
-  // update the selection, so that the buttons are in the right state
-  // selectionChanged();
-
-  setActions();
+  return buttonLayout;
 }
 
-ShortcutEditorWidget::~ShortcutEditorWidget()
+QHBoxLayout* ShortcutEditorWidget::createContextLayout()
 {
-  updateSearchToolButtonState();
+  QHBoxLayout* contextLayout = new QHBoxLayout();
+  _contextComboBox = new QComboBox();
+  _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+  connect(_contextComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ShortcutEditorWidget::highlightShortcuts);
+  contextLayout->addWidget(_contextComboBox);
+  contextLayout->addStretch();
+
+  return contextLayout;
 }
 
 void ShortcutEditorWidget::highlightShortcuts(int index)
@@ -979,6 +1018,12 @@ void ShortcutEditorWidget::reset()
   }
 
   _model->reset(sourceSelectedItems);
+}
+
+void ShortcutEditorWidget::resetAll()
+{
+  std::cout << "TEST WIDGET RESET ALL ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;
+  _model->resetAll();
 }
 
 void ShortcutEditorWidget::updateExpandStates(const QModelIndex& index)

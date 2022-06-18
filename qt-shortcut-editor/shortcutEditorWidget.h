@@ -13,6 +13,7 @@
 class QAction;
 class QCheckBox;
 class QComboBox;
+class QHBoxLayout;
 class QLineEdit;
 class QMenu;
 class QPushButton;
@@ -166,6 +167,7 @@ public:
 
 public Q_SLOTS:
   void reset();
+  void resetAll();
 
   void expandRecursively(const QModelIndex& index, bool fromExpandState = false);
   void updateExpandStates(const QModelIndex&);
@@ -177,6 +179,16 @@ private:
   void restoreExpandState();
 
   void updateSearchToolButtonState();
+
+  void createLayout();
+  QHBoxLayout* createSearchLayout();
+  void createFilterModel();
+  void createTreeView();
+  void createTreeViewContextMenuActions();
+  void setupTreeViewFiltering();
+  QHBoxLayout* createKeyboardExpandLayout();
+  QHBoxLayout* createButtonLayout();
+  QHBoxLayout* createContextLayout();
 
   ShortcutEditorDelegate* _delegate;
   ShortcutEditorModel* _model;
@@ -209,5 +221,3 @@ private:
 };
 
 #endif
-
-
