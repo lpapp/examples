@@ -44,7 +44,7 @@ AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newSh
   , _oldShortcut(action->shortcut())
   , _newShortcut(newShortcut)
 {
-  setText(QObject::tr("Assign %1 from %2 to %3 for %3")
+  setText(QObject::tr("Assign \"%1\" from \"%2\" to \"%3\"")
       .arg(action->text()).arg(_oldShortcut.toString()).arg(_newShortcut.toString()));
 }
 
@@ -362,6 +362,7 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   _actionsMap.clear();
   std::vector<QAction*> registeredActions = ActionManager::registeredActions();
   for (QAction* action : registeredActions) {
+    // std::cout << "TEST REGISTERED ACTION: " << (action ? "NOT NULL" : "NULL") << " " << action->text().toStdString() << std::endl;
     QString context = QString::fromStdString(ActionManager::getContext(action));
     QString category = QString::fromStdString(ActionManager::getCategory(action));
 
@@ -402,6 +403,8 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
       }
     }
   }
+
+  // std::cout << "TEST SETUP MODEL DATA: " << parent->childCount() << std::endl;
 }
 
 void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString, const QModelIndex& index)
@@ -550,6 +553,8 @@ ShortcutEditorModelItem* ShortcutEditorModel::findShortcut(const QString& keySeq
 
 void ShortcutEditorModel::resetAll()
 {
+  std::cout << "TEST MODEL RESET ALL ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;
+  std::cout << "TEST MODEL RESET ALL ROOT ITEM CHILD COUNT: " << rootItem->childCount() << std::endl;
   for (int i = 0; i < rootItem->childCount(); ++i) {
     ShortcutEditorModelItem* contextLevel = rootItem->child(i);
     for (int j = 0; j < contextLevel->childCount(); ++j) {
@@ -635,7 +640,7 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
       return false;
     }
     else {
-      // TODO: Handle the category line indices
+      // Note: Do we need to Handle the category line indices?
     }
   }
   else {
@@ -688,6 +693,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
 
 ShortcutEditorWidget::~ShortcutEditorWidget()
 {
+  std::cout << "TEST SHORTCUT EDITOR WIDGET DESTRUCTOR" << std::endl;
   updateSearchToolButtonState();
 }
 
@@ -1030,10 +1036,6 @@ void ShortcutEditorWidget::setActions()
   matchActionGroup->addAction(_matchRegularExpressionAction);
 
   restoreExpandState();
-
-  // make sure the button states are properly updated
-  // TODO: do we need this?
-  // selectionChanged();
 }
 
 void ShortcutEditorWidget::reset()
