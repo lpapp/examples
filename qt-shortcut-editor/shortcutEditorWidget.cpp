@@ -128,26 +128,6 @@ QVariant ShortcutEditorModelItem::data(int column) const
   return keySequenceString;
 }
 
-bool ShortcutEditorModelItem::setData(int column, const QVariant& value)
-{
-  if (column < 0 || static_cast<size_t>(column) >= m_itemData.size()) {
-    return false;
-  }
-
-  if (column == static_cast<int>(Column::Shortcut)) {
-    // std::cout << "TEST ITEM SET DATA: " << value.toString().toStdString() << std::endl;
-    QAction* action = static_cast<QAction*>(m_itemData[column].value<void*>());
-    if (action) {
-      action->setShortcut(QKeySequence::fromString(value.toString(), QKeySequence::NativeText));
-    }
-  }
-  else {
-    m_itemData[column] = value;
-  }
-
-  return true;
-}
-
 ShortcutEditorModelItem* ShortcutEditorModelItem::parentItem()
 {
   return m_parentItem;
@@ -162,6 +142,16 @@ QAction* ShortcutEditorModelItem::action() const
 {
   QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Shortcut));
   return static_cast<QAction*>(actionVariant.value<void*>());
+}
+
+void ShortcutEditorModelItem::setShortcut(const QString& shortcutString)
+{
+  QAction* itemAction = action();
+  if (itemAction) {
+    return;
+  }
+
+  itemAction->setShortcut(QKeySequence::fromString(shortcutString, QKeySequence::NativeText));
 }
 
 ShortcutEditorDelegate::ShortcutEditorDelegate(QObject* parent)
@@ -423,7 +413,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     QString keySequenceString = value.toString();
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
-      item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
+      item->setShortcut(keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -431,7 +421,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(item->action()));
     const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
-      item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
+      item->setShortcut(keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -450,8 +440,8 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     const int ret = messageBox.exec();
     switch (ret) {
       case QMessageBox::Yes:
-        foundItem->setData(static_cast<int>(Column::Shortcut), QVariant());
-        item->setData(static_cast<int>(Column::Shortcut), keySequenceString);
+        foundItem->setShortcut(QString());
+        item->setShortcut(keySequenceString);
         Q_EMIT dataChanged(index, index);
         return true;
       case QMessageBox::No:

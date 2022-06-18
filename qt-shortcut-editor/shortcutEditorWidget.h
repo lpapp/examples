@@ -75,11 +75,11 @@ public:
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
-    bool setData(int column, const QVariant& value);
     int row() const;
     ShortcutEditorModelItem* parentItem();
     const QString& id() const;
     QAction* action() const;
+    void setShortcut(const QString& shortcutString);
 
 private:
     std::vector<ShortcutEditorModelItem*> m_childItems;
