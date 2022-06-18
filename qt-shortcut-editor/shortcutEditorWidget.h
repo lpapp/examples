@@ -122,13 +122,15 @@ public:
   void setActions();
   ActionsMap getActionsMap() const;
 
+  QUndoStack* undoStack() const;
+
 public Q_SLOTS:
   void reset(const QModelIndexList& selectedItems);
   void resetAll();
   void assignShortcut(const QString& actionId, const QKeySequence& keySequence);
 
 private:
-  void setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString);
+  void setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString, const QModelIndex& index);
   void setupModelData(ShortcutEditorModelItem* parent);
 
   ShortcutEditorModelItem* rootItem;

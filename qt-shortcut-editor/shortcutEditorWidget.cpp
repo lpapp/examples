@@ -50,11 +50,13 @@ AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newSh
 
 void AssignShortcutCommand::undo()
 {
+  std::cout << "TEST ASSIGN SHORTCUT COMMAND UNDO" << std::endl;
   _action->setShortcut(_oldShortcut);
 }
 
 void AssignShortcutCommand::redo()
 {
+  std::cout << "TEST ASSIGN SHORTCUT COMMAND REDO" << std::endl;
   _action->setShortcut(_newShortcut);
 }
 
@@ -228,6 +230,11 @@ ActionsMap ShortcutEditorModel::getActionsMap() const
   return _actionsMap;
 }
 
+QUndoStack* ShortcutEditorModel::undoStack() const
+{
+  return _undoStack;
+}
+
 QModelIndex ShortcutEditorModel::index(int row, int column, const QModelIndex& parent) const
 {
   // std::cout << "TEST CREATE INDEX 1, ROW: " << row << ", COLUMN: " << column << std::endl;
@@ -397,7 +404,7 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   }
 }
 
-void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString)
+void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString, const QModelIndex& index)
 {
   QAction* itemAction = item->action();
   if (itemAction) {
@@ -405,6 +412,10 @@ void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QStri
     std::cout << "TEST SET SHORTCUT PUSH COMMAND" << std::endl;
     _undoStack->push(command);
   }
+  Q_EMIT dataChanged(index, index);
+  connect(_undoStack, &QUndoStack::indexChanged, [this, index](){
+    Q_EMIT dataChanged(index, index);
+  });
 }
 
 bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -415,16 +426,14 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     QString keySequenceString = value.toString();
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
-      setShortcut(item, keySequenceString);
-      Q_EMIT dataChanged(index, index);
+      setShortcut(item, keySequenceString, index);
       return true;
     }
 
     ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(item->action()));
     const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
-      setShortcut(item, keySequenceString);
-      Q_EMIT dataChanged(index, index);
+      setShortcut(item, keySequenceString, index);
       return true;
     }
 
@@ -442,9 +451,8 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     const int ret = messageBox.exec();
     switch (ret) {
       case QMessageBox::Yes:
-        setShortcut(foundItem, QString());
-        setShortcut(item, keySequenceString);
-        Q_EMIT dataChanged(index, index);
+        setShortcut(foundItem, QString(), index);
+        setShortcut(item, keySequenceString, index);
         return true;
       case QMessageBox::No:
         break;
@@ -750,6 +758,14 @@ void ShortcutEditorWidget::createTreeView()
   _view->setContextMenuPolicy(Qt::ActionsContextMenu);
   _view->setAllColumnsShowFocus(true);
   _view->header()->resizeSection(0, 250);
+
+  QAction* undoAction = _model->undoStack()->createUndoAction(this);
+  undoAction->setShortcuts(QKeySequence::Undo);
+  _view->addAction(undoAction);
+
+  QAction* redoAction = _model->undoStack()->createRedoAction(this);
+  redoAction->setShortcuts(QKeySequence::Redo);
+  _view->addAction(redoAction);
 
   connect(_view, &QTreeView::collapsed, this, &ShortcutEditorWidget::updateExpandStates);
   connect(_view, &QTreeView::expanded, this, &ShortcutEditorWidget::updateExpandStates);

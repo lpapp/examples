@@ -71,11 +71,11 @@ void MainWindow::createActions()
   exitAct->setStatusTip(tr("Exit the application"));
   connect(exitAct, &QAction::triggered, this, &QWidget::close);
 
-  undoAct = new QAction(tr("&Undo"), this);
-  undoAct->setShortcuts(QKeySequence::Undo);
+  // undoAct = new QAction(tr("&Undo"), this);
+  // undoAct->setShortcuts(QKeySequence::Undo);
 
-  redoAct = new QAction(tr("&Redo"), this);
-  redoAct->setShortcuts(QKeySequence::Redo);
+  // redoAct = new QAction(tr("&Redo"), this);
+  // redoAct->setShortcuts(QKeySequence::Redo);
 
   cutAct = new QAction(tr("Cu&t"), this);
   cutAct->setShortcuts(QKeySequence::Cut);
@@ -141,8 +141,8 @@ void MainWindow::createMenus()
   fileMenu->addAction(exitAct);
 
   editMenu = menuBar()->addMenu(tr("&Edit"));
-  editMenu->addAction(undoAct);
-  editMenu->addAction(redoAct);
+  // editMenu->addAction(undoAct);
+  // editMenu->addAction(redoAct);
   editMenu->addSeparator();
   editMenu->addAction(cutAct);
   editMenu->addAction(copyAct);
