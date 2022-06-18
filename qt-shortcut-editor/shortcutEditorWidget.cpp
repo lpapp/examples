@@ -22,6 +22,7 @@
 #include <QSplitter>
 #include <QToolButton>
 #include <QTreeView>
+#include <QUndoStack>
 #include <QVBoxLayout>
 
 #include <iostream>
@@ -49,12 +50,12 @@ AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newSh
 
 void AssignShortcutCommand::undo()
 {
-  _action->setShortcut(_newShortcut);
+  _action->setShortcut(_oldShortcut);
 }
 
 void AssignShortcutCommand::redo()
 {
-  _action->setShortcut(_oldShortcut);
+  _action->setShortcut(_newShortcut);
 }
 
 ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant>& data, const QString& id, ShortcutEditorModelItem* parent)
@@ -144,16 +145,6 @@ QAction* ShortcutEditorModelItem::action() const
   return static_cast<QAction*>(actionVariant.value<void*>());
 }
 
-void ShortcutEditorModelItem::setShortcut(const QString& shortcutString)
-{
-  QAction* itemAction = action();
-  if (itemAction) {
-    return;
-  }
-
-  itemAction->setShortcut(QKeySequence::fromString(shortcutString, QKeySequence::NativeText));
-}
-
 ShortcutEditorDelegate::ShortcutEditorDelegate(QObject* parent)
   : QStyledItemDelegate(parent)
 {
@@ -216,6 +207,7 @@ ShortcutEditorModel::ShortcutEditorModel(QObject* parent)
   rootItem = new ShortcutEditorModelItem({tr("Name"), tr("Shortcut")}, QString("root"));
   _hoverTooltip =
     "Define the keyboard shortcuts for any action available";
+  _undoStack = new QUndoStack(this);
 }
 
 ShortcutEditorModel::~ShortcutEditorModel()
@@ -405,6 +397,16 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   }
 }
 
+void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString)
+{
+  QAction* itemAction = item->action();
+  if (itemAction) {
+    QUndoCommand* command = new AssignShortcutCommand(itemAction, QKeySequence::fromString(shortcutString, QKeySequence::NativeText));
+    std::cout << "TEST SET SHORTCUT PUSH COMMAND" << std::endl;
+    _undoStack->push(command);
+  }
+}
+
 bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
   std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA: " << value.toString().toStdString() << ", ROLE: " << role << "(" << Qt::EditRole << "), COLUMN: " << index.column() << "(" << static_cast<int>(Column::Shortcut) << ")" << std::endl;
@@ -413,7 +415,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     QString keySequenceString = value.toString();
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (keySequenceString.isEmpty()) {
-      item->setShortcut(keySequenceString);
+      setShortcut(item, keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -421,7 +423,7 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(item->action()));
     const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
-      item->setShortcut(keySequenceString);
+      setShortcut(item, keySequenceString);
       Q_EMIT dataChanged(index, index);
       return true;
     }
@@ -440,8 +442,8 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     const int ret = messageBox.exec();
     switch (ret) {
       case QMessageBox::Yes:
-        foundItem->setShortcut(QString());
-        item->setShortcut(keySequenceString);
+        setShortcut(foundItem, QString());
+        setShortcut(item, keySequenceString);
         Q_EMIT dataChanged(index, index);
         return true;
       case QMessageBox::No:

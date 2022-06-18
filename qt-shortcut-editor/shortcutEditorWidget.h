@@ -20,6 +20,7 @@ class QMenu;
 class QPushButton;
 class QToolButton;
 class QTreeView;
+class QUndoStack;
 
 class KeyboardWidget;
 
@@ -79,7 +80,6 @@ public:
     ShortcutEditorModelItem* parentItem();
     const QString& id() const;
     QAction* action() const;
-    void setShortcut(const QString& shortcutString);
 
 private:
     std::vector<ShortcutEditorModelItem*> m_childItems;
@@ -128,11 +128,13 @@ public Q_SLOTS:
   void assignShortcut(const QString& actionId, const QKeySequence& keySequence);
 
 private:
+  void setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString);
   void setupModelData(ShortcutEditorModelItem* parent);
 
   ShortcutEditorModelItem* rootItem;
   ActionsMap _actionsMap;
   QString _hoverTooltip;
+  QUndoStack* _undoStack;
 };
 
 class ShortcutEditorSortFilterProxyModel : public QSortFilterProxyModel
