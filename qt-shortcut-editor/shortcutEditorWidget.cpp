@@ -413,7 +413,7 @@ void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QStri
     _undoStack->push(command);
   }
   Q_EMIT dataChanged(index, index);
-  connect(_undoStack, &QUndoStack::indexChanged, [this, index](){
+  connect(_undoStack, &QUndoStack::indexChanged, this, [this, index](){
     Q_EMIT dataChanged(index, index);
   });
 }
