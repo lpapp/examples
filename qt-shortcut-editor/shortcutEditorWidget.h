@@ -193,7 +193,7 @@ public Q_SLOTS:
   void updateExpandStates(const QModelIndex&);
 
 private Q_SLOTS:
-  void highlightShortcuts(int index);
+  void setKeyboardContext(const QItemSelection& selected, const QItemSelection& deselected);
 
 private:
   void restoreExpandState();
@@ -218,7 +218,6 @@ private:
   QLineEdit* _search;
   QTreeView* _view;
   QToolButton* _keyboardExpandToolButton;
-  QComboBox* _contextComboBox;
   KeyboardWidget* _keyboardWidget;
   QPushButton* _resetAllButton;
   QPushButton* _resetButton;

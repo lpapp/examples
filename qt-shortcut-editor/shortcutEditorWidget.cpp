@@ -683,6 +683,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   // TODO: make it dynamically expanding
   // _keyboardWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   connect(_view->model(), &QAbstractItemModel::dataChanged, _keyboardWidget, &KeyboardWidget::highlightShortcuts);
+  connect(_view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ShortcutEditorWidget::setKeyboardContext);
 
   createLayout();
 
@@ -697,6 +698,33 @@ ShortcutEditorWidget::~ShortcutEditorWidget()
   updateSearchToolButtonState();
 }
 
+void ShortcutEditorWidget::setKeyboardContext(const QItemSelection& selected, const QItemSelection& /*deselected*/)
+{
+  QModelIndex index = _filterModel->mapToSource(selected.indexes()[0]);
+  ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
+  QAction* selectedAction = item->action();
+  QString context;
+  if (selectedAction) {
+    context = QString::fromStdString(ActionManager::getContext(selectedAction));
+  }
+  else if (!item->parentItem()->parentItem()) {
+    context = item->data(static_cast<int>(Column::Name)).toString();
+  }
+  else if (!item->parentItem()->parentItem()->parentItem()) {
+    context = item->parentItem()->data(static_cast<int>(Column::Name)).toString();
+  }
+
+  std::vector<QAction*> actions;
+  ActionsMap actionsMap = _model->getActionsMap();
+  for (const auto& category : actionsMap[context]) {
+    for (const auto& action : category.second) {
+      actions.push_back(action);
+    }
+  }
+
+  _keyboardWidget->setActions(actions);
+}
+
 void ShortcutEditorWidget::createLayout()
 {
   QVBoxLayout* layout = new QVBoxLayout();
@@ -704,7 +732,6 @@ void ShortcutEditorWidget::createLayout()
   layout->addLayout(createSearchLayout());
   layout->addWidget(_view);
   layout->addLayout(createKeyboardExpandLayout());
-  layout->addLayout(createContextLayout());
   layout->addWidget(_keyboardWidget);
   layout->addLayout(createButtonLayout());
   setLayout(layout);
@@ -867,7 +894,6 @@ QHBoxLayout* ShortcutEditorWidget::createKeyboardExpandLayout()
 
   connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
     _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
-    _contextComboBox->setVisible(!_contextComboBox->isVisible());
   }); 
 
   return keyboardExpandLayout;
@@ -892,31 +918,6 @@ QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
   return buttonLayout;
 }
 
-QHBoxLayout* ShortcutEditorWidget::createContextLayout()
-{
-  QHBoxLayout* contextLayout = new QHBoxLayout();
-  _contextComboBox = new QComboBox();
-  _contextComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-  connect(_contextComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ShortcutEditorWidget::highlightShortcuts);
-  contextLayout->addWidget(_contextComboBox);
-  contextLayout->addStretch();
-
-  return contextLayout;
-}
-
-void ShortcutEditorWidget::highlightShortcuts(int index)
-{
-  std::vector<QAction*> actions;
-  ActionsMap actionsMap = _model->getActionsMap();
-  for (const auto& category : actionsMap[_contextComboBox->itemText(index)]) {
-    for (const auto& action : category.second) {
-      actions.push_back(action);
-    }
-  }
-
-  _keyboardWidget->setActions(actions);
-}
-
 void ShortcutEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
 {
   _model->setHoverTooltipText(hoverTooltipText);
@@ -927,11 +928,6 @@ void ShortcutEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
 void ShortcutEditorWidget::setActions()
 {
   _model->setActions();
-
-  _contextComboBox->clear();
-  for (const auto& context : _model->getActionsMap()) {
-    _contextComboBox->addItem(context.first);
-  }
 
   _searchToolButtonMenu->addSection("Search");
 
