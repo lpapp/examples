@@ -60,42 +60,42 @@ void AssignShortcutCommand::redo()
 }
 
 ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant>& data, const QString& id, ShortcutEditorModelItem* parent)
-  : m_itemData(data)
-  , m_parentItem(parent)
-  , m_id(id)
+  : _itemData(data)
+  , _parentItem(parent)
+  , _id(id)
 {
 }
 
 ShortcutEditorModelItem::~ShortcutEditorModelItem()
 {
-  qDeleteAll(m_childItems);
+  qDeleteAll(_childItems);
 }
 
 void ShortcutEditorModelItem::appendChild(ShortcutEditorModelItem* item)
 {
-  m_childItems.push_back(item);
+  _childItems.push_back(item);
 }
 
 ShortcutEditorModelItem* ShortcutEditorModelItem::child(int row)
 {
-  if (row < 0 || static_cast<size_t>(row) >= m_childItems.size()) {
+  if (row < 0 || static_cast<size_t>(row) >= _childItems.size()) {
     return nullptr;
   }
 
-  return m_childItems.at(row);
+  return _childItems.at(row);
 }
 
 int ShortcutEditorModelItem::childCount() const
 {
-  return m_childItems.size();
+  return _childItems.size();
 }
 
 int ShortcutEditorModelItem::row() const
 {
-  if (m_parentItem) {
-    auto it = std::find(m_parentItem->m_childItems.cbegin(), m_parentItem->m_childItems.cend(), const_cast<ShortcutEditorModelItem*>(this));
-    if (it != m_parentItem->m_childItems.cend()) {
-      return std::distance(m_parentItem->m_childItems.cbegin(), it);
+  if (_parentItem) {
+    auto it = std::find(_parentItem->_childItems.cbegin(), _parentItem->_childItems.cend(), const_cast<ShortcutEditorModelItem*>(this));
+    if (it != _parentItem->_childItems.cend()) {
+      return std::distance(_parentItem->_childItems.cbegin(), it);
     }
     else {
       return -1;
@@ -107,16 +107,16 @@ int ShortcutEditorModelItem::row() const
 
 int ShortcutEditorModelItem::columnCount() const
 {
-    return m_itemData.size();
+    return _itemData.size();
 }
 
 QVariant ShortcutEditorModelItem::data(int column) const
 {
-  if (column < 0 || static_cast<size_t>(column) >= m_itemData.size()) {
+  if (column < 0 || static_cast<size_t>(column) >= _itemData.size()) {
     return QVariant();
   }
 
-  QVariant columnVariant = m_itemData.at(column);
+  QVariant columnVariant = _itemData.at(column);
   if (column != static_cast<int>(Column::Shortcut) || columnVariant.canConvert<QString>()) {
     return columnVariant;
   }
@@ -132,17 +132,17 @@ QVariant ShortcutEditorModelItem::data(int column) const
 
 ShortcutEditorModelItem* ShortcutEditorModelItem::parentItem()
 {
-  return m_parentItem;
+  return _parentItem;
 }
 
 const QString& ShortcutEditorModelItem::id() const
 {
-  return m_id;
+  return _id;
 }
 
 QAction* ShortcutEditorModelItem::action() const
 {
-  QVariant actionVariant = m_itemData.at(static_cast<int>(Column::Shortcut));
+  QVariant actionVariant = _itemData.at(static_cast<int>(Column::Shortcut));
   return static_cast<QAction*>(actionVariant.value<void*>());
 }
 

@@ -82,10 +82,10 @@ public:
     QAction* action() const;
 
 private:
-    std::vector<ShortcutEditorModelItem*> m_childItems;
-    std::vector<QVariant> m_itemData;
-    ShortcutEditorModelItem* m_parentItem;
-    QString m_id;
+    std::vector<ShortcutEditorModelItem*> _childItems;
+    std::vector<QVariant> _itemData;
+    ShortcutEditorModelItem* _parentItem;
+    QString _id;
 };
 
 class ShortcutEditorModel : public QAbstractItemModel
