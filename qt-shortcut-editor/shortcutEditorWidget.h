@@ -13,8 +13,8 @@
 
 class QAction;
 class QCheckBox;
-class QComboBox;
 class QHBoxLayout;
+class QItemSelection;
 class QLineEdit;
 class QMenu;
 class QPushButton;

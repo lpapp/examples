@@ -7,7 +7,6 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCheckBox>
-#include <QComboBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
