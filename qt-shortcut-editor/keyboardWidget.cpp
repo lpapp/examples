@@ -238,7 +238,7 @@ KeyboardWidget::KeyboardWidget(QWidget* parent)
           connect(button, &QAbstractButton::clicked, [this, key, button](){
             _modifiers.setFlag(static_cast<Qt::KeyboardModifier>(key.key), !_modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key)));
             const bool enabled = _modifiers.testFlag(static_cast<Qt::KeyboardModifier>(key.key));
-            button->setPalette(enabled ? _color : palette());
+            button->setPalette(enabled ? QApplication::palette().color(QPalette::Text) : palette());
             highlightShortcuts();
           });
         }
@@ -286,11 +286,6 @@ void KeyboardWidget::resizeEvent(QResizeEvent* /*event*/)
   resizeButtons();
 }
 
-void KeyboardWidget::setButtonColor(const QColor& color)
-{
-  _color = color;
-}
-
 void KeyboardWidget::highlightShortcuts()
 {
   resetHighlights();
@@ -302,7 +297,7 @@ void KeyboardWidget::highlightShortcuts()
     int key = action->shortcut()[0].toCombined() - static_cast<int>(_modifiers);
 #endif
     if (_buttonsMap.count(key)) {
-      _buttonsMap[key]->setPalette(_color);
+      _buttonsMap[key]->setPalette(QApplication::palette().color(QPalette::Text));
       _buttonsMap[key]->setToolTip(action->text());
     }
   }

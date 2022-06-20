@@ -913,13 +913,7 @@ void ShortcutEditorWidget::highlightShortcuts(int index)
       actions.push_back(action);
     }
   }
-  std::vector<QColor> colors{Qt::white, Qt::black, Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow, Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta, Qt::darkYellow};
-  QColor color = Qt::white;
-  if (static_cast<size_t>(_contextComboBox->currentIndex()) < colors.size()) {
-    color = colors[index];
-  }
 
-  _keyboardWidget->setButtonColor(color);
   _keyboardWidget->setActions(actions);
 }
 

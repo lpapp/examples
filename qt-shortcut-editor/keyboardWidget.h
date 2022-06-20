@@ -11,7 +11,6 @@
 #include <vector>
 
 class QAction;
-class QColor;
 class QMimeData;
 
 class KeyButton : public QPushButton
@@ -41,7 +40,6 @@ class KeyboardWidget : public QWidget
 
 public:
 	KeyboardWidget(QWidget* parent = nullptr);
-  void setButtonColor(const QColor& color);
   void setActions(const std::vector<QAction*> actions);
   Qt::KeyboardModifiers modifiers() const;
 
@@ -61,7 +59,6 @@ private:
   std::vector<std::vector<KeyButton*>> _buttons;
 
   Qt::KeyboardModifiers _modifiers;
-  QColor _color;
   std::vector<QAction*> _actions;
 };
 
