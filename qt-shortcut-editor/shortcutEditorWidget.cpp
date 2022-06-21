@@ -361,24 +361,38 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   _actionsMap.clear();
   std::vector<QAction*> registeredActions = ActionManager::registeredActions();
   for (QAction* action : registeredActions) {
-    // std::cout << "TEST REGISTERED ACTION: " << (action ? "NOT NULL" : "NULL") << " " << action->text().toStdString() << std::endl;
+    // std::cout << "TEST REGISTERED ACTION: " << (action ? "NOT NULL" : "NULL") << " \"" << action->text().toStdString() << "\"" << std::endl;
     QString context = QString::fromStdString(ActionManager::getContext(action));
+    // std::cout << "TEST AFTER" << std::endl;
     QString category = QString::fromStdString(ActionManager::getCategory(action));
 
     CategoryActionsMap categoryActionsMap;
-    if (_actionsMap.count(context)) {
+    const bool containsContext = _actionsMap.count(context);
+    if (containsContext) {
       categoryActionsMap = _actionsMap[context];
     }
 
     std::vector<QAction*> actions;
-    if (categoryActionsMap.count(category)) {
+    const bool containsCategory = categoryActionsMap.count(category);
+    if (containsCategory) {
       actions = categoryActionsMap[category];
     }
 
     actions.push_back(action);
 
-    categoryActionsMap.insert_or_assign(category, actions);
-    _actionsMap.insert_or_assign(context, categoryActionsMap);
+    if (containsCategory) {
+      categoryActionsMap[category] = actions;
+    }
+    else {
+      categoryActionsMap.insert({category, actions});
+    }
+
+    if (containsContext) {
+      _actionsMap[context] = categoryActionsMap;
+    }
+    else {
+      _actionsMap.insert({context, categoryActionsMap});
+    }
   }
 
   QAction* nullAction = nullptr;
@@ -652,7 +666,7 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
   QString target;
   switch (_target) {
     case SearchTarget::Shortcut:
-      std::cout << "TEST SEARCH TARGET SHORTCUT" << std::endl;
+      // std::cout << "TEST SEARCH TARGET SHORTCUT" << std::endl;
       if (action) {
         target = item->action()->shortcut().toString();
       }
@@ -666,11 +680,12 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
       break;
     case SearchTarget::Name:
     default:
-      std::cout << "TEST SEARCH TARGET NAME" << std::endl;
+      // std::cout << "TEST SEARCH TARGET NAME" << std::endl;
       target = actionName;
       break;
   };
 
+  // std::cout << "TEST TARGET (" << target.toStdString() << "): '" << filterRegularExpression().pattern().toStdString() << "'" << std::endl;
   return target.contains(filterRegularExpression());
 }
 
@@ -723,33 +738,6 @@ ShortcutEditorWidget::~ShortcutEditorWidget()
 {
   std::cout << "TEST SHORTCUT EDITOR WIDGET DESTRUCTOR" << std::endl;
   updateSearchToolButtonState();
-}
-
-void ShortcutEditorWidget::setKeyboardContext(const QItemSelection& selected, const QItemSelection& /*deselected*/)
-{
-  QModelIndex index = _filterModel->mapToSource(selected.indexes()[0]);
-  ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
-  QAction* selectedAction = item->action();
-  QString context;
-  if (selectedAction) {
-    context = QString::fromStdString(ActionManager::getContext(selectedAction));
-  }
-  else if (!item->parentItem()->parentItem()) {
-    context = item->data(static_cast<int>(Column::Name)).toString();
-  }
-  else if (!item->parentItem()->parentItem()->parentItem()) {
-    context = item->parentItem()->data(static_cast<int>(Column::Name)).toString();
-  }
-
-  std::vector<QAction*> actions;
-  ActionsMap actionsMap = _model->getActionsMap();
-  for (const auto& category : actionsMap[context]) {
-    for (const auto& action : category.second) {
-      actions.push_back(action);
-    }
-  }
-
-  _keyboardWidget->setActions(actions);
 }
 
 void ShortcutEditorWidget::createLayout()
@@ -878,6 +866,7 @@ void ShortcutEditorWidget::setupTreeViewFiltering()
 {
   connect(_search, &QLineEdit::textChanged, [this](const QString& text){
     if (_matchContainsAction->isChecked()) {
+      std::cout << "TEST TEXT CHANGED: " << text.toStdString() << std::endl;
       _filterModel->setFilterFixedString(text);
     }
     else if (_matchExactlyAction->isChecked()) {
@@ -943,6 +932,33 @@ QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
 
   buttonLayout->addStretch(0);
   return buttonLayout;
+}
+
+void ShortcutEditorWidget::setKeyboardContext(const QItemSelection& selected, const QItemSelection& /*deselected*/)
+{
+  QModelIndex index = _filterModel->mapToSource(selected.indexes()[0]);
+  ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
+  QAction* selectedAction = item->action();
+  QString context;
+  if (selectedAction) {
+    context = QString::fromStdString(ActionManager::getContext(selectedAction));
+  }
+  else if (!item->parentItem()->parentItem()) {
+    context = item->data(static_cast<int>(Column::Name)).toString();
+  }
+  else if (!item->parentItem()->parentItem()->parentItem()) {
+    context = item->parentItem()->data(static_cast<int>(Column::Name)).toString();
+  }
+
+  std::vector<QAction*> actions;
+  ActionsMap actionsMap = _model->getActionsMap();
+  for (const auto& category : actionsMap[context]) {
+    for (const auto& action : category.second) {
+      actions.push_back(action);
+    }
+  }
+
+  _keyboardWidget->setActions(actions);
 }
 
 void ShortcutEditorWidget::setHoverTooltipText(const QString& hoverTooltipText)
