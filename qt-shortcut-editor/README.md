@@ -27,6 +27,7 @@ The following features are supported:
 * Changing shortcuts in the tree.
 * Removing shortcutss in the tree.
 * Clash detection (only in clashing contexts, smartly).
+* Shortcut processing blocked whilst recording.
 
 * Undo an assignment by shortcut (ctrl-z).
 * Redo an assignment by shortcut (shift-ctrl-z).
@@ -43,15 +44,24 @@ The following features are supported:
 * Reset all shortcuts.
 * Restore the defaults on any page in the dialog.
 
-* Highlighting keys on the keyboard.
+* Saving the state of the tree (expansion and collapsing).
+* Saving the state of the search options.
+* Clearing the search field by a button press.
+* Highlighting keys on the keyboard (following application settings).
 * Changing the context on the keyboard automatically driven by selection.
-* Drag from the tree to the keyboard to assign.
-* Drag from the keyboard to the tree to assign.
+* Drag a row from the tree to the keyboard to assign.
+* Drag from the keyboard to a tree row to assign.
 * Highlight indication when dragging from the tree unto the keyboard to see
-  which key would be assigned.
+  which key would be assigned. (following application settings).
 * Tooltips for the actions on the keyboard.
 * Keyboard highlights automatically updating on assignment (recording or drag and drop).
 
+* Tooltip for the shortcut editor itself.
 * Tree automatically resizing to take up the space.
 * Tree scrollable if too many items.
-* Highlight custom shortcuts.
+* Highlight custom shortcuts (following application settings).
+* Multiple shortcuts for the same action.
+* Tree organised by contexts.
+* Multiple selections.
+* Native view of the shortcuts (e.g. pretty glyphs on Mac).
+* Cross-platform (tested on Windows, Linux and Mac).
