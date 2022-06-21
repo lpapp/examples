@@ -936,6 +936,11 @@ QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
 
 void ShortcutEditorWidget::setKeyboardContext(const QItemSelection& selected, const QItemSelection& /*deselected*/)
 {
+  QModelIndexList indexList = selected.indexes();
+  if (indexList.isEmpty()) {
+    return _keyboardWidget->setActions({});
+  }
+
   QModelIndex index = _filterModel->mapToSource(selected.indexes()[0]);
   ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
   QAction* selectedAction = item->action();
