@@ -649,7 +649,29 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
     }
   }
 
-  return actionName.contains(filterRegularExpression());
+  QString target;
+  switch (_target) {
+    case SearchTarget::Shortcut:
+      std::cout << "TEST SEARCH TARGET SHORTCUT" << std::endl;
+      if (action) {
+        target = item->action()->shortcut().toString();
+      }
+      break;
+    case SearchTarget::DefaultShortcut:
+      if (action) {
+        target = ActionManager::getDefaultShortcut(action).toString();
+      }
+      break;
+    case SearchTarget::CustomShortcut:
+      break;
+    case SearchTarget::Name:
+    default:
+      std::cout << "TEST SEARCH TARGET NAME" << std::endl;
+      target = actionName;
+      break;
+  };
+
+  return target.contains(filterRegularExpression());
 }
 
 void ShortcutEditorSortFilterProxyModel::updateContext(const std::string& context, bool checked)
@@ -661,6 +683,12 @@ void ShortcutEditorSortFilterProxyModel::updateContext(const std::string& contex
     _contexts.erase(context);
   }
 
+  invalidateFilter();
+}
+
+void ShortcutEditorSortFilterProxyModel::updateTarget(SearchTarget target)
+{
+  _target = target;
   invalidateFilter();
 }
 
@@ -989,6 +1017,13 @@ void ShortcutEditorWidget::setActions()
   _nonDefaultShortcutAction = _searchToolButtonMenu->addAction(tr("Non-default Shortcut"));
   _nonDefaultShortcutAction->setCheckable(true);
   _nonDefaultShortcutAction->setChecked(sSearchToolButtonState._nonDefaultShortcutChecked);
+
+  _filterModel->updateTarget(_nameAction->isChecked() ? SearchTarget::Name : SearchTarget::Shortcut);
+  connect(_nameAction, &QAction::toggled, this, [this](const bool checked) {
+    SearchTarget target = checked ? SearchTarget::Name : SearchTarget::Shortcut;
+    std::cout << "TEST SEARCH TARGET: " << static_cast<int>(target) << std::endl;
+    _filterModel->updateTarget(target);
+  });
 
   _searchToolButtonMenu->addSection("Match");
 

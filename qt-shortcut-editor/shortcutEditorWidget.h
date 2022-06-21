@@ -37,6 +37,13 @@ enum class Column : uint8_t {
   Shortcut
 };
 
+enum class SearchTarget : uint8_t {
+  Name,
+  Shortcut,
+  DefaultShortcut,
+  CustomShortcut
+};
+
 struct SearchToolButtonState
 {
   QString _actionGroupName;
@@ -148,10 +155,13 @@ public:
 
 public Q_SLOTS:
   void updateContext(const std::string& context, bool checked);
+  void updateTarget(SearchTarget target);
 
 private:
   bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+
   std::unordered_set<std::string> _contexts;
+  SearchTarget _target;
 };
 
 class ShortcutEditorDelegate : public QStyledItemDelegate
