@@ -685,7 +685,6 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
       break;
   };
 
-  // std::cout << "TEST TARGET (" << target.toStdString() << "): '" << filterRegularExpression().pattern().toStdString() << "'" << std::endl;
   return target.contains(filterRegularExpression());
 }
 
@@ -866,7 +865,6 @@ void ShortcutEditorWidget::setupTreeViewFiltering()
 {
   connect(_search, &QLineEdit::textChanged, [this](const QString& text){
     if (_matchContainsAction->isChecked()) {
-      std::cout << "TEST TEXT CHANGED: " << text.toStdString() << std::endl;
       _filterModel->setFilterFixedString(text);
     }
     else if (_matchExactlyAction->isChecked()) {
