@@ -37,7 +37,7 @@ void PreferencesLayout::addRowWidgets(const QString& labelText, const QList<QWid
 void PreferencesLayout::addDivider(const QString& text, int row)
 {
   QFrame* divider = new QFrame();
-  divider->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+  divider->setFrameStyle(static_cast<int>(QFrame::HLine) | static_cast<int>(QFrame::Sunken));
   divider->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
   if (row >= 0) {
     insertRow(row, text, divider);
