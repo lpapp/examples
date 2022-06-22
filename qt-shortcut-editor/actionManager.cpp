@@ -1,6 +1,7 @@
 #include "actionManager.h"
 
 #include <QAction>
+#include <QApplication>
 
 #include <algorithm>
 #include <cctype>
@@ -66,7 +67,7 @@ void ActionManager::registerActions(std::vector<QAction*> actions, const std::st
 
 QAction* ActionManager::registerAction(const std::string& name, const std::string& shortcut, const std::string& context, const std::string& category)
 {
-  QAction* action = new QAction(QObject::tr(name.c_str()));
+  QAction* action = new QAction(QObject::tr(name.c_str()), qApp);
   action->setShortcut(QKeySequence(QString::fromStdString(shortcut)));
   registerAction(action, context, category);
   return action;
@@ -74,7 +75,7 @@ QAction* ActionManager::registerAction(const std::string& name, const std::strin
 
 QAction* ActionManager::registerAction(const std::string& name, int shortcut, const std::string& context, const std::string& category)
 {
-  QAction* action = new QAction(QObject::tr(name.c_str()));
+  QAction* action = new QAction(QObject::tr(name.c_str()), qApp);
   action->setShortcut(QKeySequence(shortcut));
   registerAction(action, context, category);
   return action;
@@ -82,7 +83,7 @@ QAction* ActionManager::registerAction(const std::string& name, int shortcut, co
 
 QAction* ActionManager::registerAction(const std::string& name, const std::vector<std::string>& shortcuts, const std::string& context, const std::string& category)
 {
-  QAction* action = new QAction(QObject::tr(name.c_str()));
+  QAction* action = new QAction(QObject::tr(name.c_str()), qApp);
   QList<QKeySequence> keySequences;
   for (const std::string& shortcut : shortcuts) {
     keySequences.push_back(QKeySequence(QString::fromStdString(shortcut)));
@@ -94,7 +95,7 @@ QAction* ActionManager::registerAction(const std::string& name, const std::vecto
 
 QAction* ActionManager::registerAction(const std::string& name, const std::vector<int>& shortcuts, const std::string& context, const std::string& category)
 {
-  QAction* action = new QAction(QObject::tr(name.c_str()));
+  QAction* action = new QAction(QObject::tr(name.c_str()), qApp);
   QList<QKeySequence> keySequences;
   for (const int shortcut : shortcuts) {
     keySequences.push_back(QKeySequence(shortcut));
