@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
+
 HotkeyEditorModelItem::HotkeyEditorModelItem(const std::vector<QVariant>& data, HotkeyEditorModelItem* parent)
   : m_itemData(data)
   , m_parentItem(parent)

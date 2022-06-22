@@ -12,8 +12,6 @@ class QModelIndex;
 class QSortFilterProxyModel;
 class QTreeView;
 
-static const char* kDefaultShortcutPropertyName = "defaultShortcut";
-static const char* kIdPropertyName = "id";
 static const std::string kDomainName = "lpapp";
 
 using CategoryHotkeysMap = std::map<QString, std::vector<QAction*>>;

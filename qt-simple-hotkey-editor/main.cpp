@@ -4,6 +4,9 @@
 #include <QApplication>
 #include <QPalette>
 
+static const char* kIdPropertyName = "id";
+static const char* kDefaultShortcutPropertyName = "defaultShortcut";
+
 void setApplication(QApplication& application)
 {
     QPalette palette(QColor(50, 50, 50));
