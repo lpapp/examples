@@ -7,7 +7,13 @@
 class BorderLayout : public QLayout
 {
 public:
-  enum Position { West, North, South, East, Center };
+  enum class Position {
+    West,
+    North,
+    South,
+    East,
+    Center
+  };
 
   explicit BorderLayout(QWidget* parent, const QMargins& margins = QMargins(), int spacing = -1);
   BorderLayout(int spacing = -1);
@@ -29,7 +35,7 @@ public:
 private:
   struct ItemWrapper
   {
-    ItemWrapper(QLayoutItem* i, Position p) {
+    ItemWrapper(QLayoutItem* i = nullptr, Position p = Position::West) {
       item = i;
       position = p;
     }
@@ -41,7 +47,7 @@ private:
   enum SizeType { MinimumSize, SizeHint };
   QSize calculateSize(SizeType sizeType) const;
 
-  std::vector<ItemWrapper*> items;
+  std::vector<ItemWrapper> items;
 };
 
 #endif

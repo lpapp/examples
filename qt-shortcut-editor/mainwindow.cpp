@@ -16,12 +16,12 @@
 MainWindow::MainWindow()
 {
   BorderLayout* layout = new BorderLayout;
-  layout->addWidget(new OpenGLWidget, BorderLayout::Center);
-  layout->addWidget(new QLabel("North"), BorderLayout::North);
-  layout->addWidget(new QLabel("West"), BorderLayout::West);
-  layout->addWidget(new QLabel("East 1"), BorderLayout::East);
-  layout->addWidget(new QLabel("East 2") , BorderLayout::East);
-  layout->addWidget(new QLabel("South"), BorderLayout::South);
+  layout->addWidget(new OpenGLWidget, BorderLayout::Position::Center);
+  layout->addWidget(new QLabel("North"), BorderLayout::Position::North);
+  layout->addWidget(new QLabel("West"), BorderLayout::Position::West);
+  layout->addWidget(new QLabel("East 1"), BorderLayout::Position::East);
+  layout->addWidget(new QLabel("East 2") , BorderLayout::Position::East);
+  layout->addWidget(new QLabel("South"), BorderLayout::Position::South);
   QWidget* centralWidget = new QWidget;
   centralWidget->setLayout(layout);
   setCentralWidget(centralWidget);
