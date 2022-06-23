@@ -711,6 +711,8 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
 {
   std::cout << "TEST SHORTCUT EDITOR WIDGET CONSTRUCTOR" << std::endl;
 
+  createSearchLayout();
+
   _model = new ShortcutEditorModel(this);
   createFilterModel();
   _delegate = new ShortcutEditorDelegate(this);
@@ -719,6 +721,7 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
   // setToolTip(_model->hoverTooltipText());
 
+  std::cout << "TEST CONSTRUCTING THE KEYBOARD WIDGET" << std::endl;
   _keyboardWidget = new KeyboardWidget(this);
   connect(_keyboardWidget, &KeyboardWidget::actionDropped, _model, &ShortcutEditorModel::assignShortcut);
   // TODO: make it dynamically expanding
@@ -743,7 +746,7 @@ void ShortcutEditorWidget::createLayout()
 {
   QVBoxLayout* layout = new QVBoxLayout();
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
-  layout->addLayout(createSearchLayout());
+  layout->addLayout(_searchLayout);
   layout->addWidget(_view);
   layout->addLayout(createKeyboardExpandLayout());
   layout->addWidget(_keyboardWidget);
@@ -761,9 +764,9 @@ void ShortcutEditorWidget::createFilterModel()
   _filterModel->setDynamicSortFilter(true);
 }
 
-QHBoxLayout* ShortcutEditorWidget::createSearchLayout()
+void ShortcutEditorWidget::createSearchLayout()
 {
-  QHBoxLayout* searchLayout = new QHBoxLayout();
+  _searchLayout = new QHBoxLayout();
 
   _searchToolButtonMenu = new QMenu();
   _searchToolButton = new QToolButton(this);
@@ -771,19 +774,19 @@ QHBoxLayout* ShortcutEditorWidget::createSearchLayout()
   _searchToolButton->setMenu(_searchToolButtonMenu);
   _searchToolButton->setPopupMode(QToolButton::InstantPopup);
 
+  std::cout << "TEST CONSTRUCTING THE SEARCH LINE EDIT" << std::endl;
   _search = new QLineEdit(this);
   _search->setPlaceholderText("Search Shortcuts");
   _search->setClearButtonEnabled(true);
 
-  searchLayout->addWidget(_searchToolButton);
-  searchLayout->addWidget(_search);
-  searchLayout->setSpacing(0);
-
-  return searchLayout;
+  _searchLayout->addWidget(_searchToolButton);
+  _searchLayout->addWidget(_search);
+  _searchLayout->setSpacing(0);
 }
 
 void ShortcutEditorWidget::createTreeView()
 {
+  std::cout << "TEST CONSTRUCTING THE TREE VIEW" << std::endl;
   _view = new QTreeView(this);
   _view->setModel(_filterModel);
   _view->setItemDelegateForColumn(1, _delegate);
@@ -804,7 +807,6 @@ void ShortcutEditorWidget::createTreeView()
 
   _view->setContextMenuPolicy(Qt::ActionsContextMenu);
   _view->setAllColumnsShowFocus(true);
-  _view->setFocusPolicy(Qt::StrongFocus);
   _view->header()->resizeSection(0, 250);
 
   QAction* undoAction = _model->undoStack()->createUndoAction(this);
@@ -917,14 +919,16 @@ QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
 {
   QHBoxLayout* buttonLayout = new QHBoxLayout();
 
+  std::cout << "TEST CONSTRUCTING THE RESET ALL BUTTON" << std::endl;
   _resetAllButton = new QPushButton("Reset All", this);
-  _resetAllButton->setFocusPolicy(Qt::TabFocus);
+  _resetAllButton->setFocusPolicy(Qt::StrongFocus);
   connect(_resetAllButton, &QAbstractButton::clicked, [this]() { std::cout << "TEST RESET ALL CLICKED ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;});
   connect(_resetAllButton, &QAbstractButton::clicked, _model, &ShortcutEditorModel::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
+  std::cout << "TEST CONSTRUCTING THE RESET BUTTON" << std::endl;
   _resetButton = new QPushButton("Reset", this);
-  _resetButton->setFocusPolicy(Qt::TabFocus);
+  _resetButton->setFocusPolicy(Qt::StrongFocus);
   connect(_resetButton, &QAbstractButton::clicked, this, &ShortcutEditorWidget::reset);
   buttonLayout->addWidget(_resetButton);
 

@@ -211,7 +211,7 @@ private:
   void updateSearchToolButtonState();
 
   void createLayout();
-  QHBoxLayout* createSearchLayout();
+  void createSearchLayout();
   void createFilterModel();
   void createTreeView();
   void createTreeViewContextMenuActions();
@@ -223,6 +223,7 @@ private:
   ShortcutEditorDelegate* _delegate;
   ShortcutEditorModel* _model;
   ShortcutEditorSortFilterProxyModel* _filterModel;
+  QHBoxLayout* _searchLayout;
   QToolButton* _searchToolButton;
   QMenu* _searchToolButtonMenu;
   QLineEdit* _search;
