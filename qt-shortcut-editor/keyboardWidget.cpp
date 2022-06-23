@@ -84,7 +84,7 @@ void KeyButton::dragEnterEvent(QDragEnterEvent* event)
     return;
   }
 
-  std::cout << "TEST DRAG ENTER EVENT: " << text().toStdString() << std::endl;
+  // std::cout << "TEST DRAG ENTER EVENT: " << text().toStdString() << std::endl;
   _dragPalette = palette();
   setPalette(QApplication::palette().color(QPalette::Highlight));
   event->acceptProposedAction();
@@ -92,7 +92,7 @@ void KeyButton::dragEnterEvent(QDragEnterEvent* event)
 
 void KeyButton::dragLeaveEvent(QDragLeaveEvent* /*event*/)
 {
-  std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
+  // std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
   setPalette(_dragPalette);
 }
 
@@ -292,6 +292,11 @@ void KeyboardWidget::highlightShortcuts()
   resetHighlights();
 
   for (const QAction* action : _actions) {
+    QKeySequence keySequence = action->shortcut();
+    if (keySequence.isEmpty()) {
+      continue;
+    }
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     int key = action->shortcut()[0] - static_cast<int>(_modifiers);
 #else

@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-static const char* kDefaultShortcutPropertyName = "defaultShortcut";
+static const char* kDefaultShortcutPropertyName = "defaultShortcuts";
 static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
 static const char* kIdPropertyName = "id";
 // TODO: add an override for registering third-party actions with a string
@@ -43,7 +43,7 @@ void ActionManager::registerAction(QAction* action)
 
 void EncodeString(std::string& text)
 {
-  text.erase(std::remove_if(text.begin(), text.end(), [](char c) { return std::isspace(c); }), text.end());
+  // text.erase(std::remove_if(text.begin(), text.end(), [](char c) { return std::isspace(c); }), text.end());
 }
 
 void ActionManager::registerAction(QAction* action, const std::string& context, const std::string& category)
@@ -54,7 +54,7 @@ void ActionManager::registerAction(QAction* action, const std::string& context, 
   std::string conciseCategory = category;
   EncodeString(conciseContext);
 
-  action->setProperty(kIdPropertyName, QString::fromStdString(kDomainName + "." + conciseContext + "." + conciseCategory) + "." + action->text().simplified().remove(' '));
+  action->setProperty(kIdPropertyName, QString::fromStdString(kDomainName + "." + conciseContext + "." + conciseCategory) + "." + action->text()/*.simplified().remove(' ')*/);
   registerAction(action);
 }
 
@@ -117,7 +117,16 @@ std::string ActionManager::getId(QAction* action)
 
 std::string ActionManager::getContext(QAction* action)
 {
-  return action->property(kIdPropertyName).toString().split(kIdDelimiter)[static_cast<int>(Id::Context)].toStdString();
+  // std::cout << "TEST GET CONTEXT ID 1: " << reinterpret_cast<void*>(action) << std::endl;
+  // std::cout << "TEST GET CONTEXT ID 2: " << action->property(kIdPropertyName).toString().toStdString() << std::endl;
+  QVariant idVariant = action->property(kIdPropertyName);
+  if (!idVariant.isValid() || idVariant.isNull() || !idVariant.canConvert<QString>()) {
+    return std::string();
+  }
+
+  const QStringList sections = idVariant.toString().split(kIdDelimiter);
+  const size_t index = static_cast<int>(Id::Context);
+  return ((sections.size() <= index) ? std::string() : sections[index].toStdString());
 }
 
 std::string ActionManager::getCategory(QAction* action)
@@ -132,5 +141,5 @@ QKeySequence ActionManager::getDefaultShortcut(QAction* action)
 
 QList<QKeySequence> ActionManager::getDefaultShortcuts(QAction* action)
 {
-  return action->property(kDefaultShortcutsPropertyName).value<QList<QKeySequence>>();
+  return action->property(kDefaultShortcutPropertyName).value<QList<QKeySequence>>();
 }
