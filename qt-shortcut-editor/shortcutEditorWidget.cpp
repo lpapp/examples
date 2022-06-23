@@ -913,7 +913,7 @@ void ShortcutEditorWidget::createKeyboardExpandLayout()
 {
   _keyboardExpandLayout = new QHBoxLayout();
   _keyboardExpandToolButton = new QToolButton(this);
-  _keyboardExpandToolButton->setFocusPolicy(Qt::StrongFocus);
+  _keyboardExpandToolButton->setFocusPolicy(Qt::TabFocus);
   QIcon keyboardExpandIcon;
   keyboardExpandIcon.addPixmap(style()->standardPixmap(QStyle::SP_ArrowRight),
                            QIcon::Normal, QIcon::Off);
@@ -935,14 +935,14 @@ QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
 
   std::cout << "TEST CONSTRUCTING THE RESET ALL BUTTON" << std::endl;
   _resetAllButton = new QPushButton("Reset All", this);
-  _resetAllButton->setFocusPolicy(Qt::StrongFocus);
+  _resetAllButton->setFocusPolicy(Qt::TabFocus);
   connect(_resetAllButton, &QAbstractButton::clicked, [this]() { std::cout << "TEST RESET ALL CLICKED ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;});
   connect(_resetAllButton, &QAbstractButton::clicked, _model, &ShortcutEditorModel::resetAll);
   buttonLayout->addWidget(_resetAllButton);
 
   std::cout << "TEST CONSTRUCTING THE RESET BUTTON" << std::endl;
   _resetButton = new QPushButton("Reset", this);
-  _resetButton->setFocusPolicy(Qt::StrongFocus);
+  _resetButton->setFocusPolicy(Qt::TabFocus);
   connect(_resetButton, &QAbstractButton::clicked, this, &ShortcutEditorWidget::reset);
   buttonLayout->addWidget(_resetButton);
 
