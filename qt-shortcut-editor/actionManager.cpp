@@ -10,7 +10,6 @@
 #include <vector>
 
 static const char* kDefaultShortcutPropertyName = "defaultShortcuts";
-static const char* kDefaultShortcutsPropertyName = "defaultShortcuts";
 static const char* kIdPropertyName = "id";
 // TODO: add an override for registering third-party actions with a string
 // parameter to differentiate them from the default domain and other
@@ -41,18 +40,19 @@ void ActionManager::registerAction(QAction* action)
   _idActionHash.insert({getId(action), action});
 }
 
+// TODO: Remove?
 void EncodeString(std::string& text)
 {
-  // text.erase(std::remove_if(text.begin(), text.end(), [](char c) { return std::isspace(c); }), text.end());
+  text.erase(std::remove_if(text.begin(), text.end(), [](char c) { return std::isspace(c); }), text.end());
 }
 
 void ActionManager::registerAction(QAction* action, const std::string& context, const std::string& category)
 {
   std::string conciseContext = context;
-  EncodeString(conciseContext);
+  // EncodeString(conciseContext);
 
   std::string conciseCategory = category;
-  EncodeString(conciseContext);
+  // EncodeString(conciseContext);
 
   action->setProperty(kIdPropertyName, QString::fromStdString(kDomainName + "." + conciseContext + "." + conciseCategory) + "." + action->text()/*.simplified().remove(' ')*/);
   registerAction(action);
@@ -126,7 +126,7 @@ std::string ActionManager::getContext(QAction* action)
 
   const QStringList sections = idVariant.toString().split(kIdDelimiter);
   const size_t index = static_cast<int>(Id::Context);
-  return ((sections.size() <= index) ? std::string() : sections[index].toStdString());
+  return ((static_cast<size_t>(sections.size()) <= index) ? std::string() : sections[index].toStdString());
 }
 
 std::string ActionManager::getCategory(QAction* action)
