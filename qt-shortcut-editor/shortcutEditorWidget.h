@@ -216,9 +216,8 @@ private:
   void createTreeView();
   void createTreeViewContextMenuActions();
   void setupTreeViewFiltering();
-  QHBoxLayout* createKeyboardExpandLayout();
+  void createKeyboardExpandLayout();
   QHBoxLayout* createButtonLayout();
-  QHBoxLayout* createContextLayout();
 
   ShortcutEditorDelegate* _delegate;
   ShortcutEditorModel* _model;
@@ -228,6 +227,7 @@ private:
   QMenu* _searchToolButtonMenu;
   QLineEdit* _search;
   QTreeView* _view;
+  QHBoxLayout* _keyboardExpandLayout;
   QToolButton* _keyboardExpandToolButton;
   KeyboardWidget* _keyboardWidget;
   QPushButton* _resetAllButton;

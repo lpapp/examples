@@ -731,6 +731,8 @@ ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent) :
   _delegate = new ShortcutEditorDelegate(this);
   createTreeView();
 
+  createKeyboardExpandLayout();
+
   // TODO: Add meaningful tooltip, maybe with some delay to be less distractive?
   // setToolTip(_model->hoverTooltipText());
 
@@ -761,7 +763,7 @@ void ShortcutEditorWidget::createLayout()
   layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
   layout->addLayout(_searchLayout);
   layout->addWidget(_view);
-  layout->addLayout(createKeyboardExpandLayout());
+  layout->addLayout(_keyboardExpandLayout);
   layout->addWidget(_keyboardWidget);
   layout->addLayout(createButtonLayout());
   setLayout(layout);
@@ -907,10 +909,11 @@ void ShortcutEditorWidget::setupTreeViewFiltering()
   });
 }
 
-QHBoxLayout* ShortcutEditorWidget::createKeyboardExpandLayout()
+void ShortcutEditorWidget::createKeyboardExpandLayout()
 {
-  QHBoxLayout* keyboardExpandLayout = new QHBoxLayout();
+  _keyboardExpandLayout = new QHBoxLayout();
   _keyboardExpandToolButton = new QToolButton(this);
+  _keyboardExpandToolButton->setFocusPolicy(Qt::StrongFocus);
   QIcon keyboardExpandIcon;
   keyboardExpandIcon.addPixmap(style()->standardPixmap(QStyle::SP_ArrowRight),
                            QIcon::Normal, QIcon::Off);
@@ -918,14 +921,12 @@ QHBoxLayout* ShortcutEditorWidget::createKeyboardExpandLayout()
                            QIcon::Normal, QIcon::On);
   _keyboardExpandToolButton->setIcon(keyboardExpandIcon);
   _keyboardExpandToolButton->setCheckable(true);
-  keyboardExpandLayout->addWidget(_keyboardExpandToolButton);
-  keyboardExpandLayout->addWidget(new QLabel(tr("Keyboard"), this));
+  _keyboardExpandLayout->addWidget(_keyboardExpandToolButton);
+  _keyboardExpandLayout->addWidget(new QLabel(tr("Keyboard"), this));
 
   connect(_keyboardExpandToolButton, &QAbstractButton::clicked, [this](){
     _keyboardWidget->setVisible(!_keyboardWidget->isVisible());
   }); 
-
-  return keyboardExpandLayout;
 }
 
 QHBoxLayout* ShortcutEditorWidget::createButtonLayout()
