@@ -232,7 +232,7 @@ HotkeyEditorWidget::HotkeyEditorWidget(QWidget* parent) :
   _view->header()->resizeSection(0, 250);
   QHBoxLayout* buttonLayout = new QHBoxLayout();
   _okButton = new QPushButton("Ok", this);
-  _okButton->setFocusPolicy(Qt::StrongFocus);
+  _okButton->setFocusPolicy(Qt::TabFocus);
   _cancelButton = new QPushButton("Cancel", this);
   _cancelButton->setFocusPolicy(Qt::StrongFocus);
   buttonLayout->addWidget(_okButton);
