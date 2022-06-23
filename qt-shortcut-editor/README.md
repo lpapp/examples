@@ -65,3 +65,4 @@ The following features are supported:
 * Multiple selections.
 * Native view of the shortcuts (e.g. pretty glyphs on Mac).
 * Cross-platform (tested on Windows, Linux and Mac).
+* Tab and Shift-Tab navigation amongst the UI elements.

@@ -1,5 +1,4 @@
 add_executable(TabNavigation
-  hotkeyEditorWidget.cpp
   main.cpp
 )
 

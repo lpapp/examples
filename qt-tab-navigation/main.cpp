@@ -1,13 +1,22 @@
-#include "hotkeyEditorWidget.h"
-
-#include <QAction>
 #include <QApplication>
-#include <QPalette>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 int main(int argc, char *argv[])
 {
   QApplication app(argc, argv);
-  HotkeyEditorWidget* hotkeyEditorWidget = new HotkeyEditorWidget; 
-  hotkeyEditorWidget->show();
+  QWidget mainWindow;
+  QHBoxLayout* layout = new QHBoxLayout;
+  QPushButton *restoreButton = new QPushButton("Restore");
+  restoreButton->setFocusPolicy(Qt::StrongFocus);
+  layout->addWidget(restoreButton);
+  QPushButton *okButton = new QPushButton("Ok");
+  okButton->setFocusPolicy(Qt::TabFocus);
+  layout->addWidget(okButton);
+  QPushButton *cancelButton = new QPushButton("Cancel");
+  cancelButton->setFocusPolicy(Qt::StrongFocus);
+  layout->addWidget(cancelButton);
+  mainWindow.setLayout(layout);
+  mainWindow.show();
   return app.exec();
 }
