@@ -50,7 +50,7 @@ struct SearchToolButtonState
   QString _matchGroupName;
   bool _allContexts;
   bool _defaultShortcutChecked;
-  bool _nonDefaultShortcutChecked;
+  bool _customShortcutChecked;
   std::map<std::string, bool> _contextActionsState;
 };
 
@@ -232,15 +232,13 @@ private:
   KeyboardWidget* _keyboardWidget;
   QPushButton* _resetAllButton;
   QPushButton* _resetButton;
-  QPushButton* _importButton;
-  QPushButton* _exportButton;
 
   QAction* _nameAction;
   QAction* _shortcutAction;
   QAction* _allContextsAction;
   std::vector<QAction*> _contextActions;
   QAction* _defaultShortcutAction;
-  QAction* _nonDefaultShortcutAction;
+  QAction* _customShortcutAction;
   QAction* _matchContainsAction;
   QAction* _matchExactlyAction;
   QAction* _matchStartsWithAction;

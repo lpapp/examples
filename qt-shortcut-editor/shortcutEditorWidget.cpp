@@ -441,12 +441,19 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
     std::cout << "TEST SHORTCUT EDITOR MODEL SET DATA 2: " << value.toString().toStdString() << std::endl;
     QString keySequenceString = value.toString();
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
+    QAction* itemAction = item->action();
+    if (itemAction) {
+      if (keySequenceString == itemAction->shortcut().toString(QKeySequence::NativeText)) {
+        return true;
+      }
+    }
+
     if (keySequenceString.isEmpty()) {
       setShortcut(item, keySequenceString, index);
       return true;
     }
 
-    ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(item->action()));
+    ShortcutEditorModelItem* foundItem = findShortcut(keySequenceString, ActionManager::getContext(itemAction));
     const ShortcutEditorModelItem* currentItem = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
     if (!foundItem || currentItem == foundItem) {
       setShortcut(item, keySequenceString, index);
@@ -664,9 +671,9 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
   }
 
   QString target;
+  // std::cout << "TEST SEARCH TARGET SHORTCUT: " << _target << std::endl;
   switch (_target) {
     case SearchTarget::Shortcut:
-      // std::cout << "TEST SEARCH TARGET SHORTCUT" << std::endl;
       if (action) {
         target = item->action()->shortcut().toString();
       }
@@ -677,10 +684,16 @@ bool ShortcutEditorSortFilterProxyModel::filterAcceptsRow(int sourceRow,
       }
       break;
     case SearchTarget::CustomShortcut:
+      if (action) {
+        QKeySequence shortcut = action->shortcut();
+        QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
+        if (shortcut != defaultShortcut) {
+          target = shortcut.toString();
+        }
+      }
       break;
     case SearchTarget::Name:
     default:
-      // std::cout << "TEST SEARCH TARGET NAME" << std::endl;
       target = actionName;
       break;
   };
@@ -1033,13 +1046,13 @@ void ShortcutEditorWidget::setActions()
 
   _searchToolButtonMenu->addSection("Shortcut");
 
-  _defaultShortcutAction = _searchToolButtonMenu->addAction(tr("Default Shortcut"));
+  _defaultShortcutAction = _searchToolButtonMenu->addAction(tr("Default"));
   _defaultShortcutAction->setCheckable(true);
   _defaultShortcutAction->setChecked(sSearchToolButtonState._defaultShortcutChecked);
 
-  _nonDefaultShortcutAction = _searchToolButtonMenu->addAction(tr("Non-default Shortcut"));
-  _nonDefaultShortcutAction->setCheckable(true);
-  _nonDefaultShortcutAction->setChecked(sSearchToolButtonState._nonDefaultShortcutChecked);
+  _customShortcutAction = _searchToolButtonMenu->addAction(tr("Custom"));
+  _customShortcutAction->setCheckable(true);
+  _customShortcutAction->setChecked(sSearchToolButtonState._customShortcutChecked);
 
   _filterModel->updateTarget(_nameAction->isChecked() ? SearchTarget::Name : SearchTarget::Shortcut);
   connect(_nameAction, &QAction::toggled, this, [this](const bool checked) {
@@ -1147,7 +1160,7 @@ void ShortcutEditorWidget::updateSearchToolButtonState()
 {
   sSearchToolButtonState._allContexts = _allContextsAction->isChecked();
   sSearchToolButtonState._defaultShortcutChecked = _defaultShortcutAction->isChecked();
-  sSearchToolButtonState._nonDefaultShortcutChecked = _nonDefaultShortcutAction->isChecked();
+  sSearchToolButtonState._customShortcutChecked = _customShortcutAction->isChecked();
 
   for (const auto& contextAction : _contextActions) {
     sSearchToolButtonState._contextActionsState[contextAction->text().toStdString()] = contextAction->isChecked();
