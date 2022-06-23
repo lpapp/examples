@@ -39,7 +39,7 @@ void KeyButton::mousePressEvent(QMouseEvent* event)
 {
   std::cout << "TEST MOUSE PRESS EVENT" << std::endl;
   if (event->button() == Qt::LeftButton) {
-    dragStartPosition = event->pos();
+    _dragStartPosition = event->pos();
   }
   QPushButton::mousePressEvent(event);
 }
@@ -51,7 +51,7 @@ void KeyButton::mouseMoveEvent(QMouseEvent* event)
     return;
   }
 
-  if ((event->pos() - dragStartPosition).manhattanLength()
+  if ((event->pos() - _dragStartPosition).manhattanLength()
        < QApplication::startDragDistance()) {
     return;
   }
@@ -85,6 +85,7 @@ void KeyButton::dragEnterEvent(QDragEnterEvent* event)
   }
 
   std::cout << "TEST DRAG ENTER EVENT: " << text().toStdString() << std::endl;
+  _dragPalette = palette();
   setPalette(QApplication::palette().color(QPalette::Highlight));
   event->acceptProposedAction();
 }
@@ -92,7 +93,7 @@ void KeyButton::dragEnterEvent(QDragEnterEvent* event)
 void KeyButton::dragLeaveEvent(QDragLeaveEvent* /*event*/)
 {
   std::cout << "TEST DRAG LEAVE EVENT: " << text().toStdString() << std::endl;
-  setPalette(QApplication::palette());
+  setPalette(_dragPalette);
 }
 
 void KeyButton::dragMoveEvent(QDragMoveEvent* event)

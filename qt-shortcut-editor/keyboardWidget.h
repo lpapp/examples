@@ -2,6 +2,7 @@
 #define KEYBOARDWIDGET_H
 
 #include <QKeySequence>
+#include <QPalette>
 #include <QPoint>
 #include <QPushButton>
 #include <QString>
@@ -31,7 +32,8 @@ private:
   void dragMoveEvent(QDragMoveEvent* event) override;
   void dropEvent(QDropEvent* event) override;
 
-  QPoint dragStartPosition;
+  QPoint _dragStartPosition;
+  QPalette _dragPalette;
 };
 
 class KeyboardWidget : public QWidget
