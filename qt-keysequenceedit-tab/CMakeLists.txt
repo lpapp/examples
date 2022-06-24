@@ -1,2 +1,2 @@
-add_executable(SequenceEditTab main.cpp)
-target_link_libraries(SequenceEditTab Qt::Widgets)
+add_executable(KeySequenceEditTab main.cpp)
+target_link_libraries(KeySequenceEditTab Qt::Widgets)
