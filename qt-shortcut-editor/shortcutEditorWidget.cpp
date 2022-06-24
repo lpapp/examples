@@ -158,22 +158,28 @@ QWidget* ShortcutEditorDelegate::createEditor(QWidget* parent,
 {
   std::cout << "TEST SHORTCUT EDITOR DELEGATE CREATE EDITOR" << std::endl;
   QKeySequenceEdit* editor = new QKeySequenceEdit(parent);
-  editor->setFocusPolicy(Qt::StrongFocus);
   connect(editor, &QKeySequenceEdit::editingFinished, this, &ShortcutEditorDelegate::commitAndCloseEditor);
   return editor;
 }
 
 void ShortcutEditorDelegate::commitAndCloseEditor()
 {
+  std::cout << "TEST SHORTCUT EDITOR DELEGATE COMMIT AND CLOSE EDITOR" << std::endl;
+
   QKeySequenceEdit* editor = qobject_cast<QKeySequenceEdit*>(sender());
-  Q_EMIT commitData(editor);
-  Q_EMIT closeEditor(editor);
+  if (editor) {
+    Q_EMIT commitData(editor);
+    Q_EMIT closeEditor(editor);
+  }
 }
 
 void ShortcutEditorDelegate::setEditorData(QWidget* editor,
                                          const QModelIndex& index) const
 {
-  std::cout << "TEST SHORTCUT EDITOR DELEGATE SET EDITOR DATA" << std::endl;
+  if (!editor || !index.isValid()) {
+    return;
+  }
+
   QString value = index.model()->data(index, Qt::EditRole).toString();
 
   QKeySequenceEdit* keySequenceEdit = static_cast<QKeySequenceEdit*>(editor);
@@ -184,12 +190,15 @@ void ShortcutEditorDelegate::setModelData(QWidget* editor, QAbstractItemModel* m
                                         const QModelIndex& index) const
 {
   std::cout << "TEST SHORTCUT EDITOR DELEGATE SET MODEL DATA: " << model->metaObject()->className() << std::endl;
+  if (!editor || !model || !index.isValid()) {
+    return;
+  }
+
   const QKeySequenceEdit* keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
   if (keySequenceEdit) {
     const QKeySequence keySequence = keySequenceEdit->keySequence();
     QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
     model->setData(index, keySequenceString);
-    return;
   }
 }
 
@@ -199,6 +208,11 @@ void ShortcutEditorDelegate::updateEditorGeometry(QWidget* editor,
 {
   std::cout << "TEST UPDATE EDITOR GEOMETRY" << std::endl;
   editor->setGeometry(option.rect);
+}
+
+bool ShortcutEditorDelegate::eventFilter(QObject* /*object*/, QEvent* /*event*/)
+{
+  return false;
 }
 
 ShortcutEditorModel::ShortcutEditorModel(QObject* parent)

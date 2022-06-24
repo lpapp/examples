@@ -170,10 +170,10 @@ class ShortcutEditorDelegate : public QStyledItemDelegate
 
 public:
   ShortcutEditorDelegate(QObject* parent = nullptr);
+
+protected:
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                         const QModelIndex& index) const override;
-
-  void commitAndCloseEditor();
 
   void setEditorData(QWidget* editor, const QModelIndex& index) const override;
   void setModelData(QWidget* editor, QAbstractItemModel* model,
@@ -181,6 +181,11 @@ public:
 
   void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option,
                             const QModelIndex& index) const override;
+
+  bool eventFilter(QObject *editor, QEvent *event) override;
+
+private Q_SLOTS:
+  void commitAndCloseEditor();
 };
 
 class ShortcutEditorWidget : public QWidget
