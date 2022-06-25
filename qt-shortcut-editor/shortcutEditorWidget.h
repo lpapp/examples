@@ -54,19 +54,25 @@ struct SearchToolButtonState
   std::map<std::string, bool> _contextActionsState;
 };
 
+struct ShortcutCommandData
+{
+  QAction* _action;
+  QKeySequence _oldShortcut;
+  QKeySequence _newShortcut;
+};
+
 class AssignShortcutCommand : public QUndoCommand
 {
 public:
   AssignShortcutCommand(QAction* action, QKeySequence newShortcut, QUndoCommand* parent = nullptr);
+  AssignShortcutCommand(QAction* action, QUndoCommand* parent = nullptr);
   ~AssignShortcutCommand() = default;
 
   void undo() override;
   void redo() override;
 
 private:
-  QAction* _action;
-  QKeySequence _oldShortcut;
-  QKeySequence _newShortcut;
+  std::vector<ShortcutCommandData> _data;
 };
 
 class ShortcutEditorModelItem

@@ -39,24 +39,34 @@ static SearchToolButtonState sSearchToolButtonState = {
 
 AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newShortcut, QUndoCommand *parent)
   : QUndoCommand(parent)
-  , _action(action)
-  , _oldShortcut(action->shortcut())
-  , _newShortcut(newShortcut)
 {
+  _data.push_back({action, action->shortcut(), newShortcut});
   setText(QObject::tr("Assign \"%1\" from \"%2\" to \"%3\"")
-      .arg(action->text()).arg(_oldShortcut.toString()).arg(_newShortcut.toString()));
+      .arg(action->text()).arg(action->shortcut().toString()).arg(newShortcut.toString()));
+}
+
+AssignShortcutCommand::AssignShortcutCommand(QAction* action, QUndoCommand *parent)
+  : QUndoCommand(parent)
+{
+  _data.push_back({action, action->shortcut(), ActionManager::getDefaultShortcut(action)});
+  setText(QObject::tr("Assign \"%1\" from \"%2\" to \"%3\"")
+      .arg(action->text()).arg(action->shortcut().toString()).arg(ActionManager::getDefaultShortcut(action).toString()));
 }
 
 void AssignShortcutCommand::undo()
 {
   std::cout << "TEST ASSIGN SHORTCUT COMMAND UNDO" << std::endl;
-  _action->setShortcut(_oldShortcut);
+  for (const ShortcutCommandData& dataEntry : _data) {
+    dataEntry._action->setShortcut(dataEntry._oldShortcut);
+  }
 }
 
 void AssignShortcutCommand::redo()
 {
   std::cout << "TEST ASSIGN SHORTCUT COMMAND REDO" << std::endl;
-  _action->setShortcut(_newShortcut);
+  for (const ShortcutCommandData& dataEntry : _data) {
+    dataEntry._action->setShortcut(dataEntry._newShortcut);
+  }
 }
 
 ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant>& data, const QString& id, ShortcutEditorModelItem* parent)
