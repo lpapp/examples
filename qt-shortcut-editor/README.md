@@ -29,10 +29,31 @@ The following features are supported:
 * Clash detection (only in clashing contexts, smartly).
 * Shortcut processing blocked whilst recording.
 
-* Undo an assignment by shortcut (ctrl-z).
-* Redo an assignment by shortcut (shift-ctrl-z).
-* Context menu undo an assignment.
-* Context menu redo an assignment.
+* Undo a single assignment by shortcut (ctrl-z).
+* Redo a single assignment by shortcut (shift-ctrl-z).
+* Undo multiple assignments by shortcut (ctrl-z).
+* Redo multiple assignments by shortcut (shift-ctrl-z).
+* Undo a single reset by shortcut (ctrl-z).
+* Redo a single reset by shortcut (shift-ctrl-z).
+* Undo multiple resets by shortcut (ctrl-z).
+* Redo multiple resets by shortcut (shift-ctrl-z).
+* Undo reset all by shortcut (ctrl-z).
+* Redo reset reset all by shortcut (shift-ctrl-z).
+* Undo restore defaults by shortcut (ctrl-z).
+* Redo restore deafults by shortcut (shift-ctrl-z).
+
+* Undo a single assignment in the context pop-up.
+* Redo a single assignment in the context pop-up.
+* Undo multiple assignments in the context pop-up.
+* Redo multiple assignments in the context pop-up.
+* Undo a single reset in the context pop-up.
+* Redo a single reset in the context pop-up.
+* Undo multiple resets in the context pop-up.
+* Redo multiple resets in the context pop-up.
+* Undo reset all in the context pop-up.
+* Redo reset reset all in the context pop-up.
+* Undo restore defaults in the context pop-up.
+* Redo restore deafults in the context pop-up.
 
 * Saving shortcuts (persistence between sessions).
 * Saving shortcuts (persistence in the same session after reopening dialog).
