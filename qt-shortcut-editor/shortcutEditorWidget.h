@@ -65,7 +65,7 @@ class AssignShortcutCommand : public QUndoCommand
 {
 public:
   AssignShortcutCommand(QAction* action, QKeySequence newShortcut, QUndoCommand* parent = nullptr);
-  AssignShortcutCommand(QAction* action, QUndoCommand* parent = nullptr);
+  AssignShortcutCommand(std::vector<QAction*> actions, QUndoCommand* parent = nullptr);
   ~AssignShortcutCommand() = default;
 
   void undo() override;

@@ -45,12 +45,21 @@ AssignShortcutCommand::AssignShortcutCommand(QAction* action, QKeySequence newSh
       .arg(action->text()).arg(action->shortcut().toString()).arg(newShortcut.toString()));
 }
 
-AssignShortcutCommand::AssignShortcutCommand(QAction* action, QUndoCommand *parent)
+AssignShortcutCommand::AssignShortcutCommand(std::vector<QAction*> actions, QUndoCommand *parent)
   : QUndoCommand(parent)
 {
-  _data.push_back({action, action->shortcut(), ActionManager::getDefaultShortcut(action)});
-  setText(QObject::tr("Assign \"%1\" from \"%2\" to \"%3\"")
+  for (QAction* action : actions) {
+    _data.push_back({action, action->shortcut(), ActionManager::getDefaultShortcut(action)});
+  }
+
+  if (actions.size() == 1) {
+    QAction* action = actions[0];
+    setText(QObject::tr("Reset \"%1\" from \"%2\" to \"%3\"")
       .arg(action->text()).arg(action->shortcut().toString()).arg(ActionManager::getDefaultShortcut(action).toString()));
+  }
+  else {
+    setText(QObject::tr("Reset multiple"));
+  }
 }
 
 void AssignShortcutCommand::undo()
@@ -598,7 +607,8 @@ ShortcutEditorModelItem* ShortcutEditorModel::findShortcut(const QString& keySeq
 void ShortcutEditorModel::resetAll()
 {
   std::cout << "TEST MODEL RESET ALL ADDRESS: " << reinterpret_cast<void*>(this) << std::endl;
-  std::cout << "TEST MODEL RESET ALL ROOT ITEM CHILD COUNT: " << rootItem->childCount() << std::endl;
+
+  std::vector<QAction*> actions;
   for (int i = 0; i < rootItem->childCount(); ++i) {
     ShortcutEditorModelItem* contextLevel = rootItem->child(i);
     for (int j = 0; j < contextLevel->childCount(); ++j) {
@@ -609,12 +619,18 @@ void ShortcutEditorModel::resetAll()
         QKeySequence shortcut = action->shortcut();
         QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
         if (shortcut != defaultShortcut) {
-          action->setShortcut(defaultShortcut);
+          actions.push_back(action);
           QModelIndex index = createIndex(k, 1, actionLevel);
           Q_EMIT dataChanged(index, index);
         }
       }
     }
+  }
+
+  if (!actions.empty()) {
+    QUndoCommand* command = new AssignShortcutCommand(actions);
+    std::cout << "TEST RESET PUSH COMMAND" << std::endl;
+    _undoStack->push(command);
   }
 }
 
@@ -643,15 +659,23 @@ void ShortcutEditorModel::assignShortcut(const QString& actionId, const QKeySequ
 
 void ShortcutEditorModel::reset(const QModelIndexList& selectedItems)
 {
+  std::vector<QAction*> actions;
+
   for (const QModelIndex& selectedItem : selectedItems) {
     ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(selectedItem.internalPointer());
     QAction* action = item->action();
     QKeySequence shortcut = action->shortcut();
     QKeySequence defaultShortcut = ActionManager::getDefaultShortcut(action);
     if (shortcut != defaultShortcut) {
-      action->setShortcut(defaultShortcut);
+      actions.push_back(action);
     }
     Q_EMIT dataChanged(selectedItem, selectedItem);
+  }
+
+  if (!actions.empty()) {
+    QUndoCommand* command = new AssignShortcutCommand(actions);
+    std::cout << "TEST RESET PUSH COMMAND" << std::endl;
+    _undoStack->push(command);
   }
 }
 
