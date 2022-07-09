@@ -30,9 +30,8 @@ class ShortcutEditorModelItem
 {
 public:
     explicit ShortcutEditorModelItem(const std::vector<QVariant>& data,
-                                   const QString& id,
-                                   ShortcutEditorModelItem* parentItem = nullptr);
-    ~ShortcutEditorModelItem() = default;
+                                     ShortcutEditorModelItem* parentItem = nullptr);
+    ~ShortcutEditorModelItem();
 
     void appendChild(ShortcutEditorModelItem* child);
 
@@ -71,7 +70,6 @@ public:
   void setActions();
 
 private:
-  void setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString, const QModelIndex& index);
   void setupModelData(ShortcutEditorModelItem* parent);
 
   ShortcutEditorModelItem* rootItem;
@@ -106,7 +104,7 @@ class ShortcutEditorWidget : public QWidget
 
 public:
   explicit ShortcutEditorWidget(QWidget* parent = nullptr);
-  ~ShortcutEditorWidget() override;
+  ~ShortcutEditorWidget() override = default;
 
   void setActions();
 

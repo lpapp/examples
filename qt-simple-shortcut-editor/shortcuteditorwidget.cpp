@@ -11,7 +11,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant>& data, const QString& id, ShortcutEditorModelItem* parent)
+ShortcutEditorModelItem::ShortcutEditorModelItem(const std::vector<QVariant> &data, ShortcutEditorModelItem *parent)
     : _itemData(data)
     , _parentItem(parent)
 {
@@ -22,7 +22,7 @@ ShortcutEditorModelItem::~ShortcutEditorModelItem()
     qDeleteAll(_childItems);
 }
 
-void ShortcutEditorModelItem::appendChild(ShortcutEditorModelItem* item)
+void ShortcutEditorModelItem::appendChild(ShortcutEditorModelItem *item)
 {
     _childItems.push_back(item);
 }
@@ -72,7 +72,7 @@ QVariant ShortcutEditorModelItem::data(int column) const
         return columnVariant;
     }
   
-    QAction* action = static_cast<QAction*>(columnVariant.value<void*>());
+    QAction *action = static_cast<QAction *>(columnVariant.value<void *>());
     if (!action) {
         return QVariant();
     }
@@ -81,15 +81,15 @@ QVariant ShortcutEditorModelItem::data(int column) const
     return keySequenceString;
 }
 
-ShortcutEditorModelItem* ShortcutEditorModelItem::parentItem()
+ShortcutEditorModelItem *ShortcutEditorModelItem::parentItem()
 {
     return _parentItem;
 }
 
-QAction* ShortcutEditorModelItem::action() const
+QAction *ShortcutEditorModelItem::action() const
 {
     QVariant actionVariant = _itemData.at(static_cast<int>(Column::Shortcut));
-    return static_cast<QAction*>(actionVariant.value<void*>());
+    return static_cast<QAction*>(actionVariant.value<void *>());
 }
 
 ShortcutEditorDelegate::ShortcutEditorDelegate(QObject* parent)
@@ -128,14 +128,14 @@ void ShortcutEditorDelegate::setEditorData(QWidget* editor,
     keySequenceEdit->setKeySequence(value);
 }
 
-void ShortcutEditorDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
+void ShortcutEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                         const QModelIndex& index) const
 {
   if (!editor || !model || !index.isValid()) {
       return;
   }
 
-  const QKeySequenceEdit* keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
+  const QKeySequenceEdit *keySequenceEdit = qobject_cast<QKeySequenceEdit*>(editor);
   if (keySequenceEdit) {
       const QKeySequence keySequence = keySequenceEdit->keySequence();
       QString keySequenceString = keySequence.toString(QKeySequence::NativeText);
@@ -329,37 +329,24 @@ void ShortcutEditorModel::setupModelData(ShortcutEditorModelItem* parent)
   }
 }
 
-void ShortcutEditorModel::setShortcut(ShortcutEditorModelItem* item, const QString& shortcutString, const QModelIndex& index)
-{
-  QAction* itemAction = item->action();
-  if (itemAction) {
-    QUndoCommand* command = new AssignShortcutCommand(itemAction, QKeySequence::fromString(shortcutString, QKeySequence::NativeText));
-    _undoStack->push(command);
-  }
-  Q_EMIT dataChanged(index, index);
-  connect(_undoStack, &QUndoStack::indexChanged, this, [this, index](){
-    Q_EMIT dataChanged(index, index);
-  });
-}
-
 bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
   if (role == Qt::EditRole && index.column() == static_cast<int>(Column::Shortcut)) {
-    QString keySequenceString = value.toString();
-    ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
-    QAction* itemAction = item->action();
-    if (itemAction) {
-      if (keySequenceString == itemAction->shortcut().toString(QKeySequence::NativeText)) {
-        return true;
+      QString keySequenceString = value.toString();
+      ShortcutEditorModelItem* item = static_cast<ShortcutEditorModelItem*>(index.internalPointer());
+      QAction* itemAction = item->action();
+      if (itemAction) {
+          if (keySequenceString == itemAction->shortcut().toString(QKeySequence::NativeText)) {
+            return true;
+          }
       }
-    }
 
-    if (keySequenceString.isEmpty()) {
-      setShortcut(item, keySequenceString, index);
-      return true;
-    }
+      itemAction->setShortcut(keySequenceString);
+      Q_EMIT dataChanged(index, index);
 
-    setShortcut(item, keySequenceString, index);
+      if (keySequenceString.isEmpty()) {
+          return true;
+      }
   }
 
   return QAbstractItemModel::setData(index, value, role);
@@ -368,33 +355,19 @@ bool ShortcutEditorModel::setData(const QModelIndex& index, const QVariant& valu
 ShortcutEditorWidget::ShortcutEditorWidget(QWidget* parent)
     : QWidget(parent)
 {
-    createTreeView();
-    createLayout();
+    _model = new ShortcutEditorModel(this);
+    _delegate = new ShortcutEditorDelegate(this);
+    _view = new QTreeView(this);
+    _view->setModel(_model);
+    _view->setItemDelegateForColumn(1, _delegate);
+    _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    _view->setAllColumnsShowFocus(true);
+    _view->header()->resizeSection(0, 250);
 
-    setActions();
-}
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addWidget(_view);
+    setLayout(layout);
 
-void ShortcutEditorWidget::createLayout()
-{
-  QVBoxLayout* layout = new QVBoxLayout();
-  layout->setContentsMargins(0, 0, 0, 0); // fill out to the entire widget area, no insets
-  layout->addWidget(_view);
-  setLayout(layout);
-}
-
-void ShortcutEditorWidget::createTreeView()
-{
-  _model = new ShortcutEditorModel(this);
-  _delegate = new ShortcutEditorDelegate(this);
-  _view = new QTreeView(this);
-  _view->setModel(_model);
-  _view->setItemDelegateForColumn(1, _delegate);
-  _view->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-  _view->setAllColumnsShowFocus(true);
-  _view->header()->resizeSection(0, 250);
-}
-
-void ShortcutEditorWidget::setActions()
-{
-  _model->setActions();
+    _model->setActions();
 }
