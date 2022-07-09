@@ -40,4 +40,4 @@ add_subdirectory(qt-treeview)
 find_package(pxr REQUIRED)
 
 # add_subdirectory(usd-tf-windows)
-# add_subdirectory(qt-usd-view)
+add_subdirectory(qt-usd-view)

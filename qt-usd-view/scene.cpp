@@ -5,8 +5,8 @@
 #include <pxr/usd/usdGeom/camera.h>
 #include <pxr/usd/usdGeom/xformCommonAPI.h>
 #include "pxr/imaging/glf/simpleLightingContext.h"
-#include <string>
 
+#include <iostream>
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
@@ -15,17 +15,17 @@ Scene::Scene()
   , _height(0)
   , _won(false)
 {
-  mStage = UsdStage::Open("board.usda");
+  _stage = UsdStage::Open("board.usda");
   UsdStageRefPtr switchStage = UsdStage::Open("switch.usda");
   
-  mBoard = mStage->GetPrimAtPath(SdfPath("/board1"));
-  auto cameraPrim = mStage->GetPrimAtPath(SdfPath("/camera1"));
-  mCamera = UsdGeomCamera(cameraPrim).GetCamera(UsdTimeCode::Default());
+  _board = _stage->GetPrimAtPath(SdfPath("/board1"));
+  auto cameraPrim = _stage->GetPrimAtPath(SdfPath("/camera1"));
+  _camera = UsdGeomCamera(cameraPrim).GetCamera(UsdTimeCode::Default());
   
   // Static USD produces warning that the visibility attribute doesn't exist.
   {
-      UsdGeomImageable imBoard(mBoard);
-      imBoard.CreateVisibilityAttr();
+      UsdGeomImageable i_board(_board);
+      i_board.CreateVisibilityAttr();
   }
 
   UsdPrimRange range(switchStage->GetPrimAtPath(SdfPath::AbsoluteRootPath()));
@@ -43,7 +43,7 @@ Scene::Scene()
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       sprintf(name, "/board1/xf%ix%i", i, j);
-      auto xfPrim = mStage->DefinePrim(SdfPath(name), TfToken("Xform"));
+      auto xfPrim = _stage->DefinePrim(SdfPath(name), TfToken("Xform"));
   
       // Static USD produces warning that the visibility attribute doesn't
       // exist.
@@ -75,7 +75,7 @@ Scene::Scene()
   
       // Add an object
       sprintf(name, "%s/switch", name);
-      auto instPrim = mStage->DefinePrim(SdfPath(name));
+      auto instPrim = _stage->DefinePrim(SdfPath(name));
       instPrim.GetReferences().AddReference(
               switchStage->GetRootLayer()->GetIdentifier(),
               SdfPath("/switch1"));
@@ -89,7 +89,7 @@ Scene::Scene()
   std::cout << "OpenGL version is " << major << "." << minor << std::endl;
 
   if (UsdImagingGLEngine::IsHydraEnabled()) {
-    std::cout << "--> ", mRenderer.GetRendererDisplayName(mRenderer.GetCurrentRendererId()).c_str()) << std::endl;
+    std::cout << "--> " << _renderer.GetRendererDisplayName(_renderer.GetCurrentRendererId()) << std::endl;
   }
 
   _params.frame = 1.0;
@@ -140,7 +140,7 @@ void Scene::prepare(float seconds)
       }
     }
 
-    if (mWon > 1)
+    if (_won > 1)
     {
       double t = std::max(translation[1] - 100.0 * seconds, -200.0);
       if (translation[1] > t) {
@@ -150,8 +150,8 @@ void Scene::prepare(float seconds)
     }
   }
 
-  if (mWon && !rotated) {
-    mWon = 2;
+  if (_won && !rotated) {
+    _won = 2;
   }
 }
 
@@ -165,7 +165,7 @@ void Scene::draw(int width, int height)
   GfMatrix4d projMat = frustum.ComputeProjectionMatrix();
   
   const GfVec4d viewport(0, 0, width, height);
-  mRenderer.SetRenderViewport(viewport);
+  _renderer.SetRenderViewport(viewport);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   
@@ -190,7 +190,7 @@ void Scene::click()
       return;
   }
   
-  auto clickedPrim = _stage->GetPrimAtPath(mCurrent);
+  auto clickedPrim = _stage->GetPrimAtPath(_current);
   while (clickedPrim.IsValid() && clickedPrim.GetTypeName() != "Xform") {
     clickedPrim = clickedPrim.GetParent();
   }
@@ -243,13 +243,14 @@ void Scene::cursor(float x, float y)
   auto frustum = cameraFrustum.ComputeNarrowedFrustum(GfVec2d(2.0 * x - 1.0, 2.0 * (1.0 - y) - 1.0), size);
   
   GfVec3d outHitPoint;
+  GfVec3d outHitNormal;
   SdfPath outHitPrimPath;
   
   if (_renderer.TestIntersection(frustum.ComputeViewMatrix(), frustum.ComputeProjectionMatrix(),
-        _board, _params, &outHitPoint, &outHitPrimPath)) {
-    if (outHitPrimPath != mCurrent) {
+        _board, _params, &outHitPoint, &outHitNormal, &outHitPrimPath)) {
+    if (outHitPrimPath != _current) {
       _current = outHitPrimPath;
-      std::cout << "hit " << mCurrent.GetPrimPath().GetString() << std::endl;
+      std::cout << "hit " << _current.GetPrimPath().GetString() << std::endl;
     }
   }
   else {

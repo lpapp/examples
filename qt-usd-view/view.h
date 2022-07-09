@@ -21,3 +21,5 @@ private:
     Scene* _scene = nullptr;
     QElapsedTimer _elapsed;
 };
+
+#endif
