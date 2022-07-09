@@ -25,7 +25,7 @@ The following features are supported:
 
 * Assigning shortcuts in the tree.
 * Changing shortcuts in the tree.
-* Removing shortcutss in the tree.
+* Removing shortcuts in the tree.
 * Clash detection (only in clashing contexts, smartly).
 * Shortcut processing blocked whilst recording.
 

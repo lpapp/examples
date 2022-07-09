@@ -11,5 +11,7 @@ class TestbedConan(ConanFile):
   ]
 
   requires = [
-    "Qt/5.15.2"
+    "Qt/5.15.2",
+    "OpenSubdiv/3.4.3@thirdparty/development",
+    "USD/21.05"
   ]

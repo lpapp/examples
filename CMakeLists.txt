@@ -36,3 +36,8 @@ add_subdirectory(qt-simple-hotkey-editor)
 add_subdirectory(qt-tab-navigation)
 add_subdirectory(qt-test-keysequence)
 add_subdirectory(qt-treeview)
+
+find_package(pxr REQUIRED)
+
+# add_subdirectory(usd-tf-windows)
+# add_subdirectory(qt-usd-view)
