@@ -37,7 +37,6 @@ void ActionManager::registerAction(QAction* action)
 {
   action->setProperty(kDefaultShortcutPropertyName, QVariant::fromValue(action->shortcut()));
   _actions.push_back(action);
-  _idActionHash.insert({getId(action), action});
 }
 
 // TODO: Remove?
@@ -64,4 +63,21 @@ QAction* ActionManager::registerAction(const std::string& name, const std::strin
   action->setShortcut(QKeySequence(QString::fromStdString(shortcut)));
   registerAction(action, context, category);
   return action;
+}
+
+std::string ActionManager::getContext(QAction* action)
+{
+  QVariant idVariant = action->property(kIdPropertyName);
+  if (!idVariant.isValid() || idVariant.isNull() || !idVariant.canConvert<QString>()) {
+    return std::string();
+  }
+
+  const QStringList sections = idVariant.toString().split(kIdDelimiter);
+  const size_t index = static_cast<int>(Id::Context);
+  return ((static_cast<size_t>(sections.size()) <= index) ? std::string() : sections[index].toStdString());
+}
+
+std::string ActionManager::getCategory(QAction* action)
+{
+  return action->property(kIdPropertyName).toString().split(kIdDelimiter)[static_cast<int>(Id::Category)].toStdString();
 }

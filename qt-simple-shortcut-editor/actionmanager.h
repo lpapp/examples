@@ -20,6 +20,9 @@ public:
   static void registerAction(QAction* action);
   static void registerAction(QAction* action, const std::string& context, const std::string& category);
   static QAction* registerAction(const std::string& name, const std::string& shortcut, const std::string& context, const std::string& category);
+
+  static std::string getContext(QAction* action);
+  static std::string getCategory(QAction* action);
 };
 
 #endif

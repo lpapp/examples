@@ -13,5 +13,6 @@ class TestbedConan(ConanFile):
   requires = [
     "Qt/5.15.2",
     "OpenSubdiv/3.4.3@thirdparty/development",
-    "USD/21.05"
+    "USD/21.05",
+    "QtSingleApplication/2.6@backup/CL571730"
   ]
