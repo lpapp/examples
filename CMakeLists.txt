@@ -26,6 +26,7 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
 add_subdirectory(qt)
 add_subdirectory(qt-button-dnd)
+add_subdirectory(qt-form-layout)
 add_subdirectory(qt-keyboard)
 add_subdirectory(qt-keypad)
 add_subdirectory(qt-keysequenceedit-tab)
