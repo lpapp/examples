@@ -24,8 +24,6 @@ endif()
 
 add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0xFFFFFF)
 
-find_package(QtSingleApplication REQUIRED)
-
 add_subdirectory(qt)
 add_subdirectory(qt-button-dnd)
 add_subdirectory(qt-keyboard)
@@ -36,12 +34,18 @@ add_subdirectory(qt-save-dialog)
 add_subdirectory(qt-shortcut-editor)
 add_subdirectory(qt-simple-hotkey-editor)
 add_subdirectory(qt-simple-shortcut-editor)
-add_subdirectory(qt-single-application)
+
+find_package(QtSingleApplication)
+if (QtSingleApplication_FOUND)
+  add_subdirectory(qt-single-application)
+endif()
+
 add_subdirectory(qt-tab-navigation)
 add_subdirectory(qt-test-keysequence)
 add_subdirectory(qt-treeview)
 
-find_package(pxr REQUIRED)
-
-# add_subdirectory(usd-tf-windows)
-add_subdirectory(qt-usd-view)
+find_package(pxr)
+if (pxr_FOUND)
+  # add_subdirectory(usd-tf-windows)
+  add_subdirectory(qt-usd-view)
+endif()
